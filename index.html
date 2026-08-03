@@ -3,1070 +3,1229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>फेस डिटेक्सन एटेन्डेन्स</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>उपस्थिति प्रणाली | Attendance System</title>
+
+<!-- ===== CDN LIBRARIES ===== -->
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root{
-  --crimson:#A6192E;
-  --crimson-dark:#7d1122;
-  --blue:#00308F;
-  --blue-dark:#001d57;
+  --crimson:#A61B3F;
+  --crimson-dark:#7D1230;
+  --blue:#0B3D91;
+  --blue-dark:#082a63;
   --gold:#C9A227;
-  --ivory:#FBF8F2;
-  --paper:#F3EEE2;
-  --ink:#1E1B16;
-  --ink-soft:#5c574c;
-  --line:#E4DCC8;
-  --ok:#1E7A4C;
-  --ok-bg:#E5F3EB;
-  --warn:#B8860B;
-  --warn-bg:#FBF1DA;
-  --danger:#B3261E;
-  --danger-bg:#FBE9E7;
-  --radius:16px;
-  --shadow:0 8px 28px rgba(30,27,22,0.10);
-  --shadow-sm:0 2px 8px rgba(30,27,22,0.08);
+  --gold-light:#E8C765;
+  --ivory:#FBF6EC;
+  --ivory-deep:#F3EAD6;
+  --charcoal:#241C15;
+  --ink-soft:#5A4E3F;
+  --card:#FFFFFF;
+  --line:#E7DCC3;
+  --ok:#2E7D46;
+  --danger:#B23A2E;
+  --shadow: 0 10px 30px rgba(36,28,21,0.12);
+  --radius: 18px;
+  --radius-sm: 12px;
 }
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
-  font-family:'Noto Sans Devanagari','Inter',sans-serif;
+  font-family:'Noto Sans Devanagari','Noto Sans',sans-serif;
   background:
-    radial-gradient(1200px 600px at 100% -10%, rgba(0,48,143,0.06), transparent 60%),
-    radial-gradient(1000px 500px at -10% 10%, rgba(166,25,46,0.05), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(201,162,39,0.10), transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(11,61,145,0.07), transparent 45%),
     var(--ivory);
-  color:var(--ink);
+  color:var(--charcoal);
   min-height:100vh;
-  padding-bottom:84px;
+  -webkit-font-smoothing:antialiased;
 }
-.mono{font-family:'JetBrains Mono',monospace;}
+h1,h2,h3,.display{
+  font-family:'Yatra One','Noto Sans Devanagari',cursive;
+  font-weight:400;
+  letter-spacing:0.2px;
+}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--gold-light);border-radius:8px;}
+button{font-family:inherit;}
+input,select,textarea{font-family:inherit;}
 
-/* ===== Header (Government style) ===== */
-.gov-topstrip{
-  height:6px;
-  background:linear-gradient(90deg,var(--crimson) 0 33%, var(--blue) 33% 66%, var(--gold) 66% 100%);
+/* ===== Pagoda motif (signature element) ===== */
+.pagoda-strip{
+  height:14px;
+  width:100%;
+  background:
+    linear-gradient(135deg, transparent 50%, var(--gold) 50%) 0 0/16px 14px repeat-x,
+    linear-gradient(-135deg, transparent 50%, var(--gold) 50%) 0 0/16px 14px repeat-x;
+  background-position: 0 0, 8px 0;
+  opacity:0.9;
 }
-header.gov-header{
-  background:linear-gradient(160deg,var(--blue) 0%, var(--blue-dark) 100%);
-  color:#fff;
-  padding:18px 18px 22px;
-  position:relative;
-  overflow:hidden;
-  border-bottom:4px solid var(--gold);
-}
-header.gov-header::after{
-  content:"";
-  position:absolute; inset:0;
-  background-image:
-    repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 18px);
-  pointer-events:none;
-}
-.gov-header-row{display:flex; align-items:center; gap:14px; position:relative; z-index:1;}
-.seal{
-  width:56px; height:56px; flex:none; border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #ffe8a8, var(--gold) 55%, #97791b 100%);
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 0 0 3px rgba(255,255,255,0.55), 0 4px 10px rgba(0,0,0,0.35);
-}
-.seal svg{width:34px; height:34px;}
-.gov-titles{flex:1; min-width:0;}
-.gov-eyebrow{
-  font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
-  color:#cfe0ff; font-family:'Inter',sans-serif; font-weight:600;
-}
-.gov-title{
-  font-size:20px; font-weight:800; margin:2px 0 1px; line-height:1.25;
-  font-family:'Tiro Devanagari Hindi', 'Noto Sans Devanagari', serif;
-}
-.gov-sub{font-size:12.5px; color:#c3d3f2; font-family:'Inter',sans-serif;}
-.gov-clock{
-  text-align:right; font-family:'JetBrains Mono',monospace; position:relative; z-index:1;
-}
-.gov-clock .time{font-size:17px; font-weight:700; letter-spacing:.02em;}
-.gov-clock .date{font-size:10.5px; color:#c3d3f2; margin-top:2px;}
+.pagoda-icon{display:inline-block;line-height:0;}
+.pagoda-icon svg{display:block;}
 
-/* ===== Nav ===== */
-nav.tabs{
-  display:flex; gap:6px; padding:12px 14px 0; max-width:900px; margin:0 auto;
-  overflow-x:auto; scrollbar-width:none;
+/* ===== Lock screen ===== */
+#lockScreen{
+  position:fixed;inset:0;z-index:999;
+  background:linear-gradient(180deg,var(--blue-dark),var(--crimson-dark) 130%);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  color:#fff;text-align:center;padding:24px;
 }
-nav.tabs::-webkit-scrollbar{display:none;}
-nav.tabs button{
-  flex:none;
-  display:flex; align-items:center; gap:7px;
-  padding:10px 15px; border-radius:12px 12px 0 0;
-  border:1px solid var(--line); border-bottom:none;
-  background:#fff; color:var(--ink-soft);
-  font-family:'Noto Sans Devanagari',sans-serif; font-weight:600; font-size:13.5px;
-  cursor:pointer; transition:.15s ease;
+#lockScreen.hidden{display:none;}
+.lock-card{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(6px);
+  border-radius:var(--radius);
+  padding:28px 24px;
+  max-width:380px;width:100%;
 }
-nav.tabs button svg{width:16px;height:16px;}
-nav.tabs button.active{
-  background:var(--paper); color:var(--crimson);
-  border-color:var(--gold);
-  box-shadow:0 -3px 0 var(--crimson) inset;
+.lock-video-wrap{
+  width:220px;height:220px;border-radius:50%;overflow:hidden;margin:18px auto;
+  border:4px solid var(--gold);position:relative;background:#000;
+  box-shadow:0 0 0 6px rgba(201,162,39,0.2);
 }
-main{max-width:900px; margin:0 auto; padding:0 14px 24px;}
-.panel{
-  background:var(--paper);
-  border:1px solid var(--line);
-  border-radius:0 12px 12px 12px;
-  padding:18px; margin-top:0;
-  box-shadow:var(--shadow-sm);
-}
-.hidden{display:none !important;}
+.lock-video-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+.lock-status{font-size:14px;opacity:0.9;min-height:20px;margin-top:6px;}
 
-/* ===== Cards / sections ===== */
-.section-title{
-  display:flex; align-items:center; gap:9px;
-  font-size:15.5px; font-weight:800; color:var(--blue-dark);
-  margin:0 0 14px; padding-bottom:10px; border-bottom:2px dashed var(--line);
+/* ===== App shell ===== */
+#app{display:none;min-height:100vh;}
+#app.ready{display:flex;}
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+  color:#f4efe0;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
 }
-.section-title .idx{
-  width:24px;height:24px;border-radius:6px; background:var(--crimson); color:#fff;
-  display:flex;align-items:center;justify-content:center; font-size:12px; font-weight:800;
+.brand{
+  padding:22px 18px 14px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.14);
 }
-.grid2{display:grid; grid-template-columns:1fr; gap:18px;}
-@media(min-width:720px){.grid2{grid-template-columns:1.1fr 1fr;}}
+.brand-title{font-family:'Yatra One',cursive;font-size:22px;line-height:1.1;}
+.brand-sub{font-size:11px;opacity:0.75;letter-spacing:0.5px;}
+.nav{padding:14px 10px;display:flex;flex-direction:column;gap:4px;flex:1;overflow-y:auto;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:12px;
+  color:rgba(244,239,224,0.85);
+  cursor:pointer;font-size:15px;font-weight:500;
+  transition:background .15s, color .15s;
+  user-select:none;
+}
+.nav-item svg{width:19px;height:19px;flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,0.08);}
+.nav-item.active{background:var(--gold);color:var(--blue-dark);font-weight:700;}
+.sidebar-foot{padding:14px 18px;font-size:11px;opacity:0.6;border-top:1px solid rgba(255,255,255,0.14);}
 
-.cam-wrap{
-  position:relative; width:100%; aspect-ratio:4/3; border-radius:var(--radius);
-  overflow:hidden; background:#0d1117; box-shadow:var(--shadow);
-  border:3px solid #fff; outline:2px solid var(--line);
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{
+  padding:16px 26px;background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20;
 }
-.cam-wrap video, .cam-wrap canvas{
-  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-}
-.cam-wrap canvas{pointer-events:none;}
-.cam-frame{
-  position:absolute; inset:14px; border-radius:14px; pointer-events:none;
-  border:2px solid rgba(255,255,255,0.0);
-}
-.cam-frame::before, .cam-frame::after,
-.cam-frame b::before, .cam-frame b::after{
-  content:""; position:absolute; width:26px; height:26px; border-color:var(--gold);
-  border-style:solid; opacity:.95;
-}
-.cam-frame::before{top:0;left:0;border-width:3px 0 0 3px; border-top-left-radius:8px;}
-.cam-frame::after{top:0;right:0;border-width:3px 3px 0 0; border-top-right-radius:8px;}
-.cam-frame b{position:absolute; inset:0;}
-.cam-frame b::before{bottom:0;left:0;border-width:0 0 3px 3px; border-bottom-left-radius:8px;}
-.cam-frame b::after{bottom:0;right:0;border-width:0 3px 3px 0; border-bottom-right-radius:8px;}
+.topbar h1{font-size:22px;margin:0;color:var(--crimson-dark);}
+.topbar .date-badge{font-size:13px;color:var(--ink-soft);background:var(--ivory-deep);padding:6px 12px;border-radius:999px;border:1px solid var(--line);}
+.menu-toggle{display:none;background:none;border:none;font-size:22px;color:var(--blue);cursor:pointer;}
 
-.cam-status{
-  position:absolute; left:12px; top:12px; z-index:3;
-  display:flex; align-items:center; gap:6px;
-  background:rgba(13,17,23,0.6); backdrop-filter:blur(4px);
-  color:#fff; font-size:11.5px; padding:5px 10px; border-radius:20px;
-  font-family:'Inter',sans-serif; font-weight:600;
+.content{padding:22px 26px 60px;flex:1;}
+.view{display:none;}
+.view.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== Cards / Grid ===== */
+.grid{display:grid;gap:18px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1050px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:20px;
 }
-.cam-status .dot{width:7px;height:7px;border-radius:50%; background:#7d8590;}
-.cam-status .dot.live{background:#3fb950; box-shadow:0 0 8px #3fb950; animation:pulse 1.4s infinite;}
-.cam-status .dot.scan{background:var(--gold); box-shadow:0 0 8px var(--gold); animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{opacity:1} 50%{opacity:.35}}
+.stat-card{position:relative;overflow:hidden;padding:18px 20px;}
+.stat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--gold),var(--crimson));}
+.stat-num{font-size:32px;font-weight:700;color:var(--crimson-dark);font-family:'Yatra One',cursive;}
+.stat-label{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+.stat-icon{position:absolute;right:14px;top:14px;opacity:0.15;}
+.stat-icon svg{width:46px;height:46px;}
 
-.cam-msg{
-  position:absolute; left:10px; right:10px; bottom:12px; z-index:3;
-  text-align:center; padding:10px 12px; border-radius:12px;
-  font-size:13px; font-weight:700; font-family:'Noto Sans Devanagari',sans-serif;
-  transition:.2s; backdrop-filter:blur(6px);
-}
-.cam-msg.ok{background:rgba(30,122,76,0.88); color:#fff;}
-.cam-msg.warn{background:rgba(184,134,11,0.9); color:#fff;}
-.cam-msg.danger{background:rgba(179,38,30,0.9); color:#fff;}
-.cam-msg.info{background:rgba(0,48,143,0.85); color:#fff;}
+.section-title{font-size:19px;color:var(--crimson-dark);margin:26px 0 12px;display:flex;align-items:center;gap:8px;}
 
-.cam-actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
-
-/* buttons */
+/* ===== Buttons ===== */
 .btn{
-  appearance:none; border:none; cursor:pointer;
-  font-family:'Noto Sans Devanagari',sans-serif; font-weight:700; font-size:13.5px;
-  padding:12px 18px; border-radius:11px; display:inline-flex; align-items:center; gap:8px;
-  transition:.15s ease; letter-spacing:.01em;
+  border:none;border-radius:12px;padding:11px 18px;font-size:14px;font-weight:600;
+  cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .12s, box-shadow .12s, opacity .12s;
 }
-.btn svg{width:16px;height:16px;flex:none;}
-.btn:active{transform:scale(.97);}
-.btn-primary{background:linear-gradient(160deg,var(--crimson),var(--crimson-dark)); color:#fff; box-shadow:0 4px 12px rgba(166,25,46,0.28);}
-.btn-primary:disabled{opacity:.5; cursor:not-allowed; box-shadow:none;}
-.btn-blue{background:linear-gradient(160deg,var(--blue),var(--blue-dark)); color:#fff; box-shadow:0 4px 12px rgba(0,48,143,0.28);}
-.btn-outline{background:#fff; color:var(--blue-dark); border:1.5px solid var(--line);}
-.btn-outline:hover{border-color:var(--blue);}
-.btn-ghost{background:transparent; color:var(--ink-soft); padding:8px 10px;}
-.btn-danger{background:#fff; color:var(--danger); border:1.5px solid var(--danger-bg);}
-.btn-sm{padding:7px 11px; font-size:12px; border-radius:9px;}
-.btn-block{width:100%; justify-content:center;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:linear-gradient(135deg,var(--crimson),var(--crimson-dark));color:#fff;box-shadow:0 6px 16px rgba(166,27,63,0.3);}
+.btn-gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--charcoal);box-shadow:0 6px 16px rgba(201,162,39,0.3);}
+.btn-blue{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;box-shadow:0 6px 16px rgba(11,61,145,0.3);}
+.btn-ghost{background:var(--ivory-deep);color:var(--charcoal);border:1px solid var(--line);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:9px;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-block{width:100%;justify-content:center;}
+.icon-btn{background:var(--ivory-deep);border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.icon-btn svg{width:18px;height:18px;}
 
-/* forms */
-.field{margin-bottom:13px;}
-.field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px;}
-.field input, .field select, .field textarea{
-  width:100%; padding:11px 12px; border-radius:10px; border:1.5px solid var(--line);
-  font-family:'Noto Sans Devanagari',sans-serif; font-size:14px; background:#fff; color:var(--ink);
+/* ===== Forms ===== */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+  font-size:14.5px;background:#fff;color:var(--charcoal);outline:none;transition:border-color .15s;
 }
-.field input:focus, .field select:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,48,143,0.1);}
-.req{color:var(--crimson);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:640px){.field-row{grid-template-columns:1fr;}}
 
-.face-samples{display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;}
-.face-samples .sample{
-  width:52px;height:52px;border-radius:8px;object-fit:cover;
-  border:2px solid var(--ok); box-shadow:var(--shadow-sm);
+/* ===== Category chips ===== */
+.cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:6px;}
+@media(max-width:900px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:560px){.cat-grid{grid-template-columns:repeat(2,1fr);}}
+.cat-chip{
+  border:1.5px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;
+  background:#fff;transition:all .15s;
 }
-.sample-slot{
-  width:52px;height:52px;border-radius:8px; border:2px dashed var(--line);
-  display:flex;align-items:center;justify-content:center; color:var(--ink-soft); font-size:11px; background:#fff;
-}
-.progress-track{height:8px; background:var(--line); border-radius:6px; overflow:hidden; margin-top:8px;}
-.progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--crimson),var(--gold)); transition:width .25s;}
+.cat-chip:hover{border-color:var(--gold);}
+.cat-chip.selected{border-color:var(--crimson);background:linear-gradient(160deg,#fff,var(--ivory-deep));box-shadow:0 4px 14px rgba(166,27,63,0.18);}
+.cat-chip .ic{font-size:24px;}
+.cat-chip .lbl{font-size:12.5px;margin-top:6px;font-weight:600;color:var(--ink-soft);}
+.cat-chip.selected .lbl{color:var(--crimson-dark);}
 
-/* stat cards */
-.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
-.stat-card{
-  background:#fff; border:1px solid var(--line); border-radius:13px; padding:12px 10px; text-align:center;
-  box-shadow:var(--shadow-sm);
+/* ===== Photo capture ===== */
+.photo-box{
+  width:100%;max-width:260px;aspect-ratio:1/1;border-radius:16px;border:2px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--ivory-deep);
+  margin:0 auto 10px;position:relative;
 }
-.stat-card .num{font-size:22px; font-weight:800; color:var(--blue-dark); font-family:'JetBrains Mono',monospace;}
-.stat-card .lbl{font-size:10.5px; color:var(--ink-soft); font-weight:600; margin-top:3px;}
+.photo-box img{width:100%;height:100%;object-fit:cover;}
+.photo-box .ph-empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:10px;}
 
-/* tables */
-.table-wrap{
-  overflow-x:auto; border-radius:13px; border:1px solid var(--line); background:#fff;
-  box-shadow:var(--shadow-sm);
-}
-table.gov-table{width:100%; border-collapse:collapse; font-size:13px; min-width:560px;}
-table.gov-table thead th{
-  background:linear-gradient(160deg,var(--blue),var(--blue-dark)); color:#fff;
-  text-align:left; padding:11px 12px; font-weight:700; font-size:12px; white-space:nowrap;
-  position:sticky; top:0;
-}
-table.gov-table thead th:first-child{border-top-left-radius:0;}
-table.gov-table tbody td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
-table.gov-table tbody tr:nth-child(even){background:#FAF8F2;}
-table.gov-table tbody tr:hover{background:#F2EEDF;}
-table.gov-table tbody tr:last-child td{border-bottom:none;}
-.avatar-sm{width:34px;height:34px;border-radius:8px;object-fit:cover; border:1.5px solid var(--line);}
-.badge{display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:11px; font-weight:700;}
-.badge.ok{background:var(--ok-bg); color:var(--ok);}
-.badge.warn{background:var(--warn-bg); color:var(--warn);}
-.badge.danger{background:var(--danger-bg); color:var(--danger);}
-.empty-row td{text-align:center; padding:30px 12px; color:var(--ink-soft); font-size:13px;}
+/* ===== Table ===== */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--line);}
+table{width:100%;border-collapse:collapse;background:#fff;min-width:560px;}
+th,td{padding:11px 14px;text-align:left;font-size:14px;border-bottom:1px solid var(--line);}
+th{background:var(--ivory-deep);color:var(--crimson-dark);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:0.4px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FCF9F1;}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;}
+.badge-qr{background:#E3EEFB;color:var(--blue-dark);}
+.badge-face{background:#FBEAE3;color:var(--crimson-dark);}
+.empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+.empty-state svg{width:56px;height:56px;opacity:0.4;margin-bottom:10px;}
 
-.toolbar{display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center;}
-.toolbar input[type="text"], .toolbar input[type="date"]{
-  padding:9px 12px; border-radius:9px; border:1.5px solid var(--line); font-size:13px; background:#fff;
-  font-family:'Noto Sans Devanagari',sans-serif;
+/* ===== Person list card ===== */
+.person-row{
+  display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:14px;background:#fff;margin-bottom:10px;
 }
-.toolbar .spacer{flex:1;}
+.person-row img{width:52px;height:52px;border-radius:12px;object-fit:cover;border:2px solid var(--gold-light);}
+.person-row .pi{flex:1;min-width:0;}
+.person-row .pn{font-weight:700;font-size:15px;}
+.person-row .pc{font-size:12.5px;color:var(--ink-soft);}
+.person-actions{display:flex;gap:8px;flex-wrap:wrap;}
 
-/* toast */
-#toastHost{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; width:min(92vw,420px); pointer-events:none;}
-.toast{
-  pointer-events:auto;
-  display:flex; align-items:flex-start; gap:10px;
-  background:#fff; border-radius:12px; padding:12px 14px; box-shadow:var(--shadow);
-  border-left:4px solid var(--blue); font-size:13px; font-weight:600; color:var(--ink);
-  animation:slideIn .25s ease;
+/* ===== ID Card ===== */
+.idcard{
+  width:340px;border-radius:20px;background:linear-gradient(160deg,#fff, #FEFBF3);
+  border:2px solid var(--gold);box-shadow:var(--shadow);overflow:hidden;position:relative;margin:0 auto;
 }
-.toast.ok{border-left-color:var(--ok);}
-.toast.warn{border-left-color:var(--warn);}
-.toast.danger{border-left-color:var(--danger);}
-.toast svg{width:18px;height:18px;flex:none; margin-top:1px;}
-@keyframes slideIn{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:translateY(0)}}
+.idcard-head{
+  background:linear-gradient(120deg,var(--crimson),var(--crimson-dark));
+  color:#fff;padding:14px 16px 22px;position:relative;
+}
+.idcard-head .org{font-family:'Yatra One',cursive;font-size:19px;}
+.idcard-head .sub{font-size:10.5px;opacity:0.85;letter-spacing:0.5px;}
+.idcard-body{padding:0 18px 18px;margin-top:-30px;display:flex;flex-direction:column;align-items:center;}
+.idcard-body img.photo{width:92px;height:92px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,0.2);background:#eee;}
+.idcard-body .name{font-weight:800;font-size:17px;margin-top:8px;text-align:center;}
+.idcard-body .cat-tag{font-size:11.5px;background:var(--gold);color:var(--charcoal);padding:3px 12px;border-radius:999px;font-weight:700;margin-top:4px;}
+.idcard-info{width:100%;margin-top:12px;font-size:12.5px;}
+.idcard-info div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dotted var(--line);}
+.idcard-info span:first-child{color:var(--ink-soft);}
+.idcard-info span:last-child{font-weight:600;text-align:right;}
+.idcard-qr{display:flex;justify-content:center;margin-top:14px;}
+.idcard-foot{text-align:center;font-size:9.5px;color:var(--ink-soft);padding:8px 0 4px;letter-spacing:0.4px;}
 
-/* stamp animation on success */
-.stamp-layer{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:5;}
-.stamp{
-  width:120px;height:120px; border:5px solid #3fb950; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; color:#3fb950;
-  font-weight:800; font-size:14px; transform:scale(0) rotate(-25deg); opacity:0;
-  background:rgba(13,17,23,0.35);
+/* ===== Modal ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(36,28,21,0.55);backdrop-filter:blur(2px);
+  display:none;align-items:center;justify-content:center;z-index:500;padding:16px;
 }
-.stamp.show{animation:stampIn .55s cubic-bezier(.2,1.6,.4,1) forwards;}
-@keyframes stampIn{0%{transform:scale(0) rotate(-25deg); opacity:0;} 60%{transform:scale(1.15) rotate(-8deg); opacity:1;} 100%{transform:scale(1) rotate(-10deg); opacity:1;}}
-
-/* bottom nav mobile */
-.bottomnav{
-  position:fixed; left:0; right:0; bottom:0; z-index:50;
-  background:#fff; border-top:1px solid var(--line);
-  display:flex; box-shadow:0 -4px 16px rgba(0,0,0,0.08);
-}
-.bottomnav button{
-  flex:1; background:none; border:none; padding:9px 4px 8px; cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  color:var(--ink-soft); font-family:'Noto Sans Devanagari',sans-serif; font-size:10.5px; font-weight:700;
-}
-.bottomnav button svg{width:20px;height:20px;}
-.bottomnav button.active{color:var(--crimson);}
-.bottomnav button.active svg{filter:drop-shadow(0 2px 4px rgba(166,25,46,.3));}
-@media(min-width:720px){.bottomnav{display:none;} body{padding-bottom:0;}}
-@media(max-width:719px){nav.tabs{display:none;} .panel{border-radius:12px;}}
-
-/* loading overlay */
-#loadOverlay{
-  position:fixed; inset:0; background:linear-gradient(160deg,var(--blue-dark),var(--blue)); z-index:99999;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; gap:16px;
-  transition:opacity .4s ease;
-}
-.loader-ring{width:56px;height:56px; border-radius:50%; border:5px solid rgba(255,255,255,0.25); border-top-color:var(--gold); animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-#loadOverlay .lt{font-weight:800; font-size:16px; font-family:'Tiro Devanagari Hindi',serif;}
-#loadOverlay .ls{font-size:12px; color:#c3d3f2; font-family:'JetBrains Mono',monospace;}
-
-/* permission modal */
-.modal-backdrop{
-  position:fixed; inset:0; background:rgba(15,17,20,0.55); z-index:9998;
-  display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(2px);
-}
+.modal-overlay.open{display:flex;}
 .modal{
-  background:#fff; border-radius:18px; max-width:400px; width:100%; padding:22px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.3); border-top:5px solid var(--crimson);
+  background:var(--ivory);border-radius:var(--radius);max-width:480px;width:100%;
+  max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);
 }
-.modal-icon{width:52px;height:52px; border-radius:50%; background:var(--danger-bg); color:var(--danger); display:flex; align-items:center; justify-content:center; margin-bottom:14px;}
-.modal-icon svg{width:28px;height:28px;}
-.modal h3{margin:0 0 8px; font-size:17px; color:var(--ink); font-family:'Tiro Devanagari Hindi',serif;}
-.modal p{margin:0 0 10px; font-size:13.5px; color:var(--ink-soft); line-height:1.6;}
-.modal ol{margin:0 0 16px; padding-left:18px; font-size:13px; color:var(--ink-soft); line-height:1.8;}
-.modal .modal-actions{display:flex; gap:10px;}
+.modal.wide{max-width:640px;}
+.modal-head{
+  padding:18px 22px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--ivory);z-index:2;
+}
+.modal-head h3{margin:0;font-size:19px;color:var(--crimson-dark);}
+.modal-body{padding:22px;}
+.close-x{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink-soft);line-height:1;}
 
-footer.gov-footer{
-  text-align:center; padding:22px 14px 8px; color:var(--ink-soft); font-size:11.5px; font-family:'Inter',sans-serif;
+.cam-video-wrap{width:100%;border-radius:14px;overflow:hidden;background:#000;position:relative;aspect-ratio:4/3;}
+.cam-video-wrap video, .cam-video-wrap canvas{width:100%;height:100%;object-fit:cover;}
+.cam-controls{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+
+#qr-reader{width:100%;border-radius:14px;overflow:hidden;}
+#qr-reader video{border-radius:14px;}
+
+.toast-wrap{position:fixed;top:18px;right:18px;z-index:1000;display:flex;flex-direction:column;gap:10px;}
+.toast{
+  background:var(--charcoal);color:#fff;padding:12px 18px;border-radius:12px;font-size:13.5px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px;min-width:220px;
+  animation:slideIn .2s ease;
 }
-footer.gov-footer b{color:var(--blue-dark);}
+.toast.ok{border-left:4px solid var(--ok);}
+.toast.err{border-left:4px solid var(--danger);}
+.toast.info{border-left:4px solid var(--blue);}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+.result-flash{
+  padding:16px;border-radius:14px;text-align:center;margin-top:14px;font-weight:700;font-size:16px;display:none;
+}
+.result-flash.show{display:block;animation:fadeIn .2s;}
+.result-flash.success{background:#E7F5EA;color:var(--ok);border:1.5px solid var(--ok);}
+.result-flash.fail{background:#FBEAE8;color:var(--danger);border:1.5px solid var(--danger);}
+
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.tab-btn{
+  padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
+  cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+}
+.tab-btn.active{background:var(--crimson);border-color:var(--crimson);color:#fff;}
+
+.mono{font-family:monospace;}
+.hint{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-260px;top:0;z-index:200;transition:left .2s;box-shadow:0 0 30px rgba(0,0,0,0.3);}
+  .sidebar.open{left:0;}
+  .menu-toggle{display:block;}
+  #app.ready{display:block;}
+}
+@media print{
+  body *{visibility:hidden;}
+  #printArea, #printArea *{visibility:visible;}
+  #printArea{position:absolute;top:0;left:0;width:100%;}
+}
 </style>
 </head>
 <body>
 
-<div id="loadOverlay">
-  <div class="loader-ring"></div>
-  <div class="lt">फेस डिटेक्सन एटेन्डेन्स लोड हुँदैछ...</div>
-  <div class="ls" id="loadStatus">सुरु गर्दै...</div>
-</div>
+<div class="toast-wrap" id="toastWrap"></div>
 
-<div id="toastHost"></div>
-
-<div class="gov-topstrip"></div>
-<header class="gov-header">
-  <div class="gov-header-row">
-    <div class="seal">
-      <svg viewBox="0 0 64 64" fill="none">
-        <path d="M32 8 L40 26 L58 26 L43 37 L49 55 L32 44 L15 55 L21 37 L6 26 L24 26 Z" fill="#7d1122" opacity="0.85"/>
-        <circle cx="32" cy="32" r="6" fill="#00308F"/>
-      </svg>
+<!-- ================= FACE LOCK SCREEN ================= -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="pagoda-icon" style="margin-bottom:6px;">
+      <svg width="52" height="40" viewBox="0 0 52 40" fill="none"><path d="M26 2L4 16H48L26 2Z" fill="#C9A227"/><path d="M26 10L10 22H42L26 10Z" fill="#E8C765"/><rect x="22" y="22" width="8" height="14" fill="#C9A227"/></svg>
     </div>
-    <div class="gov-titles">
-      <div class="gov-eyebrow">कार्यालय हाजिरी व्यवस्थापन</div>
-      <div class="gov-title">फेस डिटेक्सन एटेन्डेन्स</div>
-      <div class="gov-sub">अनुहार पहिचानमा आधारित डिजिटल हाजिरी प्रणाली</div>
+    <h2 class="display" style="margin:0 0 4px;font-size:24px;">फेस लक प्रणाली</h2>
+    <div id="lockSubtitle" style="font-size:13.5px;opacity:0.85;">प्रणाली अनलक गर्न आफ्नो अनुहार क्यामेरामा देखाउनुहोस्</div>
+    <div class="lock-video-wrap">
+      <video id="lockVideo" autoplay muted playsinline></video>
     </div>
-    <div class="gov-clock">
-      <div class="time" id="clockTime">--:--:--</div>
-      <div class="date" id="clockDate">----</div>
+    <div class="lock-status" id="lockStatus">क्यामेरा तयार गर्दै...</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-gold" id="btnVerifyFace">✓ अनुहार जाँच गर्नुहोस्</button>
+      <button class="btn btn-ghost" id="btnSkipLock" style="display:none;">प्रणाली खोल्नुहोस् (लक छैन)</button>
     </div>
   </div>
-</header>
+</div>
 
-<nav class="tabs" id="tabsNav">
-  <button data-tab="dashboard" class="active">🏛 ड्यासबोर्ड</button>
-  <button data-tab="register">🧑 नयाँ दर्ता</button>
-  <button data-tab="attendance">📷 हाजिर गर्नुहोस्</button>
-  <button data-tab="records">📋 रेकर्डहरू</button>
-</nav>
-
-<main>
-
-  <!-- ===================== DASHBOARD ===================== -->
-  <section id="tab-dashboard" class="panel">
-    <div class="section-title"><span class="idx">1</span> आजको सारांश</div>
-    <div class="stats">
-      <div class="stat-card"><div class="num" id="statTotalPeople">0</div><div class="lbl">कुल दर्ता भएका</div></div>
-      <div class="stat-card"><div class="num" id="statTodayPresent">0</div><div class="lbl">आज उपस्थित</div></div>
-      <div class="stat-card"><div class="num" id="statTodayAbsent">0</div><div class="lbl">आज अनुपस्थित</div></div>
-    </div>
-    <div class="section-title" style="margin-top:6px"><span class="idx">2</span> आजको हाजिरी</div>
-    <div class="table-wrap">
-      <table class="gov-table">
-        <thead><tr><th>फोटो</th><th>नाम</th><th>परिचय नं.</th><th>विभाग</th><th>समय</th><th>स्थिति</th></tr></thead>
-        <tbody id="dashTodayBody"><tr class="empty-row"><td colspan="6">आजको हाजिरी रेकर्ड छैन</td></tr></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ===================== REGISTER ===================== -->
-  <section id="tab-register" class="panel hidden">
-    <div class="section-title"><span class="idx">1</span> नयाँ व्यक्ति दर्ता</div>
-    <div class="grid2">
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="pagoda-icon"><svg width="30" height="26" viewBox="0 0 52 40" fill="none"><path d="M26 2L4 16H48L26 2Z" fill="#C9A227"/><path d="M26 10L10 22H42L26 10Z" fill="#E8C765"/><rect x="22" y="22" width="8" height="14" fill="#C9A227"/></svg></div>
       <div>
-        <div class="cam-wrap" id="regCamWrap">
-          <video id="regVideo" autoplay muted playsinline></video>
-          <canvas id="regCanvas"></canvas>
-          <div class="cam-frame"><b></b></div>
-          <div class="cam-status"><span class="dot" id="regDot"></span><span id="regDotLabel">क्यामेरा बन्द</span></div>
-          <div class="cam-msg info hidden" id="regMsg"></div>
-          <div class="stamp-layer"><div class="stamp" id="regStamp">✓ खिचियो</div></div>
-        </div>
-        <div class="cam-actions">
-          <button class="btn btn-blue" id="regCamBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            क्यामेरा सुरु गर्नुहोस्
-          </button>
-          <button class="btn btn-primary" id="regCaptureBtn" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
-            अनुहार खिच्नुहोस् (<span id="capCount">0</span>/3)
-          </button>
-        </div>
-        <div class="progress-track"><div class="progress-fill" id="regProgress"></div></div>
-        <div class="face-samples" id="faceSamples">
-          <div class="sample-slot">१</div><div class="sample-slot">२</div><div class="sample-slot">३</div>
-        </div>
-      </div>
-      <div>
-        <form id="regForm">
-          <div class="field"><label>पूरा नाम <span class="req">*</span></label><input type="text" id="fName" placeholder="जस्तै: राम बहादुर श्रेष्ठ" required></div>
-          <div class="field"><label>परिचय पत्र नं. <span class="req">*</span></label><input type="text" id="fId" placeholder="जस्तै: EMP-2082-001" required></div>
-          <div class="field"><label>विभाग / कार्यालय <span class="req">*</span></label><input type="text" id="fDept" placeholder="जस्तै: प्रशासन शाखा" required></div>
-          <div class="field"><label>पद</label><input type="text" id="fPost" placeholder="जस्तै: नायब सुब्बा"></div>
-          <div class="field"><label>सम्पर्क नं.</label><input type="text" id="fPhone" placeholder="जस्तै: 98XXXXXXXX"></div>
-          <button type="submit" class="btn btn-primary btn-block" id="regSubmitBtn" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-            दर्ता सम्पन्न गर्नुहोस्
-          </button>
-          <p style="font-size:11.5px; color:var(--ink-soft); margin-top:10px;">* पहिले ३ वटा फरक-फरक कोणबाट अनुहार खिच्नुहोस्, त्यसपछि फारम भर्नुहोस्।</p>
-        </form>
+        <div class="brand-title">उपस्थिति प्रणाली</div>
+        <div class="brand-sub">FACE + QR ATTENDANCE</div>
       </div>
     </div>
-  </section>
+    <nav class="nav" id="navList">
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        ड्यासबोर्ड
+      </div>
+      <div class="nav-item" data-view="register">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        दर्ता गर्नुहोस्
+      </div>
+      <div class="nav-item" data-view="people">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        सबै व्यक्ति / ID कार्ड
+      </div>
+      <div class="nav-item" data-view="attendance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+        उपस्थिति लगाउनुहोस्
+      </div>
+      <div class="nav-item" data-view="monthly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        महिनावारी रिपोर्ट
+      </div>
+      <div class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        सेटिङ्ग
+      </div>
+    </nav>
+    <div class="sidebar-foot">नेपाली शैली · IndexedDB · Offline-first</div>
+  </aside>
 
-  <!-- ===================== ATTENDANCE ===================== -->
-  <section id="tab-attendance" class="panel hidden">
-    <div class="section-title"><span class="idx">1</span> अनुहार पहिचान गरी हाजिर गर्नुहोस्</div>
-    <div class="cam-wrap" id="attCamWrap" style="max-width:520px; margin:0 auto;">
-      <video id="attVideo" autoplay muted playsinline></video>
-      <canvas id="attCanvas"></canvas>
-      <div class="cam-frame"><b></b></div>
-      <div class="cam-status"><span class="dot" id="attDot"></span><span id="attDotLabel">क्यामेरा बन्द</span></div>
-      <div class="cam-msg info hidden" id="attMsg"></div>
-      <div class="stamp-layer"><div class="stamp" id="attStamp">✓ हाजिर भयो</div></div>
-    </div>
-    <div class="cam-actions" style="justify-content:center;">
-      <button class="btn btn-blue" id="attCamBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        क्यामेरा सुरु गर्नुहोस्
-      </button>
-      <button class="btn btn-outline hidden" id="attStopBtn">क्यामेरा बन्द गर्नुहोस्</button>
-    </div>
-    <p style="text-align:center; font-size:12px; color:var(--ink-soft); margin-top:12px;">क्यामेरा अगाडि अनुहार सोझै देखाउनुहोस्। पहिचान भएपछि स्वतः हाजिर हुनेछ।</p>
-  </section>
-
-  <!-- ===================== RECORDS ===================== -->
-  <section id="tab-records" class="panel hidden">
-    <div class="section-title"><span class="idx">1</span> दर्ता भएका व्यक्तिहरू</div>
-    <div class="toolbar">
-      <input type="text" id="peopleSearch" placeholder="🔍 नाम / परिचय नं. खोज्नुहोस्">
-      <div class="spacer"></div>
-      <span style="font-size:12px; color:var(--ink-soft);" id="peopleCount">0 जना</span>
-    </div>
-    <div class="table-wrap">
-      <table class="gov-table">
-        <thead><tr><th>फोटो</th><th>नाम</th><th>परिचय नं.</th><th>विभाग</th><th>पद</th><th>दर्ता मिति</th><th>कार्य</th></tr></thead>
-        <tbody id="peopleBody"><tr class="empty-row"><td colspan="7">कुनै दर्ता भएको छैन</td></tr></tbody>
-      </table>
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <h1 id="viewTitle">ड्यासबोर्ड</h1>
+      </div>
+      <div class="date-badge" id="todayBadge">-</div>
     </div>
 
-    <div class="section-title" style="margin-top:22px"><span class="idx">2</span> हाजिरी रेकर्ड</div>
-    <div class="toolbar">
-      <input type="date" id="attDateFilter">
-      <input type="text" id="attSearch" placeholder="🔍 नाम खोज्नुहोस्">
-      <div class="spacer"></div>
-      <button class="btn btn-outline btn-sm" id="clearFilterBtn">फिल्टर हटाउनुहोस्</button>
+    <div class="content">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="view active" id="view-dashboard">
+        <div class="grid grid-4">
+          <div class="card stat-card">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#0B3D91" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="stat-num" id="statTotalPeople">0</div>
+            <div class="stat-label">कुल दर्ता भएका व्यक्ति</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#A61B3F" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 16l2 2 4-4"/></svg></div>
+            <div class="stat-num" id="statTodayAttendance">0</div>
+            <div class="stat-label">आजको उपस्थिति</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A227" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div class="stat-num" id="statTotalCategories">10</div>
+            <div class="stat-label">कुल श्रेणी</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2E7D46" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+            <div class="stat-num" id="statTotalAttendance">0</div>
+            <div class="stat-label">जम्मा उपस्थिति रेकर्ड</div>
+          </div>
+        </div>
+
+        <div class="section-title">🕐 आजको उपस्थिति</div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>फोटो</th><th>नाम</th><th>श्रेणी</th><th>समय</th><th>माध्यम</th></tr></thead>
+              <tbody id="todayAttendanceBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="todayEmpty" style="display:none;">आजसम्म कुनै उपस्थिति दर्ता भएको छैन</div>
+        </div>
+      </section>
+
+      <!-- ============ REGISTER ============ -->
+      <section class="view" id="view-register">
+        <div class="card" style="max-width:760px;margin:0 auto;">
+          <h3 style="margin-top:0;color:var(--crimson-dark);">१. श्रेणी छान्नुहोस्</h3>
+          <div class="cat-grid" id="catGrid"></div>
+
+          <div id="regFormWrap" style="display:none;margin-top:22px;">
+            <h3 style="color:var(--crimson-dark);">२. फोटो खिच्नुहोस्</h3>
+            <div class="photo-box" id="photoBox"><div class="ph-empty">📷<br>फोटो अझै खिचिएको छैन</div></div>
+            <div style="text-align:center;margin-bottom:20px;">
+              <button class="btn btn-blue btn-sm" id="btnOpenCamReg">📸 क्यामेरा खोल्नुहोस्</button>
+            </div>
+
+            <h3 style="color:var(--crimson-dark);">३. विवरण भर्नुहोस्</h3>
+            <div class="field-row">
+              <div class="field"><label>पूरा नाम *</label><input type="text" id="fName" placeholder="जस्तै: राम बहादुर श्रेष्ठ"></div>
+              <div class="field"><label>सम्पर्क नम्बर</label><input type="tel" id="fPhone" placeholder="98XXXXXXXX"></div>
+            </div>
+            <div class="field"><label>ठेगाना</label><input type="text" id="fAddress" placeholder="जस्तै: काठमाडौं"></div>
+            <div class="field-row" id="dynamicFields"></div>
+
+            <button class="btn btn-primary btn-block" id="btnSaveRegister">✔ दर्ता गर्नुहोस् र ID कार्ड बनाउनुहोस्</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PEOPLE / ID CARDS ============ -->
+      <section class="view" id="view-people">
+        <div class="card" style="margin-bottom:18px;">
+          <input type="text" id="searchPeople" placeholder="🔍 नाम वा श्रेणीबाट खोज्नुहोस्..." style="width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14.5px;">
+        </div>
+        <div id="peopleList"></div>
+        <div class="empty-state" id="peopleEmpty" style="display:none;">
+          <div>😊</div>अझै कोही दर्ता भएको छैन। "दर्ता गर्नुहोस्" बाट सुरु गर्नुहोस्।
+        </div>
+      </section>
+
+      <!-- ============ ATTENDANCE ============ -->
+      <section class="view" id="view-attendance">
+        <div class="tabs">
+          <button class="tab-btn active" data-mode="qr">▦ QR कोड स्क्यान</button>
+          <button class="tab-btn" data-mode="face">😊 अनुहार स्क्यान</button>
+        </div>
+        <div class="card" style="max-width:520px;margin:0 auto;">
+          <div id="attQrPane">
+            <div id="qr-reader"></div>
+            <div style="text-align:center;margin-top:14px;">
+              <button class="btn btn-blue" id="btnStartQr">▶ स्क्यानर सुरु गर्नुहोस्</button>
+              <button class="btn btn-ghost" id="btnStopQr" style="display:none;">■ रोक्नुहोस्</button>
+            </div>
+          </div>
+          <div id="attFacePane" style="display:none;">
+            <div class="cam-video-wrap"><video id="attFaceVideo" autoplay muted playsinline></video></div>
+            <div style="text-align:center;margin-top:14px;">
+              <button class="btn btn-blue" id="btnStartFaceAtt">▶ क्यामेरा सुरु गर्नुहोस्</button>
+              <button class="btn btn-primary" id="btnCaptureFaceAtt" style="display:none;">😊 अनुहार पहिचान गर्नुहोस्</button>
+              <button class="btn btn-ghost" id="btnStopFaceAtt" style="display:none;">■ रोक्नुहोस्</button>
+            </div>
+          </div>
+          <div class="result-flash" id="attResultFlash"></div>
+        </div>
+      </section>
+
+      <!-- ============ MONTHLY REPORT ============ -->
+      <section class="view" id="view-monthly">
+        <div class="card">
+          <div class="field-row">
+            <div class="field"><label>व्यक्ति छान्नुहोस्</label><select id="monthlyPersonSelect"></select></div>
+            <div class="field"><label>महिना छान्नुहोस्</label><input type="month" id="monthlyMonthInput"></div>
+          </div>
+          <button class="btn btn-primary" id="btnLoadMonthly">रिपोर्ट हेर्नुहोस्</button>
+          <button class="btn btn-gold" id="btnExportExcel" style="margin-left:8px;">⬇ Excel डाउनलोड (सबै डाटा)</button>
+        </div>
+        <div class="card" style="margin-top:18px;">
+          <div id="monthlySummary" style="margin-bottom:12px;font-size:14.5px;color:var(--ink-soft);"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>मिति</th><th>समय</th><th>माध्यम</th></tr></thead>
+              <tbody id="monthlyTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="monthlyEmpty" style="display:none;">यो महिनाको लागि कुनै रेकर्ड फेला परेन</div>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS ============ -->
+      <section class="view" id="view-settings">
+        <div class="card" style="max-width:520px;">
+          <h3 style="margin-top:0;color:var(--crimson-dark);">फेस लक सेटिङ्ग</h3>
+          <p class="hint">फेस लक सक्रिय गर्दा, प्रणाली खोल्दा दर्ता भएका व्यक्तिहरूमध्ये कसैको अनुहार जाँच गर्नुपर्ने हुन्छ।</p>
+          <label style="display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer;">
+            <input type="checkbox" id="faceLockToggle" style="width:20px;height:20px;">
+            फेस लक सक्रिय गर्नुहोस्
+          </label>
+          <hr style="border:none;border-top:1px solid var(--line);margin:20px 0;">
+          <h3 style="color:var(--crimson-dark);">डाटा व्यवस्थापन</h3>
+          <button class="btn btn-danger" id="btnResetAll">⚠ सबै डाटा मेटाउनुहोस्</button>
+        </div>
+      </section>
+
     </div>
-    <div class="table-wrap">
-      <table class="gov-table">
-        <thead><tr><th>फोटो</th><th>नाम</th><th>परिचय नं.</th><th>विभाग</th><th>मिति</th><th>समय</th><th>स्थिति</th></tr></thead>
-        <tbody id="attendanceBody"><tr class="empty-row"><td colspan="7">कुनै हाजिरी रेकर्ड छैन</td></tr></tbody>
-      </table>
+  </div>
+</div>
+
+<!-- ================= CAMERA MODAL (registration) ================= -->
+<div class="modal-overlay" id="camModal">
+  <div class="modal">
+    <div class="modal-head"><h3>📸 फोटो खिच्नुहोस्</h3><button class="close-x" id="camModalClose">✕</button></div>
+    <div class="modal-body">
+      <div class="cam-video-wrap" id="camVideoWrap">
+        <video id="regVideo" autoplay muted playsinline></video>
+      </div>
+      <canvas id="regCanvas" style="display:none;"></canvas>
+      <div class="cam-controls">
+        <button class="btn btn-ghost btn-sm" id="btnSwitchCam">🔄 फ्रन्ट/ब्याक क्यामेरा</button>
+        <button class="btn btn-primary" id="btnCapturePhoto">📷 खिच्नुहोस्</button>
+        <button class="btn btn-gold" id="btnRetakePhoto" style="display:none;">♻ फेरि खिच्नुहोस्</button>
+        <button class="btn btn-blue" id="btnUsePhoto" style="display:none;">✔ यो फोटो प्रयोग गर्नुहोस्</button>
+      </div>
+      <div class="hint" id="camHint">अनुहार क्यामेरा फ्रेमको बीचमा राख्नुहोस्।</div>
     </div>
-  </section>
+  </div>
+</div>
 
-</main>
-
-<footer class="gov-footer">
-  <b>फेस डिटेक्सन एटेन्डेन्स</b> — स्थानीय ब्राउजरमै सुरक्षित रूपमा भण्डारण (IndexedDB) । कुनै डाटा बाहिर पठाइँदैन।
-</footer>
-
-<div class="bottomnav" id="bottomNav">
-  <button data-tab="dashboard" class="active">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
-    ड्यासबोर्ड
-  </button>
-  <button data-tab="register">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
-    नयाँ दर्ता
-  </button>
-  <button data-tab="attendance">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-    हाजिर
-  </button>
-  <button data-tab="records">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-4M9 3v6h6V3"/></svg>
-    रेकर्ड
-  </button>
+<!-- ================= ID CARD MODAL ================= -->
+<div class="modal-overlay" id="idCardModal">
+  <div class="modal wide">
+    <div class="modal-head"><h3>🪪 परिचय पत्र</h3><button class="close-x" id="idCardModalClose">✕</button></div>
+    <div class="modal-body">
+      <div id="printArea">
+        <div class="idcard" id="idCardRender"></div>
+      </div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn btn-gold" id="btnPrintCard">🖨 प्रिन्ट गर्नुहोस्</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-"use strict";
+/* =========================================================
+   उपस्थिति प्रणाली — Attendance System
+   Single-file app: IndexedDB + face-api.js + html5-qrcode + qrcode + xlsx
+   ========================================================= */
 
-/* ============================================================
-   INDEXEDDB LAYER
-============================================================ */
-const DB_NAME = "faceAttendanceDB";
-const DB_VERSION = 1;
-let db = null;
+/* ---------- 1. CONSTANTS ---------- */
+const CATEGORIES = [
+  { key:'company',  label:'कम्पनी',        icon:'🏢', fields:['कर्मचारी ID','पद','विभाग'] },
+  { key:'school',   label:'विद्यालय',      icon:'🏫', fields:['विद्यार्थी ID','कक्षा','रोल नं.','अभिभावकको नाम'] },
+  { key:'shop',     label:'पसल',           icon:'🛍️', fields:['स्टाफ ID','भूमिका','शाखा'] },
+  { key:'contract', label:'ठेक्कापट्टा',   icon:'📜', fields:['सम्झौता नं.','कामको प्रकार','अवधि'] },
+  { key:'work',     label:'काम',           icon:'🛠️', fields:['कामदार ID','कामको प्रकार','स्थान'] },
+  { key:'office',   label:'कार्यालय',      icon:'🏛️', fields:['कर्मचारी ID','पद','विभाग'] },
+  { key:'college',  label:'कलेज',          icon:'🎓', fields:['विद्यार्थी ID','संकाय','सेमेस्टर'] },
+  { key:'factory',  label:'कारखाना',       icon:'🏭', fields:['कामदार ID','विभाग','शिफ्ट'] },
+  { key:'hospital', label:'अस्पताल',       icon:'🏥', fields:['स्टाफ ID','विभाग','पद'] },
+  { key:'other',    label:'अन्य',          icon:'📁', fields:['विवरण १','विवरण २'] },
+];
+const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.key,c]));
+const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+const FACE_MATCH_THRESHOLD = 0.55;
 
+/* ---------- 2. INDEXEDDB LAYER ---------- */
+let DB = null;
 function openDB(){
-  return new Promise((resolve, reject)=>{
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open('nepAttendanceDB', 1);
     req.onupgradeneeded = (e)=>{
-      const _db = e.target.result;
-      if(!_db.objectStoreNames.contains("people")){
-        const store = _db.createObjectStore("people", {keyPath:"id", autoIncrement:true});
-        store.createIndex("empId","empId",{unique:true});
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('persons')){
+        db.createObjectStore('persons',{keyPath:'id'});
       }
-      if(!_db.objectStoreNames.contains("attendance")){
-        const store2 = _db.createObjectStore("attendance", {keyPath:"id", autoIncrement:true});
-        store2.createIndex("personId","personId",{unique:false});
-        store2.createIndex("date","date",{unique:false});
+      if(!db.objectStoreNames.contains('attendance')){
+        const s = db.createObjectStore('attendance',{keyPath:'id'});
+        s.createIndex('personId','personId',{unique:false});
+        s.createIndex('dateKey','dateKey',{unique:false});
+      }
+      if(!db.objectStoreNames.contains('settings')){
+        db.createObjectStore('settings',{keyPath:'key'});
       }
     };
-    req.onsuccess = (e)=>{ db = e.target.result; resolve(db); };
-    req.onerror = (e)=> reject(e.target.error);
+    req.onsuccess = (e)=>{ DB = e.target.result; resolve(DB); };
+    req.onerror = (e)=> reject(e);
   });
 }
+function tx(store, mode='readonly'){ return DB.transaction(store, mode).objectStore(store); }
+function dbAdd(store, val){ return new Promise((res,rej)=>{ const r = tx(store,'readwrite').put(val); r.onsuccess=()=>res(val); r.onerror=(e)=>rej(e); }); }
+function dbGet(store, key){ return new Promise((res,rej)=>{ const r = tx(store).get(key); r.onsuccess=()=>res(r.result||null); r.onerror=(e)=>rej(e); }); }
+function dbAll(store){ return new Promise((res,rej)=>{ const out=[]; const r = tx(store).openCursor(); r.onsuccess=(e)=>{ const c=e.target.result; if(c){ out.push(c.value); c.continue(); } else res(out); }; r.onerror=(e)=>rej(e); }); }
+function dbDelete(store, key){ return new Promise((res,rej)=>{ const r = tx(store,'readwrite').delete(key); r.onsuccess=()=>res(true); r.onerror=(e)=>rej(e); }); }
+function dbClear(store){ return new Promise((res,rej)=>{ const r = tx(store,'readwrite').clear(); r.onsuccess=()=>res(true); r.onerror=(e)=>rej(e); }); }
 
-function dbAdd(storeName, obj){
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction(storeName,"readwrite");
-    const req = tx.objectStore(storeName).add(obj);
-    req.onsuccess = ()=> resolve(req.result);
-    req.onerror = (e)=> reject(e.target.error);
-  });
+/* ---------- 3. UTILITIES ---------- */
+function uuid(){ return 'p-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9); }
+function toast(msg, type='info'){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast '+type;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
 }
-function dbGetAll(storeName){
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction(storeName,"readonly");
-    const req = tx.objectStore(storeName).getAll();
-    req.onsuccess = ()=> resolve(req.result);
-    req.onerror = (e)=> reject(e.target.error);
-  });
-}
-function dbDelete(storeName, id){
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction(storeName,"readwrite");
-    const req = tx.objectStore(storeName).delete(id);
-    req.onsuccess = ()=> resolve();
-    req.onerror = (e)=> reject(e.target.error);
-  });
-}
+function dateKeyOf(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function fmtDateNe(d){ try{ return d.toLocaleDateString('ne-NP',{year:'numeric',month:'long',day:'numeric'}); }catch(e){ return d.toDateString(); } }
+function fmtTimeNe(d){ try{ return d.toLocaleTimeString('ne-NP',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return d.toLocaleTimeString(); } }
 
-/* ============================================================
-   STATE
-============================================================ */
-let people = [];        // {id, name, empId, dept, post, phone, descriptors:[Array], photo, registeredAt}
-let attendanceLog = [];
-let modelsLoaded = false;
-const MATCH_THRESHOLD = 0.5; // lower = stricter
+/* ---------- 4. STATE ---------- */
+let state = {
+  selectedCategory: null,
+  capturedPhoto: null,
+  capturedDescriptor: null,
+  camStream: null,
+  camFacingMode: 'user',
+  html5Qr: null,
+  qrRunning: false,
+  faceAttStream: null,
+  allPersonsCache: [],
+  faceApiReady: false,
+};
 
-/* ============================================================
-   TOASTS
-============================================================ */
-function toast(msg, type="info", ms=3600){
-  const host = document.getElementById("toastHost");
-  const el = document.createElement("div");
-  el.className = "toast " + type;
-  const icons = {
-    ok:'<svg viewBox="0 0 24 24" fill="none" stroke="#1E7A4C" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
-    warn:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.18A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3l-8.18-14.14a2 2 0 0 0-3.42 0z"/></svg>',
-    danger:'<svg viewBox="0 0 24 24" fill="none" stroke="#B3261E" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
-    info:'<svg viewBox="0 0 24 24" fill="none" stroke="#00308F" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
-  };
-  el.innerHTML = (icons[type]||icons.info) + "<div>"+msg+"</div>";
-  host.appendChild(el);
-  setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateY(-8px)"; el.style.transition=".25s"; setTimeout(()=>el.remove(),250); }, ms);
+/* ---------- 5. NAVIGATION ---------- */
+const VIEW_TITLES = {
+  dashboard:'ड्यासबोर्ड', register:'दर्ता गर्नुहोस्', people:'सबै व्यक्ति / ID कार्ड',
+  attendance:'उपस्थिति लगाउनुहोस्', monthly:'महिनावारी रिपोर्ट', settings:'सेटिङ्ग'
+};
+function goToView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+  document.getElementById('viewTitle').textContent = VIEW_TITLES[name] || name;
+  document.getElementById('sidebar').classList.remove('open');
+  if(name==='dashboard') renderDashboard();
+  if(name==='people') renderPeopleList();
+  if(name==='monthly') renderMonthlySelectors();
+  if(name==='settings') loadSettingsUI();
+  if(name!=='attendance') stopAllAttendanceCams();
 }
-
-/* ============================================================
-   CLOCK
-============================================================ */
-const neDigits = ["०","१","२","३","४","५","६","७","८","९"];
-function toNeDigits(str){ return String(str).replace(/[0-9]/g, d=> neDigits[d]); }
-const neMonths = ["जनवरी","फेब्रुअरी","मार्च","अप्रिल","मे","जुन","जुलाई","अगस्ट","सेप्टेम्बर","अक्टोबर","नोभेम्बर","डिसेम्बर"];
-const neDays = ["आइतबार","सोमबार","मंगलबार","बुधबार","बिहीबार","शुक्रबार","शनिबार"];
-
-function updateClock(){
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2,"0");
-  const mm = String(now.getMinutes()).padStart(2,"0");
-  const ss = String(now.getSeconds()).padStart(2,"0");
-  document.getElementById("clockTime").textContent = toNeDigits(`${hh}:${mm}:${ss}`);
-  document.getElementById("clockDate").textContent = `${neDays[now.getDay()]}, ${toNeDigits(now.getDate())} ${neMonths[now.getMonth()]} ${toNeDigits(now.getFullYear())}`;
-}
-setInterval(updateClock,1000); updateClock();
-
-function todayKey(){
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function fmtTime(ts){
-  const d = new Date(ts);
-  return toNeDigits(`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`);
-}
-function fmtDate(dateStr){
-  const [y,m,day] = dateStr.split("-").map(Number);
-  return `${toNeDigits(day)} ${neMonths[m-1]} ${toNeDigits(y)}`;
-}
-
-/* ============================================================
-   TAB NAVIGATION
-============================================================ */
-const tabs = ["dashboard","register","attendance","records"];
-function switchTab(name){
-  tabs.forEach(t=>{
-    document.getElementById("tab-"+t).classList.toggle("hidden", t!==name);
-  });
-  document.querySelectorAll("#tabsNav button, #bottomNav button").forEach(b=>{
-    b.classList.toggle("active", b.dataset.tab===name);
-  });
-  if(name!=="register" && regStream) stopStream(regVideo,"reg");
-  if(name!=="attendance" && attStream) stopStream(attVideo,"att");
-  if(name==="dashboard") renderDashboard();
-  if(name==="records") { renderPeopleTable(); renderAttendanceTable(); }
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-document.querySelectorAll("#tabsNav button, #bottomNav button").forEach(b=>{
-  b.addEventListener("click", ()=> switchTab(b.dataset.tab));
+document.getElementById('navList').addEventListener('click',(e)=>{
+  const item = e.target.closest('.nav-item');
+  if(item) goToView(item.dataset.view);
+});
+document.getElementById('menuToggle').addEventListener('click',()=>{
+  document.getElementById('sidebar').classList.toggle('open');
 });
 
-/* ============================================================
-   FACE MODELS
-============================================================ */
-async function loadModels(){
-  const MODEL_URL = "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights";
-  const statusEl = document.getElementById("loadStatus");
+/* ---------- 6. FACE-API MODEL LOADING ---------- */
+async function loadFaceModels(){
+  if(state.faceApiReady) return true;
   try{
-    statusEl.textContent = "अनुहार पहिचान मोडेल लोड हुँदैछ (१/३)...";
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-    statusEl.textContent = "अनुहार पहिचान मोडेल लोड हुँदैछ (२/३)...";
-    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-    statusEl.textContent = "अनुहार पहिचान मोडेल लोड हुँदैछ (३/३)...";
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-    modelsLoaded = true;
-    statusEl.textContent = "तयार भयो!";
+    await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL);
+    state.faceApiReady = true;
+    return true;
   }catch(err){
-    console.error(err);
-    statusEl.textContent = "मोडेल लोड गर्न असफल भयो — इन्टरनेट जडान जाँच्नुहोस्।";
-    toast("अनुहार पहिचान मोडेल लोड हुन सकेन। इन्टरनेट जडान जाँच्नुहोस् र पृष्ठ पुनः लोड गर्नुहोस्।","danger",8000);
-    throw err;
+    console.error('Face model load failed', err);
+    return false;
   }
 }
-
-/* ============================================================
-   CAMERA HANDLING (honest permission flow)
-   Browsers require an explicit, user-granted getUserMedia permission;
-   this cannot be bypassed by a webpage. We request it properly, on a
-   clear user gesture, and give guided recovery steps if it's blocked.
-============================================================ */
-let regStream=null, attStream=null;
-const regVideo=document.getElementById("regVideo"), attVideo=document.getElementById("attVideo");
-
-function showPermissionModal(errName){
-  const backdrop = document.createElement("div");
-  backdrop.className="modal-backdrop";
-  let steps = `<li>ठेगाना पट्टी (address bar) को बायाँतिर रहेको क्यामेरा/ताल्चा आइकनमा क्लिक गर्नुहोस्</li>
-               <li>"क्यामेरा" लाई <b>Allow / अनुमति दिनुहोस्</b> मा सेट गर्नुहोस्</li>
-               <li>पृष्ठ पुनः लोड (Reload) गरेर फेरि प्रयास गर्नुहोस्</li>`;
-  let title = "क्यामेरा अनुमति आवश्यक छ";
-  let desc = "यो प्रणालीले हाजिरी लिन क्यामेरा प्रयोग गर्छ। ब्राउजरको सुरक्षा नीति अनुसार, प्रयोगकर्ताको स्पष्ट स्वीकृति बिना कुनै पनि वेबसाइटले क्यामेरा जबरजस्ती खोल्न सक्दैन — यो तपाईंको गोपनीयता जोगाउनको लागि हो।";
-  if(errName==="NotFoundError"){
-    title="क्यामेरा फेला परेन";
-    desc="यस उपकरणमा क्यामेरा भेटिएन। कृपया क्यामेरा जडित उपकरण प्रयोग गर्नुहोस्।";
-    steps="";
-  }
-  backdrop.innerHTML = `
-    <div class="modal">
-      <div class="modal-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M2 2l20 20"/></svg></div>
-      <h3>${title}</h3>
-      <p>${desc}</p>
-      ${steps? `<ol>${steps}</ol>` : ""}
-      <div class="modal-actions">
-        <button class="btn btn-outline btn-block" id="modalCloseBtn">बन्द गर्नुहोस्</button>
-        <button class="btn btn-primary btn-block" id="modalRetryBtn">फेरि प्रयास</button>
-      </div>
-    </div>`;
-  document.body.appendChild(backdrop);
-  backdrop.querySelector("#modalCloseBtn").onclick=()=>backdrop.remove();
-  backdrop.querySelector("#modalRetryBtn").onclick=()=>{ backdrop.remove(); location.reload(); };
+async function getFaceDescriptorFromInput(input){
+  const detection = await faceapi.detectSingleFace(input, new faceapi.TinyFaceDetectorOptions({inputSize:320, scoreThreshold:0.5}))
+    .withFaceLandmarks().withFaceDescriptor();
+  return detection ? detection.descriptor : null;
+}
+function euclideanDist(a,b){
+  let sum=0; for(let i=0;i<a.length;i++){ const d=a[i]-b[i]; sum+=d*d; } return Math.sqrt(sum);
 }
 
-async function startCamera(videoEl, kind){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    toast("यो ब्राउजरले क्यामेरा समर्थन गर्दैन।","danger");
-    return null;
+/* ---------- 7. FACE LOCK SCREEN ---------- */
+async function initLockScreen(){
+  const settings = await dbGet('settings','faceLock').catch(()=>null);
+  const persons = await dbAll('persons').catch(()=>[]);
+  const hasFaces = persons.some(p=>p.descriptor && p.descriptor.length);
+  const lockEnabled = settings ? !!settings.enabled : false;
+
+  if(!lockEnabled || !hasFaces){
+    // No lock configured yet, or nobody registered with a face -> skip straight in
+    document.getElementById('lockScreen').classList.add('hidden');
+    startApp();
+    return;
+  }
+  document.getElementById('lockScreen').classList.remove('hidden');
+  document.getElementById('lockStatus').textContent = 'क्यामेरा र फेस मोडेल तयार गर्दै...';
+  const modelsOk = await loadFaceModels();
+  if(!modelsOk){
+    document.getElementById('lockStatus').textContent = 'फेस मोडेल लोड हुन सकेन। इन्टरनेट जडान जाँच्नुहोस्।';
+    document.getElementById('btnSkipLock').style.display='inline-flex';
+    return;
   }
   try{
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} },
-      audio:false
-    });
-    videoEl.srcObject = stream;
-    await videoEl.play();
-    if(kind==="reg"){
-      regStream = stream;
-      document.getElementById("regDot").classList.add("live");
-      document.getElementById("regDotLabel").textContent="लाइभ";
-      document.getElementById("regCaptureBtn").disabled=false;
-      document.getElementById("regCamBtn").textContent="क्यामेरा पुनः सुरु";
-    } else {
-      attStream = stream;
-      document.getElementById("attDot").classList.add("live");
-      document.getElementById("attDotLabel").textContent="लाइभ";
-      document.getElementById("attStopBtn").classList.remove("hidden");
-      document.getElementById("attCamBtn").classList.add("hidden");
-    }
-    return stream;
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});
+    document.getElementById('lockVideo').srcObject = stream;
+    state.lockStream = stream;
+    document.getElementById('lockStatus').textContent = 'तयार छ — बटन थिच्नुहोस्';
   }catch(err){
-    console.error(err);
-    showPermissionModal(err.name);
-    return null;
+    document.getElementById('lockStatus').textContent = 'क्यामेरा उपलब्ध छैन।';
+    document.getElementById('btnSkipLock').style.display='inline-flex';
   }
 }
-function stopStream(videoEl, kind){
-  const stream = kind==="reg"? regStream : attStream;
-  if(stream){ stream.getTracks().forEach(t=>t.stop()); }
-  videoEl.srcObject=null;
-  if(kind==="reg"){
-    regStream=null;
-    document.getElementById("regDot").classList.remove("live","scan");
-    document.getElementById("regDotLabel").textContent="क्यामेरा बन्द";
-  } else {
-    attStream=null;
-    document.getElementById("attDot").classList.remove("live","scan");
-    document.getElementById("attDotLabel").textContent="क्यामेरा बन्द";
-    document.getElementById("attStopBtn").classList.add("hidden");
-    document.getElementById("attCamBtn").classList.remove("hidden");
-    clearInterval(attScanTimer);
+document.getElementById('btnVerifyFace').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('lockStatus');
+  const video = document.getElementById('lockVideo');
+  if(!video.srcObject){ toast('क्यामेरा उपलब्ध छैन','err'); return; }
+  statusEl.textContent = 'जाँच गर्दै...';
+  const descriptor = await getFaceDescriptorFromInput(video);
+  if(!descriptor){
+    statusEl.textContent = 'अनुहार फेला परेन। फेरि प्रयास गर्नुहोस्।';
+    return;
   }
-}
-
-/* ============================================================
-   REGISTRATION FLOW
-============================================================ */
-let capturedDescriptors = [];
-let capturedThumb = null;
-
-document.getElementById("regCamBtn").addEventListener("click", async ()=>{
-  if(!modelsLoaded){ toast("मोडेल अझै लोड हुँदैछ, केहि क्षण पर्खनुहोस्।","warn"); return; }
-  await startCamera(regVideo,"reg");
-});
-
-document.getElementById("regCaptureBtn").addEventListener("click", async ()=>{
-  if(!regStream){ toast("पहिले क्यामेरा सुरु गर्नुहोस्।","warn"); return; }
-  const msgEl = document.getElementById("regMsg");
-  try{
-    const det = await faceapi.detectSingleFace(regVideo, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks().withFaceDescriptor();
-    if(!det){
-      msgEl.textContent="अनुहार भेटिएन। क्यामेरा अगाडि सोझै हेर्नुहोस्।";
-      msgEl.className="cam-msg warn"; setTimeout(()=>msgEl.classList.add("hidden"),2200);
-      return;
-    }
-    capturedDescriptors.push(Array.from(det.descriptor));
-
-    // thumbnail
-    const c = document.createElement("canvas");
-    c.width=160; c.height=120;
-    c.getContext("2d").drawImage(regVideo,0,0,160,120);
-    const dataUrl = c.toDataURL("image/jpeg",0.8);
-    if(!capturedThumb) capturedThumb = dataUrl;
-
-    const idx = capturedDescriptors.length-1;
-    const slots = document.querySelectorAll("#faceSamples .sample-slot, #faceSamples .sample");
-    const slotContainer = document.getElementById("faceSamples");
-    const oldSlot = slotContainer.children[idx];
-    const img = document.createElement("img");
-    img.src = dataUrl; img.className="sample";
-    if(oldSlot) slotContainer.replaceChild(img, oldSlot);
-
-    document.getElementById("capCount").textContent = capturedDescriptors.length;
-    document.getElementById("regProgress").style.width = (capturedDescriptors.length/3*100)+"%";
-
-    const stamp = document.getElementById("regStamp");
-    stamp.classList.remove("show"); void stamp.offsetWidth; stamp.classList.add("show");
-
-    if(capturedDescriptors.length>=3){
-      document.getElementById("regCaptureBtn").disabled=true;
-      document.getElementById("regSubmitBtn").disabled=false;
-      msgEl.textContent="३ वटा नमूना खिचियो। अब फारम भरेर दर्ता गर्नुहोस्।";
-      msgEl.className="cam-msg ok"; msgEl.classList.remove("hidden");
-    } else {
-      msgEl.textContent=`नमूना ${capturedDescriptors.length}/3 खिचियो। अलि फरक कोणबाट फेरि खिच्नुहोस्।`;
-      msgEl.className="cam-msg ok"; msgEl.classList.remove("hidden");
-      setTimeout(()=>msgEl.classList.add("hidden"),2200);
-    }
-  }catch(err){
-    console.error(err);
-    toast("अनुहार खिच्न त्रुटि भयो, फेरि प्रयास गर्नुहोस्।","danger");
+  const persons = await dbAll('persons');
+  let matched = null, bestDist = 999;
+  for(const p of persons){
+    if(!p.descriptor || !p.descriptor.length) continue;
+    const d = euclideanDist(Array.from(descriptor), p.descriptor);
+    if(d < bestDist){ bestDist = d; matched = p; }
+  }
+  if(matched && bestDist <= FACE_MATCH_THRESHOLD){
+    statusEl.textContent = `स्वागत छ, ${matched.name}!`;
+    toast('अनलक भयो: '+matched.name, 'ok');
+    if(state.lockStream) state.lockStream.getTracks().forEach(t=>t.stop());
+    document.getElementById('lockScreen').classList.add('hidden');
+    startApp();
+  }else{
+    statusEl.textContent = 'अनुहार मिलेन। फेरि प्रयास गर्नुहोस्।';
+    toast('अनुहार पहिचान भएन','err');
   }
 });
+document.getElementById('btnSkipLock').addEventListener('click', ()=>{
+  if(state.lockStream) state.lockStream.getTracks().forEach(t=>t.stop());
+  document.getElementById('lockScreen').classList.add('hidden');
+  startApp();
+});
+function startApp(){
+  document.getElementById('app').classList.add('ready');
+  document.getElementById('todayBadge').textContent = fmtDateNe(new Date());
+  renderDashboard();
+  loadFaceModels(); // warm up in background for registration/attendance use
+}
 
-document.getElementById("regForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  if(capturedDescriptors.length<3){ toast("कृपया पहिले ३ वटा अनुहार नमूना खिच्नुहोस्।","warn"); return; }
-  const name = document.getElementById("fName").value.trim();
-  const empId = document.getElementById("fId").value.trim();
-  const dept = document.getElementById("fDept").value.trim();
-  const post = document.getElementById("fPost").value.trim();
-  const phone = document.getElementById("fPhone").value.trim();
-  if(!name||!empId||!dept){ toast("कृपया आवश्यक फिल्डहरू भर्नुहोस्।","warn"); return; }
+/* ---------- 8. REGISTRATION ---------- */
+function renderCategoryGrid(){
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(cat=>{
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip';
+    chip.dataset.key = cat.key;
+    chip.innerHTML = `<div class="ic">${cat.icon}</div><div class="lbl">${cat.label}</div>`;
+    chip.addEventListener('click', ()=>selectCategory(cat.key));
+    grid.appendChild(chip);
+  });
+}
+function selectCategory(key){
+  state.selectedCategory = key;
+  document.querySelectorAll('.cat-chip').forEach(c=>c.classList.toggle('selected', c.dataset.key===key));
+  document.getElementById('regFormWrap').style.display = 'block';
+  const cat = CAT_MAP[key];
+  const dyn = document.getElementById('dynamicFields');
+  dyn.innerHTML = '';
+  cat.fields.forEach((label, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'field';
+    div.innerHTML = `<label>${label}</label><input type="text" data-fieldname="${label}" id="dynField_${idx}">`;
+    dyn.appendChild(div);
+  });
+}
+function resetRegisterForm(){
+  state.selectedCategory = null;
+  state.capturedPhoto = null;
+  state.capturedDescriptor = null;
+  document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('regFormWrap').style.display = 'none';
+  document.getElementById('fName').value = '';
+  document.getElementById('fPhone').value = '';
+  document.getElementById('fAddress').value = '';
+  document.getElementById('dynamicFields').innerHTML = '';
+  document.getElementById('photoBox').innerHTML = '<div class="ph-empty">📷<br>फोटो अझै खिचिएको छैन</div>';
+}
 
-  const existing = people.find(p=>p.empId.toLowerCase()===empId.toLowerCase());
-  if(existing){ toast("यो परिचय पत्र नं. पहिले नै दर्ता भइसकेको छ।","danger"); return; }
+/* ---- Camera modal (shared logic, mode = 'register') ---- */
+async function openCamera(videoElId, facing='user'){
+  try{
+    if(state.camStream){ state.camStream.getTracks().forEach(t=>t.stop()); }
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode: facing}});
+    state.camStream = stream;
+    document.getElementById(videoElId).srcObject = stream;
+    return true;
+  }catch(err){
+    toast('क्यामेरा खोल्न सकिएन: '+err.message, 'err');
+    return false;
+  }
+}
+function closeCamera(){
+  if(state.camStream){ state.camStream.getTracks().forEach(t=>t.stop()); state.camStream=null; }
+}
+document.getElementById('btnOpenCamReg').addEventListener('click', async ()=>{
+  document.getElementById('camModal').classList.add('open');
+  document.getElementById('regVideo').style.display='block';
+  document.getElementById('regCanvas').style.display='none';
+  document.getElementById('btnCapturePhoto').style.display='inline-flex';
+  document.getElementById('btnRetakePhoto').style.display='none';
+  document.getElementById('btnUsePhoto').style.display='none';
+  state.camFacingMode = 'user';
+  await openCamera('regVideo', state.camFacingMode);
+});
+document.getElementById('camModalClose').addEventListener('click', ()=>{
+  closeCamera();
+  document.getElementById('camModal').classList.remove('open');
+});
+document.getElementById('btnSwitchCam').addEventListener('click', async ()=>{
+  state.camFacingMode = state.camFacingMode === 'user' ? 'environment' : 'user';
+  await openCamera('regVideo', state.camFacingMode);
+});
+document.getElementById('btnCapturePhoto').addEventListener('click', ()=>{
+  const video = document.getElementById('regVideo');
+  const canvas = document.getElementById('regCanvas');
+  canvas.width = video.videoWidth || 480;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  if(state.camFacingMode === 'user'){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.restore();
+  video.style.display='none';
+  canvas.style.display='block';
+  document.getElementById('btnCapturePhoto').style.display='none';
+  document.getElementById('btnRetakePhoto').style.display='inline-flex';
+  document.getElementById('btnUsePhoto').style.display='inline-flex';
+  document.getElementById('camHint').textContent = 'फोटो खिचियो। ठीक भए "यो फोटो प्रयोग गर्नुहोस्" थिच्नुहोस्।';
+});
+document.getElementById('btnRetakePhoto').addEventListener('click', ()=>{
+  document.getElementById('regVideo').style.display='block';
+  document.getElementById('regCanvas').style.display='none';
+  document.getElementById('btnCapturePhoto').style.display='inline-flex';
+  document.getElementById('btnRetakePhoto').style.display='none';
+  document.getElementById('btnUsePhoto').style.display='none';
+});
+document.getElementById('btnUsePhoto').addEventListener('click', async ()=>{
+  const canvas = document.getElementById('regCanvas');
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  state.capturedPhoto = dataUrl;
+  document.getElementById('camHint').textContent = 'अनुहार पहिचान गर्दै...';
+  try{
+    await loadFaceModels();
+    const descriptor = await getFaceDescriptorFromInput(canvas);
+    state.capturedDescriptor = descriptor ? Array.from(descriptor) : null;
+    if(!descriptor) toast('अनुहार फेला परेन, तर फोटो सुरक्षित भयो। फेस-स्क्यान उपस्थितिको लागि स्पष्ट फोटो चाहिन्छ।', 'info');
+    else toast('फोटो र अनुहार डाटा तयार भयो', 'ok');
+  }catch(err){ console.error(err); }
+  document.getElementById('photoBox').innerHTML = `<img src="${dataUrl}">`;
+  closeCamera();
+  document.getElementById('camModal').classList.remove('open');
+});
+
+document.getElementById('btnSaveRegister').addEventListener('click', async ()=>{
+  const name = document.getElementById('fName').value.trim();
+  if(!state.selectedCategory){ toast('कृपया श्रेणी छान्नुहोस्','err'); return; }
+  if(!name){ toast('कृपया पूरा नाम लेख्नुहोस्','err'); return; }
+  if(!state.capturedPhoto){ toast('कृपया पहिले फोटो खिच्नुहोस्','err'); return; }
+
+  const fieldsObj = {};
+  document.querySelectorAll('#dynamicFields [data-fieldname]').forEach(inp=>{
+    fieldsObj[inp.dataset.fieldname] = inp.value.trim();
+  });
 
   const person = {
-    name, empId, dept, post, phone,
-    descriptors: capturedDescriptors.slice(),
-    photo: capturedThumb,
-    registeredAt: Date.now()
+    id: uuid(),
+    name,
+    phone: document.getElementById('fPhone').value.trim(),
+    address: document.getElementById('fAddress').value.trim(),
+    category: state.selectedCategory,
+    fields: fieldsObj,
+    photo: state.capturedPhoto,
+    descriptor: state.capturedDescriptor,
+    createdAt: Date.now(),
   };
-  try{
-    const id = await dbAdd("people", person);
-    person.id = id;
-    people.push(person);
-    toast(`"${name}" सफलतापूर्वक दर्ता भयो।`,"ok");
-    document.getElementById("regForm").reset();
-    capturedDescriptors=[]; capturedThumb=null;
-    document.getElementById("capCount").textContent="0";
-    document.getElementById("regProgress").style.width="0%";
-    document.getElementById("regCaptureBtn").disabled = regStream? false : true;
-    document.getElementById("regSubmitBtn").disabled=true;
-    document.getElementById("faceSamples").innerHTML = `<div class="sample-slot">१</div><div class="sample-slot">२</div><div class="sample-slot">३</div>`;
-    renderPeopleTable(); renderDashboard();
-  }catch(err){
-    console.error(err);
-    toast("दर्ता गर्न त्रुटि भयो।","danger");
-  }
+  await dbAdd('persons', person);
+  toast('दर्ता सफल भयो!', 'ok');
+  resetRegisterForm();
+  await showIdCard(person.id);
+  goToView('people');
 });
 
-/* ============================================================
-   ATTENDANCE FLOW
-============================================================ */
-let attScanTimer=null;
-let lastMatchedId=null, lastMatchTime=0;
+/* ---------- 9. PEOPLE LIST & ID CARD ---------- */
+async function renderPeopleList(filter=''){
+  const persons = await dbAll('persons');
+  state.allPersonsCache = persons;
+  const list = document.getElementById('peopleList');
+  const term = filter.trim().toLowerCase();
+  const filtered = persons.filter(p=>{
+    if(!term) return true;
+    return p.name.toLowerCase().includes(term) || CAT_MAP[p.category].label.includes(term);
+  }).sort((a,b)=>b.createdAt-a.createdAt);
 
-document.getElementById("attCamBtn").addEventListener("click", async ()=>{
-  if(!modelsLoaded){ toast("मोडेल अझै लोड हुँदैछ, केहि क्षण पर्खनुहोस्।","warn"); return; }
-  if(people.length===0){ toast("कुनै पनि व्यक्ति दर्ता भएको छैन। पहिले दर्ता गर्नुहोस्।","warn"); switchTab("register"); return; }
-  const stream = await startCamera(attVideo,"att");
-  if(stream) beginScanLoop();
-});
-document.getElementById("attStopBtn").addEventListener("click", ()=> stopStream(attVideo,"att"));
-
-function euclidean(a,b){
-  let sum=0;
-  for(let i=0;i<a.length;i++){ sum += (a[i]-b[i])**2; }
-  return Math.sqrt(sum);
+  list.innerHTML = '';
+  document.getElementById('peopleEmpty').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(p=>{
+    const row = document.createElement('div');
+    row.className = 'person-row';
+    row.innerHTML = `
+      <img src="${p.photo}">
+      <div class="pi">
+        <div class="pn">${p.name}</div>
+        <div class="pc">${CAT_MAP[p.category].icon} ${CAT_MAP[p.category].label}${p.phone? ' · '+p.phone : ''}</div>
+      </div>
+      <div class="person-actions">
+        <button class="btn btn-gold btn-sm" data-act="card" data-id="${p.id}">🪪 ID कार्ड</button>
+        <button class="btn btn-danger btn-sm" data-act="del" data-id="${p.id}">🗑</button>
+      </div>`;
+    list.appendChild(row);
+  });
 }
-
-function findBestMatch(descriptor){
-  let best=null, bestDist=Infinity;
-  for(const p of people){
-    for(const d of p.descriptors){
-      const dist = euclidean(descriptor, d);
-      if(dist<bestDist){ bestDist=dist; best=p; }
+document.getElementById('peopleList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  if(btn.dataset.act === 'card'){ showIdCard(id); }
+  if(btn.dataset.act === 'del'){
+    if(confirm('के तपाईं यो व्यक्तिको रेकर्ड मेटाउन चाहनुहुन्छ?')){
+      await dbDelete('persons', id);
+      toast('मेटाइयो', 'ok');
+      renderPeopleList(document.getElementById('searchPeople').value);
     }
   }
-  return {person:best, distance:bestDist};
+});
+document.getElementById('searchPeople').addEventListener('input', (e)=> renderPeopleList(e.target.value));
+
+async function showIdCard(personId){
+  const p = await dbGet('persons', personId);
+  if(!p){ toast('व्यक्ति फेला परेन','err'); return; }
+  const cat = CAT_MAP[p.category];
+  const infoRows = [
+    ...(p.phone? [['सम्पर्क', p.phone]]: []),
+    ...(p.address? [['ठेगाना', p.address]]: []),
+    ...Object.entries(p.fields||{}).filter(([k,v])=>v),
+  ].map(([k,v])=>`<div><span>${k}</span><span>${v}</span></div>`).join('');
+
+  const cardEl = document.getElementById('idCardRender');
+  cardEl.innerHTML = `
+    <div class="idcard-head">
+      <div class="org">उपस्थिति परिचय पत्र</div>
+      <div class="sub">OFFICIAL ID CARD · ${cat.label.toUpperCase()}</div>
+    </div>
+    <div class="idcard-body">
+      <img class="photo" src="${p.photo}">
+      <div class="name">${p.name}</div>
+      <div class="cat-tag">${cat.icon} ${cat.label}</div>
+      <div class="idcard-info">${infoRows}</div>
+      <div class="idcard-qr"><canvas id="idCardQrCanvas"></canvas></div>
+      <div class="idcard-foot">ID: ${p.id}</div>
+    </div>`;
+  document.getElementById('idCardModal').classList.add('open');
+  try{
+    await QRCode.toCanvas(document.getElementById('idCardQrCanvas'), p.id, {width:140, margin:1, color:{dark:'#241C15', light:'#FFFFFF'}});
+  }catch(err){ console.error('QR generation failed', err); }
+}
+document.getElementById('idCardModalClose').addEventListener('click', ()=>{
+  document.getElementById('idCardModal').classList.remove('open');
+});
+document.getElementById('btnPrintCard').addEventListener('click', ()=>{ window.print(); });
+
+/* ---------- 10. DASHBOARD ---------- */
+async function renderDashboard(){
+  const persons = await dbAll('persons');
+  const attendance = await dbAll('attendance');
+  document.getElementById('statTotalPeople').textContent = persons.length;
+  document.getElementById('statTotalAttendance').textContent = attendance.length;
+  const todayKey = dateKeyOf(new Date());
+  const todays = attendance.filter(a=>a.dateKey===todayKey).sort((a,b)=>b.timestamp-a.timestamp);
+  document.getElementById('statTodayAttendance').textContent = todays.length;
+
+  const byId = Object.fromEntries(persons.map(p=>[p.id,p]));
+  const tbody = document.getElementById('todayAttendanceBody');
+  tbody.innerHTML = '';
+  document.getElementById('todayEmpty').style.display = todays.length ? 'none':'block';
+  todays.forEach(a=>{
+    const p = byId[a.personId];
+    if(!p) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><img src="${p.photo}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;"></td>
+      <td>${p.name}</td><td>${CAT_MAP[p.category].icon} ${CAT_MAP[p.category].label}</td>
+      <td>${fmtTimeNe(new Date(a.timestamp))}</td>
+      <td><span class="badge ${a.method==='qr'?'badge-qr':'badge-face'}">${a.method==='qr'?'QR':'अनुहार'}</span></td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-function beginScanLoop(){
-  const dot = document.getElementById("attDot");
-  const dotLabel = document.getElementById("attDotLabel");
-  const msgEl = document.getElementById("attMsg");
-  dot.classList.add("scan"); dotLabel.textContent="स्क्यान गर्दै...";
-  attScanTimer = setInterval(async ()=>{
-    if(!attStream) return;
-    try{
-      const det = await faceapi.detectSingleFace(attVideo, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks().withFaceDescriptor();
-      if(!det){
-        msgEl.textContent="अनुहार खोजिँदैछ... क्यामेरा अगाडि सोझै उभिनुहोस्।";
-        msgEl.className="cam-msg info"; msgEl.classList.remove("hidden");
-        return;
-      }
-      const {person, distance} = findBestMatch(det.descriptor);
-      if(person && distance < MATCH_THRESHOLD){
-        const now = Date.now();
-        if(lastMatchedId===person.id && (now-lastMatchTime) < 4000) return; // debounce
-        lastMatchedId=person.id; lastMatchTime=now;
-        await markAttendance(person);
-      } else {
-        msgEl.textContent="⚠ यो व्यक्ति दर्ता भएको छैन। कृपया पहिले दर्ता गर्नुहोस्।";
-        msgEl.className="cam-msg danger"; msgEl.classList.remove("hidden");
-      }
-    }catch(err){ console.error(err); }
-  }, 1200);
-}
-
-async function markAttendance(person){
-  const msgEl = document.getElementById("attMsg");
-  const today = todayKey();
-  const already = attendanceLog.find(a=>a.personId===person.id && a.date===today);
-  if(already){
-    msgEl.textContent = `${person.name} — आज पहिले नै हाजिर भइसक्नुभएको छ (${fmtTime(already.timestamp)})।`;
-    msgEl.className="cam-msg warn"; msgEl.classList.remove("hidden");
-    toast(`${person.name} पहिले नै आजको हाजिरीमा दर्ता छ।`,"warn");
-    return;
+/* ---------- 11. ATTENDANCE: TAB SWITCH ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    document.getElementById('attQrPane').style.display = mode==='qr' ? 'block':'none';
+    document.getElementById('attFacePane').style.display = mode==='face' ? 'block':'none';
+    stopAllAttendanceCams();
+    hideResultFlash();
+  });
+});
+function stopAllAttendanceCams(){
+  if(state.html5Qr && state.qrRunning){
+    state.html5Qr.stop().catch(()=>{});
+    state.qrRunning = false;
+    document.getElementById('btnStartQr').style.display='inline-flex';
+    document.getElementById('btnStopQr').style.display='none';
   }
+  if(state.faceAttStream){
+    state.faceAttStream.getTracks().forEach(t=>t.stop());
+    state.faceAttStream = null;
+    document.getElementById('btnStartFaceAtt').style.display='inline-flex';
+    document.getElementById('btnCaptureFaceAtt').style.display='none';
+    document.getElementById('btnStopFaceAtt').style.display='none';
+  }
+}
+function showResultFlash(msg, ok=true){
+  const el = document.getElementById('attResultFlash');
+  el.textContent = msg;
+  el.className = 'result-flash show ' + (ok?'success':'fail');
+}
+function hideResultFlash(){
+  const el = document.getElementById('attResultFlash');
+  el.className = 'result-flash';
+}
+
+/* ---- Mark attendance (shared) ---- */
+async function markAttendance(personId, method){
+  const now = new Date();
   const record = {
-    personId: person.id, name: person.name, empId: person.empId, dept: person.dept,
-    photo: person.photo, date: today, timestamp: Date.now(), status:"उपस्थित"
+    id: 'a-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),
+    personId, method,
+    timestamp: now.getTime(),
+    dateKey: dateKeyOf(now),
   };
+  await dbAdd('attendance', record);
+  const p = await dbGet('persons', personId);
+  showResultFlash(`✔ ${p?p.name:'व्यक्ति'} — उपस्थिति दर्ता भयो (${fmtTimeNe(now)})`, true);
+  toast('उपस्थिति सफलतापूर्वक दर्ता भयो', 'ok');
+  renderDashboard();
+}
+
+/* ---- QR MODE ---- */
+document.getElementById('btnStartQr').addEventListener('click', async ()=>{
+  hideResultFlash();
+  if(!state.html5Qr) state.html5Qr = new Html5Qrcode('qr-reader');
   try{
-    const id = await dbAdd("attendance", record);
-    record.id = id;
-    attendanceLog.push(record);
-    const stamp = document.getElementById("attStamp");
-    stamp.classList.remove("show"); void stamp.offsetWidth; stamp.classList.add("show");
-    msgEl.textContent = `✓ ${person.name} — हाजिर सफल भयो (${fmtTime(record.timestamp)})`;
-    msgEl.className="cam-msg ok"; msgEl.classList.remove("hidden");
-    toast(`${person.name} को हाजिरी सफलतापूर्वक दर्ता भयो।`,"ok");
-    renderDashboard();
+    await state.html5Qr.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: 230 },
+      async (decodedText)=>{
+        if(state.qrCooldown) return;
+        state.qrCooldown = true;
+        const person = await dbGet('persons', decodedText.trim());
+        if(person){ await markAttendance(person.id, 'qr'); }
+        else{ showResultFlash('✕ यो QR कोड सिस्टममा फेला परेन', false); }
+        setTimeout(()=>{ state.qrCooldown=false; }, 2500);
+      },
+      ()=>{ /* per-frame scan error, ignore */ }
+    );
+    state.qrRunning = true;
+    document.getElementById('btnStartQr').style.display='none';
+    document.getElementById('btnStopQr').style.display='inline-flex';
   }catch(err){
-    console.error(err);
-    toast("हाजिरी दर्ता गर्न त्रुटि भयो।","danger");
+    toast('क्यामेरा सुरु हुन सकेन: '+err, 'err');
   }
-}
-
-/* ============================================================
-   RENDERING: DASHBOARD
-============================================================ */
-function renderDashboard(){
-  document.getElementById("statTotalPeople").textContent = toNeDigits(people.length);
-  const today = todayKey();
-  const todays = attendanceLog.filter(a=>a.date===today).sort((a,b)=>b.timestamp-a.timestamp);
-  document.getElementById("statTodayPresent").textContent = toNeDigits(todays.length);
-  document.getElementById("statTodayAbsent").textContent = toNeDigits(Math.max(people.length-todays.length,0));
-
-  const body = document.getElementById("dashTodayBody");
-  if(todays.length===0){
-    body.innerHTML = `<tr class="empty-row"><td colspan="6">आजको हाजिरी रेकर्ड छैन</td></tr>`;
-    return;
+});
+document.getElementById('btnStopQr').addEventListener('click', ()=>{
+  if(state.html5Qr && state.qrRunning){
+    state.html5Qr.stop().then(()=>{
+      state.qrRunning = false;
+      document.getElementById('btnStartQr').style.display='inline-flex';
+      document.getElementById('btnStopQr').style.display='none';
+    }).catch(()=>{});
   }
-  body.innerHTML = todays.map(a=>`
-    <tr>
-      <td><img class="avatar-sm" src="${a.photo||''}" alt=""></td>
-      <td>${escapeHtml(a.name)}</td>
-      <td class="mono">${escapeHtml(a.empId)}</td>
-      <td>${escapeHtml(a.dept)}</td>
-      <td class="mono">${fmtTime(a.timestamp)}</td>
-      <td><span class="badge ok">✓ ${a.status}</span></td>
-    </tr>`).join("");
-}
-
-/* ============================================================
-   RENDERING: PEOPLE TABLE
-============================================================ */
-function renderPeopleTable(){
-  const q = (document.getElementById("peopleSearch").value||"").toLowerCase();
-  const filtered = people.filter(p=> p.name.toLowerCase().includes(q) || p.empId.toLowerCase().includes(q));
-  document.getElementById("peopleCount").textContent = `${toNeDigits(filtered.length)} जना`;
-  const body = document.getElementById("peopleBody");
-  if(filtered.length===0){
-    body.innerHTML = `<tr class="empty-row"><td colspan="7">कुनै दर्ता भएको छैन</td></tr>`;
-    return;
-  }
-  body.innerHTML = filtered.map(p=>`
-    <tr>
-      <td><img class="avatar-sm" src="${p.photo||''}" alt=""></td>
-      <td>${escapeHtml(p.name)}</td>
-      <td class="mono">${escapeHtml(p.empId)}</td>
-      <td>${escapeHtml(p.dept)}</td>
-      <td>${escapeHtml(p.post||'-')}</td>
-      <td>${fmtDate(new Date(p.registeredAt).toISOString().slice(0,10))}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deletePerson(${p.id})">हटाउनुहोस्</button></td>
-    </tr>`).join("");
-}
-document.getElementById("peopleSearch").addEventListener("input", renderPeopleTable);
-
-async function deletePerson(id){
-  if(!confirm("के तपाईं यो व्यक्तिलाई हटाउन निश्चित हुनुहुन्छ? सम्बन्धित हाजिरी रेकर्ड यथावत् रहनेछ।")) return;
-  try{
-    await dbDelete("people", id);
-    people = people.filter(p=>p.id!==id);
-    toast("व्यक्ति हटाइयो।","ok");
-    renderPeopleTable(); renderDashboard();
-  }catch(err){ console.error(err); toast("हटाउन त्रुटि भयो।","danger"); }
-}
-window.deletePerson = deletePerson;
-
-/* ============================================================
-   RENDERING: ATTENDANCE TABLE
-============================================================ */
-function renderAttendanceTable(){
-  const dateF = document.getElementById("attDateFilter").value;
-  const q = (document.getElementById("attSearch").value||"").toLowerCase();
-  let filtered = attendanceLog.slice().sort((a,b)=>b.timestamp-a.timestamp);
-  if(dateF) filtered = filtered.filter(a=>a.date===dateF);
-  if(q) filtered = filtered.filter(a=>a.name.toLowerCase().includes(q));
-  const body = document.getElementById("attendanceBody");
-  if(filtered.length===0){
-    body.innerHTML = `<tr class="empty-row"><td colspan="7">कुनै हाजिरी रेकर्ड छैन</td></tr>`;
-    return;
-  }
-  body.innerHTML = filtered.map(a=>`
-    <tr>
-      <td><img class="avatar-sm" src="${a.photo||''}" alt=""></td>
-      <td>${escapeHtml(a.name)}</td>
-      <td class="mono">${escapeHtml(a.empId)}</td>
-      <td>${escapeHtml(a.dept)}</td>
-      <td>${fmtDate(a.date)}</td>
-      <td class="mono">${fmtTime(a.timestamp)}</td>
-      <td><span class="badge ok">✓ ${a.status}</span></td>
-    </tr>`).join("");
-}
-document.getElementById("attDateFilter").addEventListener("input", renderAttendanceTable);
-document.getElementById("attSearch").addEventListener("input", renderAttendanceTable);
-document.getElementById("clearFilterBtn").addEventListener("click", ()=>{
-  document.getElementById("attDateFilter").value="";
-  document.getElementById("attSearch").value="";
-  renderAttendanceTable();
 });
 
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-}
-
-/* ============================================================
-   INIT
-============================================================ */
-async function init(){
+/* ---- FACE MODE ---- */
+document.getElementById('btnStartFaceAtt').addEventListener('click', async ()=>{
+  hideResultFlash();
+  const ok = await loadFaceModels();
+  if(!ok){ toast('फेस मोडेल लोड हुन सकेन','err'); return; }
   try{
-    await openDB();
-    people = await dbGetAll("people");
-    attendanceLog = await dbGetAll("attendance");
-  }catch(err){ console.error(err); toast("डाटाबेस सुरु गर्न त्रुटि भयो।","danger"); }
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});
+    state.faceAttStream = stream;
+    document.getElementById('attFaceVideo').srcObject = stream;
+    document.getElementById('btnStartFaceAtt').style.display='none';
+    document.getElementById('btnCaptureFaceAtt').style.display='inline-flex';
+    document.getElementById('btnStopFaceAtt').style.display='inline-flex';
+  }catch(err){
+    toast('क्यामेरा उपलब्ध छैन','err');
+  }
+});
+document.getElementById('btnStopFaceAtt').addEventListener('click', stopAllAttendanceCams);
+document.getElementById('btnCaptureFaceAtt').addEventListener('click', async ()=>{
+  const video = document.getElementById('attFaceVideo');
+  showResultFlash('अनुहार पहिचान गर्दै...', true);
+  const descriptor = await getFaceDescriptorFromInput(video);
+  if(!descriptor){ showResultFlash('✕ अनुहार फेला परेन, फेरि प्रयास गर्नुहोस्', false); return; }
+  const persons = await dbAll('persons');
+  let matched=null, bestDist=999;
+  for(const p of persons){
+    if(!p.descriptor || !p.descriptor.length) continue;
+    const d = euclideanDist(Array.from(descriptor), p.descriptor);
+    if(d < bestDist){ bestDist=d; matched=p; }
+  }
+  if(matched && bestDist <= FACE_MATCH_THRESHOLD){
+    await markAttendance(matched.id, 'face');
+  }else{
+    showResultFlash('✕ अनुहार पहिचान भएन (दर्ता भएको व्यक्ति फेला परेन)', false);
+  }
+});
 
-  try{
-    await loadModels();
-  }catch(err){ /* already toasted */ }
-
-  renderDashboard(); renderPeopleTable(); renderAttendanceTable();
-
-  const overlay = document.getElementById("loadOverlay");
-  overlay.style.opacity="0";
-  setTimeout(()=> overlay.style.display="none", 420);
+/* ---------- 12. MONTHLY REPORT ---------- */
+async function renderMonthlySelectors(){
+  const persons = await dbAll('persons');
+  const sel = document.getElementById('monthlyPersonSelect');
+  sel.innerHTML = persons.map(p=>`<option value="${p.id}">${p.name} (${CAT_MAP[p.category].label})</option>`).join('');
+  const monthInput = document.getElementById('monthlyMonthInput');
+  if(!monthInput.value){
+    const now = new Date();
+    monthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
 }
-init();
+document.getElementById('btnLoadMonthly').addEventListener('click', async ()=>{
+  const personId = document.getElementById('monthlyPersonSelect').value;
+  const monthVal = document.getElementById('monthlyMonthInput').value; // YYYY-MM
+  if(!personId || !monthVal){ toast('व्यक्ति र महिना छान्नुहोस्','err'); return; }
+  const person = await dbGet('persons', personId);
+  const allAtt = await dbAll('attendance');
+  const filtered = allAtt.filter(a=>a.personId===personId && a.dateKey.startsWith(monthVal))
+    .sort((a,b)=>a.timestamp-b.timestamp);
+
+  document.getElementById('monthlySummary').innerHTML =
+    `<b>${person.name}</b> — ${CAT_MAP[person.category].label} · <b>${filtered.length}</b> दिन/पटक उपस्थित`;
+
+  const tbody = document.getElementById('monthlyTableBody');
+  tbody.innerHTML = '';
+  document.getElementById('monthlyEmpty').style.display = filtered.length ? 'none':'block';
+  filtered.forEach(a=>{
+    const d = new Date(a.timestamp);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${fmtDateNe(d)}</td><td>${fmtTimeNe(d)}</td>
+      <td><span class="badge ${a.method==='qr'?'badge-qr':'badge-face'}">${a.method==='qr'?'QR':'अनुहार'}</span></td>`;
+    tbody.appendChild(tr);
+  });
+});
+
+/* ---------- 13. EXCEL EXPORT ---------- */
+document.getElementById('btnExportExcel').addEventListener('click', async ()=>{
+  const persons = await dbAll('persons');
+  const attendance = await dbAll('attendance');
+  if(!attendance.length){ toast('निर्यात गर्न कुनै उपस्थिति डाटा छैन','err'); return; }
+  const byId = Object.fromEntries(persons.map(p=>[p.id,p]));
+  const rows = attendance.sort((a,b)=>a.timestamp-b.timestamp).map(a=>{
+    const p = byId[a.personId];
+    const d = new Date(a.timestamp);
+    return {
+      'नाम': p?p.name:'?',
+      'श्रेणी': p?CAT_MAP[p.category].label:'?',
+      'मिति': dateKeyOf(d),
+      'समय': d.toLocaleTimeString('en-GB'),
+      'माध्यम': a.method==='qr'?'QR कोड':'अनुहार',
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+  XLSX.writeFile(wb, `attendance_${dateKeyOf(new Date())}.xlsx`);
+  toast('Excel फाइल डाउनलोड भयो', 'ok');
+});
+
+/* ---------- 14. SETTINGS ---------- */
+async function loadSettingsUI(){
+  const s = await dbGet('settings','faceLock');
+  document.getElementById('faceLockToggle').checked = s ? !!s.enabled : false;
+}
+document.getElementById('faceLockToggle').addEventListener('change', async (e)=>{
+  await dbAdd('settings', {key:'faceLock', enabled:e.target.checked});
+  toast(e.target.checked ? 'फेस लक सक्रिय गरियो' : 'फेस लक निष्क्रिय गरियो', 'ok');
+});
+document.getElementById('btnResetAll').addEventListener('click', async ()=>{
+  if(!confirm('साँच्चै सबै व्यक्ति र उपस्थिति डाटा मेटाउने हो? यो कार्य फिर्ता हुँदैन।')) return;
+  await dbClear('persons');
+  await dbClear('attendance');
+  toast('सबै डाटा मेटाइयो', 'ok');
+  renderDashboard();
+  renderPeopleList();
+});
+
+/* ---------- 15. INIT ---------- */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  await openDB();
+  renderCategoryGrid();
+  await initLockScreen();
+});
 </script>
 </body>
 </html>
