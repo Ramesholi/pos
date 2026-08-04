@@ -2,1389 +2,1639 @@
 <html lang="ne">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>हाजिर | अनुहार र QR हाजिरी प्रणाली</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>विद्यालय हाजिर व्यवस्थापन प्रणाली</title>
 
-<!-- ===================== FONTS ===================== -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-
-<!-- ===================== CDN LIBRARIES ===================== -->
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<!-- ===== CDN LIBRARIES ===== -->
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
 <style>
-/* =====================================================================
-   DESIGN TOKENS — Nepali flag palette (crimson / indigo-blue / white/gold)
-   Signature element: the double-pennant (dhunge dhara / Nepal flag pennant)
-   silhouette used as a banner + the tiered-pagoda eave rule as a divider.
-   ===================================================================== */
 :root{
-  --crimson:#B0122C;
-  --crimson-deep:#7A0C1F;
-  --indigo:#0B2E6B;
-  --indigo-deep:#071F49;
-  --gold:#F2B705;
-  --ivory:#FFF8ED;
-  --paper:#FFFDF9;
-  --ink:#231815;
-  --ink-soft:#5b4f49;
-  --line:#e8dcc8;
-  --ok:#1e8a4c;
-  --warn:#c98a06;
-  --danger:#b3261e;
-  --radius:18px;
-  --shadow:0 10px 30px -12px rgba(122,12,31,.28);
-  --font-display:'Yatra One', 'Noto Sans Devanagari', cursive;
-  --font-body:'Noto Sans Devanagari','Rajdhani',sans-serif;
+  --maroon:#7A1229;
+  --maroon-deep:#5A0D1F;
+  --gold:#D6A03C;
+  --gold-light:#F0D28C;
+  --cream:#FBF6EC;
+  --paper:#FFFFFF;
+  --ink:#22232B;
+  --ink-soft:#6B6470;
+  --line:#E8DFCC;
+  --green:#2E7D4F;
+  --green-bg:#E7F5EC;
+  --red:#B3273A;
+  --red-bg:#FBEAEA;
+  --blue:#2C5F8A;
+  --radius:16px;
+  --shadow: 0 10px 30px -12px rgba(90,13,31,.25);
+  --font-display:'Baloo 2','Noto Sans Devanagari',sans-serif;
+  --font-body:'Noto Sans Devanagari','Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
 }
-
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;height:100%;}
 body{
   font-family:var(--font-body);
   background:
-    radial-gradient(1200px 600px at 100% -10%, rgba(11,46,107,.08), transparent 60%),
-    radial-gradient(1000px 500px at -10% 110%, rgba(176,18,44,.08), transparent 60%),
-    var(--ivory);
+    radial-gradient(1200px 600px at 100% -10%, #F4E3C4 0%, transparent 55%),
+    radial-gradient(900px 500px at -10% 110%, #EFD9DE 0%, transparent 55%),
+    var(--cream);
   color:var(--ink);
   min-height:100vh;
   overflow-x:hidden;
 }
-::selection{background:var(--gold); color:var(--ink);}
-button{font-family:inherit;}
-input,select,textarea{font-family:inherit;}
-
-/* ---------- Tiered pagoda-eave divider (signature motif) ---------- */
-.pagoda-divider{
-  height:14px; width:100%;
-  background:
-    linear-gradient(135deg, transparent 49%, var(--crimson) 50%) 0 0/14px 14px repeat-x,
-    linear-gradient(-135deg, transparent 49%, var(--crimson) 50%) 7px 0/14px 14px repeat-x;
-  opacity:.85;
-}
-.pagoda-divider.gold{
-  background:
-    linear-gradient(135deg, transparent 49%, var(--gold) 50%) 0 0/10px 10px repeat-x,
-    linear-gradient(-135deg, transparent 49%, var(--gold) 50%) 5px 0/10px 10px repeat-x;
-  height:10px;
-}
-
-/* ---------- Pennant banner (double-pennant, echoes Nepal's flag) ---------- */
-.pennant-banner{
-  position:relative;
-  background:linear-gradient(160deg, var(--crimson) 0%, var(--crimson-deep) 100%);
-  color:#fff;
-  padding:26px 20px 34px;
-  clip-path: polygon(0 0,100% 0,100% 82%, 52% 100%, 0 82%);
-  text-align:center;
-}
-.pennant-banner h1{
-  font-family:var(--font-display);
-  font-size:clamp(26px,5vw,38px);
-  margin:0 0 4px;
-  letter-spacing:.5px;
-  text-shadow:0 2px 0 rgba(0,0,0,.15);
-}
-.pennant-banner p{margin:0; font-size:14px; opacity:.92; font-weight:500;}
-.pennant-banner .moon-badge{
-  position:absolute; top:14px; right:18px;
-  width:34px;height:34px;border-radius:50%;
-  background:var(--gold); box-shadow:0 0 0 3px rgba(255,255,255,.5);
-}
-
-/* ---------- Layout shells ---------- */
-.screen{display:none; min-height:100vh; animation:fadeIn .35s ease;}
-.screen.active{display:block;}
-@keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
-
-.auth-wrap{
-  max-width:480px; margin:0 auto; padding:0 0 40px;
-  min-height:100vh;
-}
-.card{
-  background:var(--paper);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:22px;
-  margin:16px;
-}
-.card h2{margin:0 0 4px; font-family:var(--font-display); color:var(--indigo-deep); font-size:22px;}
-.card .sub{color:var(--ink-soft); font-size:13px; margin:0 0 16px;}
-
-.tabs{display:flex; gap:8px; margin:16px 16px 0;}
-.tab-btn{
-  flex:1; padding:12px 8px; border:none; border-radius:12px 12px 0 0;
-  background:#f0e6d6; color:var(--ink-soft); font-weight:700; font-size:15px; cursor:pointer;
-  transition:.2s;
-}
-.tab-btn.active{background:var(--paper); color:var(--crimson-deep); box-shadow:0 -4px 12px rgba(0,0,0,.05);}
-
-.field{margin-bottom:14px;}
-.field label{display:block; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;}
-.field input, .field select, .field textarea{
-  width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line);
-  background:#fff; font-size:15px; color:var(--ink); outline:none; transition:.15s;
-}
-.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--crimson); box-shadow:0 0 0 3px rgba(176,18,44,.12);}
-
-.cat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px;}
-.cat-chip{
-  border:1.5px solid var(--line); background:#fff; border-radius:14px; padding:12px 8px;
-  text-align:center; cursor:pointer; font-size:13px; font-weight:600; color:var(--ink-soft);
-  transition:.15s; line-height:1.3;
-}
-.cat-chip .ico{font-size:22px; display:block; margin-bottom:4px;}
-.cat-chip.selected{border-color:var(--crimson); background:rgba(176,18,44,.06); color:var(--crimson-deep); box-shadow:0 4px 14px rgba(176,18,44,.15);}
-
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  border:none; border-radius:14px; padding:14px 18px; font-size:15px; font-weight:700;
-  cursor:pointer; transition:.15s; width:100%;
-}
-.btn-primary{background:linear-gradient(135deg, var(--crimson) 0%, var(--crimson-deep) 100%); color:#fff; box-shadow:0 8px 20px -8px rgba(176,18,44,.55);}
-.btn-primary:hover{transform:translateY(-1px);}
-.btn-secondary{background:var(--indigo); color:#fff;}
-.btn-ghost{background:#fff; color:var(--indigo); border:1.5px solid var(--indigo);}
-.btn-gold{background:linear-gradient(135deg,#ffd75e,var(--gold)); color:#4a3300;}
-.btn-sm{padding:9px 12px; font-size:13px; width:auto;}
-.btn:disabled{opacity:.55; cursor:not-allowed;}
-.btn-danger{background:var(--danger); color:#fff;}
-.btn-row{display:flex; gap:10px;}
-
-.msg{padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:12px; font-weight:600;}
-.msg.error{background:#fdecea; color:var(--danger); border:1px solid #f5c2be;}
-.msg.ok{background:#e9f7ef; color:var(--ok); border:1px solid #b7e4c7;}
-
-/* ---------- Dashboard shell ---------- */
-.app-shell{min-height:100vh; padding-bottom:90px;}
-.topbar{
-  background:linear-gradient(160deg, var(--indigo) 0%, var(--indigo-deep) 100%);
-  color:#fff; padding:16px 18px; display:flex; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:50;
-}
-.topbar .org-info{display:flex; align-items:center; gap:10px;}
-.topbar .org-avatar{
-  width:42px;height:42px;border-radius:50%; background:var(--gold); color:var(--indigo-deep);
-  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px;
-  font-family:var(--font-display);
-}
-.topbar .org-name{font-weight:700; font-size:15px;}
-.topbar .org-cat{font-size:11px; opacity:.8;}
-.icon-btn{
-  background:rgba(255,255,255,.14); border:none; color:#fff; width:38px;height:38px;border-radius:10px;
-  font-size:16px; cursor:pointer;
-}
-
-.container{max-width:900px; margin:0 auto; padding:16px;}
-
-.view{display:none;}
-.view.active{display:block; animation:fadeIn .3s ease;}
-
-.stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px;}
-@media(min-width:640px){.stat-grid{grid-template-columns:repeat(4,1fr);}}
-.stat-card{
-  background:var(--paper); border-radius:16px; padding:16px; border:1px solid var(--line);
-  box-shadow:0 6px 18px -10px rgba(0,0,0,.12);
-}
-.stat-card .num{font-size:26px; font-weight:800; color:var(--crimson-deep); font-family:var(--font-display);}
-.stat-card .lbl{font-size:12px; color:var(--ink-soft); font-weight:600;}
-
-.quick-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
-@media(min-width:640px){.quick-grid{grid-template-columns:repeat(4,1fr);}}
-.quick-btn{
-  background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px 10px;
-  text-align:center; cursor:pointer; box-shadow:0 6px 18px -10px rgba(0,0,0,.1); transition:.15s;
-}
-.quick-btn:hover{transform:translateY(-2px); border-color:var(--crimson);}
-.quick-btn .ico{font-size:26px; display:block; margin-bottom:6px;}
-.quick-btn .txt{font-weight:700; font-size:13.5px; color:var(--ink);}
-
-.bottom-nav{
-  position:fixed; bottom:0; left:0; right:0; z-index:60;
-  background:var(--paper); border-top:1px solid var(--line);
-  display:flex; box-shadow:0 -8px 24px rgba(0,0,0,.08);
-}
-.nav-btn{
-  flex:1; border:none; background:none; padding:10px 4px 8px; cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; gap:2px; color:var(--ink-soft);
-}
-.nav-btn .ico{font-size:19px;}
-.nav-btn .txt{font-size:10.5px; font-weight:700;}
-.nav-btn.active{color:var(--crimson-deep);}
-
-h3.section-title{font-family:var(--font-display); color:var(--indigo-deep); font-size:19px; margin:0 0 12px;}
-
-/* ---------- Camera capture ---------- */
-.cam-wrap{position:relative; border-radius:16px; overflow:hidden; background:#000; aspect-ratio:4/3; margin-bottom:12px;}
-.cam-wrap video, .cam-wrap canvas.overlay{position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;}
-.cam-wrap .frame-guide{
-  position:absolute; inset:12%; border:3px dashed rgba(255,255,255,.55); border-radius:16px; pointer-events:none;
-}
-.cam-controls{display:flex; gap:10px; margin-bottom:12px;}
-.photo-preview{width:100%; border-radius:16px; margin-bottom:12px; display:none; max-height:340px; object-fit:cover;}
-
-.person-list{display:flex; flex-direction:column; gap:10px;}
-.person-row{
-  display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line);
-  border-radius:14px; padding:10px 12px;
-}
-.person-row img{width:48px;height:48px;border-radius:50%; object-fit:cover; border:2px solid var(--gold);}
-.person-row .info{flex:1;}
-.person-row .name{font-weight:700; font-size:14.5px;}
-.person-row .meta{font-size:12px; color:var(--ink-soft);}
-.person-row .actions{display:flex; gap:6px;}
-
-/* ---------- ID Card ---------- */
-.idcard{
-  width:340px; max-width:90vw; margin:0 auto; border-radius:18px; overflow:hidden;
-  background:#fff; box-shadow:var(--shadow); border:1px solid var(--line);
-}
-.idcard-head{
-  background:linear-gradient(135deg, var(--indigo) 0%, var(--indigo-deep) 100%);
-  color:#fff; padding:14px 16px; text-align:center;
-}
-.idcard-head .org{font-family:var(--font-display); font-size:16px;}
-.idcard-head .cat{font-size:10.5px; opacity:.85;}
-.idcard-body{padding:16px; display:flex; gap:14px; align-items:center;}
-.idcard-body img.photo{width:88px;height:88px;border-radius:12px; object-fit:cover; border:2px solid var(--gold);}
-.idcard-body .details{flex:1;}
-.idcard-body .name{font-weight:800; font-size:16px; color:var(--crimson-deep);}
-.idcard-body .row{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
-.idcard-foot{display:flex; align-items:center; justify-content:center; padding:10px 0 16px; background:#fff;}
-.idcard-foot .idno{text-align:center; font-size:10px; color:var(--ink-soft); margin-top:4px; letter-spacing:1px;}
-
-/* ---------- Scan view ---------- */
-.scan-tabs{display:flex; background:#f0e6d6; border-radius:14px; padding:4px; margin-bottom:14px;}
-.scan-tab{flex:1; border:none; background:none; padding:10px; border-radius:10px; font-weight:700; font-size:13.5px; color:var(--ink-soft); cursor:pointer;}
-.scan-tab.active{background:var(--paper); color:var(--crimson-deep); box-shadow:0 2px 8px rgba(0,0,0,.08);}
-#qr-reader{border-radius:16px; overflow:hidden; margin-bottom:12px;}
-.scan-result{
-  border-radius:14px; padding:14px; text-align:center; font-weight:700; margin-top:10px; display:none;
-}
-.scan-result.show{display:block; animation:fadeIn .25s ease;}
-.scan-result.ok{background:#e9f7ef; color:var(--ok); border:1px solid #b7e4c7;}
-.scan-result.dup{background:#fff6e0; color:var(--warn); border:1px solid #ffe3a3;}
-.scan-result.err{background:#fdecea; color:var(--danger); border:1px solid #f5c2be;}
-
-/* ---------- Report table ---------- */
-.report-toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
-.report-toolbar select{padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);}
-.table-wrap{overflow-x:auto; border-radius:14px; border:1px solid var(--line); background:#fff;}
-table.report{border-collapse:collapse; width:100%; font-size:11.5px;}
-table.report th, table.report td{padding:6px 5px; text-align:center; border-bottom:1px solid var(--line); border-right:1px solid #f2ede1; white-space:nowrap;}
-table.report th{background:var(--indigo); color:#fff; position:sticky; top:0; font-weight:700;}
-table.report td.name-col, table.report th.name-col{position:sticky; left:0; background:#fff8ed; text-align:left; font-weight:700; z-index:2; min-width:120px;}
-table.report th.name-col{background:var(--indigo-deep); color:#fff; z-index:3;}
-.cell-p{color:var(--ok); font-weight:800;}
-.cell-a{color:var(--danger); font-weight:800;}
-.cell-l{color:var(--warn); font-weight:800;}
-
-/* ---------- Modal ---------- */
-.modal-overlay{
-  position:fixed; inset:0; background:rgba(20,10,10,.55); z-index:100; display:none;
-  align-items:flex-end; justify-content:center;
-}
-.modal-overlay.show{display:flex; animation:fadeIn .2s ease;}
-.modal-box{
-  background:var(--paper); width:100%; max-width:480px; border-radius:22px 22px 0 0;
-  padding:20px; max-height:92vh; overflow-y:auto;
-}
-@media(min-width:640px){
-  .modal-overlay{align-items:center;}
-  .modal-box{border-radius:22px;}
-}
-.modal-box h3{margin-top:0; font-family:var(--font-display); color:var(--indigo-deep);}
-
-.face-status{
-  text-align:center; padding:10px; border-radius:12px; font-weight:700; font-size:14px; margin-bottom:10px;
-  background:#f0e6d6; color:var(--ink-soft);
-}
-.face-status.detected{background:#e9f7ef; color:var(--ok);}
-.face-status.matched{background:#e0f0ff; color:var(--indigo);}
-
-.empty-state{text-align:center; padding:40px 20px; color:var(--ink-soft);}
-.empty-state .ico{font-size:44px; display:block; margin-bottom:10px;}
-
-.toast{
-  position:fixed; bottom:100px; left:50%; transform:translateX(-50%);
-  background:var(--ink); color:#fff; padding:12px 20px; border-radius:30px; font-size:13.5px; font-weight:600;
-  z-index:200; opacity:0; pointer-events:none; transition:.3s; box-shadow:0 8px 24px rgba(0,0,0,.3);
-}
-.toast.show{opacity:1; bottom:110px;}
-
-.loader{
-  display:inline-block; width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);
-  border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
+h1,h2,h3,h4{font-family:var(--font-display); margin:0; letter-spacing:.2px;}
+button{font-family:var(--font-body); cursor:pointer;}
+input,select{font-family:var(--font-body);}
+::selection{background:var(--gold-light);}
 
 .hidden{display:none !important;}
-::-webkit-scrollbar{height:6px; width:6px;}
-::-webkit-scrollbar-thumb{background:#d9c9ab; border-radius:6px;}
+.screen{min-height:100vh; width:100%;}
+.center-screen{display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px;}
+
+/* ---------- Motif bar (Nepali paisley-inspired repeating border) ---------- */
+.motif-bar{
+  height:10px;
+  background: repeating-linear-gradient(135deg, var(--gold) 0 10px, var(--maroon) 10px 20px);
+  opacity:.9;
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  border:none; border-radius:12px; padding:13px 22px; font-size:15px; font-weight:600;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg, var(--maroon) 0%, var(--maroon-deep) 100%); color:#fff; box-shadow:0 8px 20px -8px rgba(122,18,41,.6);}
+.btn-primary:hover{box-shadow:0 10px 24px -6px rgba(122,18,41,.7);}
+.btn-gold{background:linear-gradient(135deg, var(--gold) 0%, #C88A2A 100%); color:#3A2A08; box-shadow:0 8px 20px -8px rgba(214,160,60,.6);}
+.btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+.btn-outline:hover{border-color:var(--maroon); color:var(--maroon);}
+.btn-ghost{background:transparent; color:var(--ink-soft); padding:8px 12px;}
+.btn-danger{background:var(--red-bg); color:var(--red); border:1.5px solid #F0C3C9;}
+.btn-sm{padding:8px 14px; font-size:13px; border-radius:9px;}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.5; cursor:not-allowed;}
+.icon-btn{width:42px; height:42px; border-radius:50%; border:1.5px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; font-size:18px;}
+
+/* ---------- Cards / panels ---------- */
+.card{background:var(--paper); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--line);}
+.pad{padding:26px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;}
+.field input[type=text],.field input[type=password],.field input[type=tel],.field input[type=number],.field input[type=date],.field input[type=time],.field select,.field textarea{
+  width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); background:#fff; font-size:15px; color:var(--ink); outline:none;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--maroon);}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 16px;}
+@media(max-width:560px){.grid2{grid-template-columns:1fr;}}
+
+/* ---------- Setup / Login ---------- */
+.brand-mark{
+  width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--gold),var(--maroon));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800;font-family:var(--font-display);
+  box-shadow:0 10px 24px -8px rgba(122,18,41,.5);
+}
+.setup-wrap{max-width:640px; width:100%;}
+.step-dots{display:flex; gap:6px; justify-content:center; margin:18px 0 6px;}
+.step-dots span{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.step-dots span.active{background:var(--maroon); width:22px; border-radius:5px; transition:.2s;}
+
+.photo-capture{
+  border:2px dashed var(--line); border-radius:14px; padding:14px; text-align:center; background:#FCFAF3;
+}
+.photo-preview{width:150px;height:150px;border-radius:50%;object-fit:cover;border:4px solid var(--gold-light); margin:0 auto 10px; display:block; background:#eee;}
+.photo-preview.square{border-radius:14px;}
+video.cam-feed{width:100%; max-width:340px; border-radius:12px; background:#111; display:block; margin:0 auto;}
+.cam-controls{display:flex; gap:10px; justify-content:center; margin-top:10px; flex-wrap:wrap;}
+
+/* ---------- Top bar (kiosk + admin) ---------- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; padding:14px 22px;
+  background:rgba(255,255,255,.75); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:20;
+}
+.topbar .school-id{display:flex; align-items:center; gap:12px;}
+.topbar .school-id img{width:40px;height:40px;border-radius:10px;object-fit:cover;}
+.topbar .school-id .nm{font-family:var(--font-display); font-weight:700; font-size:17px; line-height:1.1;}
+.topbar .school-id .sub{font-size:11.5px; color:var(--ink-soft);}
+.clock{font-family:var(--font-mono); font-size:13px; color:var(--ink-soft); text-align:right;}
+
+/* ---------- Kiosk ---------- */
+.kiosk-wrap{max-width:520px; margin:26px auto; padding:0 16px 40px;}
+.kiosk-stage{position:relative; border-radius:20px; overflow:hidden; box-shadow:var(--shadow); background:#0c0c10;}
+.kiosk-stage video{width:100%; display:block; aspect-ratio:3/4; object-fit:cover;}
+.kiosk-overlay{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; pointer-events:none;}
+.scan-frame{width:64%; aspect-ratio:1/1; border:3px solid rgba(214,160,60,.85); border-radius:20px; box-shadow:0 0 0 2000px rgba(0,0,0,.35);}
+.scan-line{position:absolute; left:18%; right:18%; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); animation:scanmove 2.1s linear infinite;}
+@keyframes scanmove{0%{top:20%;}50%{top:70%;}100%{top:20%;}}
+.kiosk-status{margin-top:16px; text-align:center;}
+.kiosk-status .big{font-family:var(--font-display); font-size:19px; font-weight:700;}
+.kiosk-status .small{font-size:13px; color:var(--ink-soft); margin-top:2px;}
+.result-flash{
+  position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center;
+  background:rgba(20,10,10,.55); backdrop-filter:blur(3px); animation:fadein .2s ease;
+}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.result-card{background:#fff; border-radius:22px; padding:30px 34px; text-align:center; width:min(360px,88vw); box-shadow:0 30px 60px -20px rgba(0,0,0,.4); transform:translateY(0); animation:pop .25s cubic-bezier(.2,1.4,.4,1);}
+@keyframes pop{from{transform:scale(.85); opacity:0}to{transform:scale(1); opacity:1}}
+.result-card img{width:96px;height:96px;border-radius:50%;object-fit:cover;margin:0 auto 12px; border:4px solid var(--gold-light); display:block;}
+.result-badge{width:56px;height:56px;border-radius:50%; display:flex;align-items:center;justify-content:center; font-size:28px; margin:0 auto 10px; color:#fff;}
+.result-badge.ok{background:var(--green);}
+.result-badge.err{background:var(--red);}
+.result-badge.warn{background:#C97A26;}
+
+/* ---------- Tabs / Admin shell ---------- */
+.admin-shell{display:flex; min-height:100vh;}
+.sidebar{
+  width:230px; background:linear-gradient(180deg,var(--maroon-deep),var(--maroon)); color:#fff; padding:22px 14px;
+  display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh;
+}
+.sidebar .side-head{display:flex;align-items:center;gap:10px; padding:6px 8px 22px;}
+.sidebar .side-head .nm{font-family:var(--font-display); font-weight:700; font-size:15px; line-height:1.15;}
+.sidebar .side-head .sub{font-size:10.5px; opacity:.75;}
+.side-link{
+  display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:10px; color:rgba(255,255,255,.85);
+  font-size:14.5px; font-weight:600; background:transparent; border:none; text-align:left; width:100%;
+}
+.side-link:hover{background:rgba(255,255,255,.08);}
+.side-link.active{background:rgba(255,255,255,.16); color:#fff;}
+.side-link .em{font-size:17px; width:20px; text-align:center;}
+.sidebar .spacer{flex:1;}
+.main-area{flex:1; padding:26px 30px 60px; max-width:1180px;}
+@media(max-width:880px){
+  .admin-shell{flex-direction:column;}
+  .sidebar{width:100%; height:auto; position:relative; flex-direction:row; overflow-x:auto; padding:12px;}
+  .sidebar .side-head{display:none;}
+  .side-link{white-space:nowrap; padding:10px 14px;}
+  .main-area{padding:18px;}
+}
+.page-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
+.page-head h2{font-size:23px;}
+.page-head .desc{color:var(--ink-soft); font-size:13.5px; margin-top:3px;}
+
+/* ---------- Chips / tags ---------- */
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+.chip{background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:7px 13px; font-size:13px; display:flex; align-items:center; gap:8px; font-weight:600;}
+.chip button{border:none; background:none; color:var(--ink-soft); font-size:14px; line-height:1;}
+.chip.gold{background:var(--gold-light); border-color:var(--gold);}
+
+/* ---------- Table ---------- */
+.table-wrap{overflow-x:auto; border-radius:14px; border:1px solid var(--line);}
+table.data{width:100%; border-collapse:collapse; font-size:13.5px; background:#fff;}
+table.data th{background:#FBF3E4; text-align:left; padding:10px 12px; font-weight:700; color:var(--maroon-deep); white-space:nowrap; border-bottom:2px solid var(--line);}
+table.data td{padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap;}
+table.data tr:last-child td{border-bottom:none;}
+table.data tr:hover td{background:#FCFAF3;}
+.badge{display:inline-block; padding:3px 9px; border-radius:7px; font-size:11.5px; font-weight:700;}
+.badge.student{background:#E6F0F7; color:var(--blue);}
+.badge.teacher{background:#F0E7F7; color:#6B3FA0;}
+.badge.head{background:var(--gold-light); color:#8A5A0A;}
+.badge.p{background:var(--green-bg); color:var(--green);}
+.badge.a{background:var(--red-bg); color:var(--red);}
+.badge.o{background:#FDECEC; color:#C0392B;}
+.badge.h{background:#FDF0DC; color:#B4740E;}
+
+/* ---------- People grid (register list) ---------- */
+.person-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:16px;}
+.person-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 10px; text-align:center; transition:.15s;}
+.person-card:hover{box-shadow:0 8px 18px -8px rgba(0,0,0,.15); transform:translateY(-2px);}
+.person-card img{width:64px;height:64px;border-radius:50%;object-fit:cover; margin-bottom:8px; border:3px solid var(--gold-light);}
+.person-card .nm{font-weight:700; font-size:13.5px;}
+.person-card .rl{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
+
+/* ---------- ID CARD ---------- */
+.idcard{
+  width:340px; border-radius:18px; overflow:hidden; background:#fff; box-shadow:0 16px 34px -12px rgba(0,0,0,.35);
+  border:1px solid var(--line); position:relative;
+}
+.idcard .head{
+  background:linear-gradient(135deg,var(--maroon) 0%, var(--maroon-deep) 100%); color:#fff; padding:16px 16px 34px;
+  position:relative; text-align:center;
+}
+.idcard .head::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:22px; background:var(--paper);
+  border-radius:50% 50% 0 0/22px 22px 0 0;
+}
+.idcard .head .snm{font-family:var(--font-display); font-weight:700; font-size:15px;}
+.idcard .head .saddr{font-size:10px; opacity:.85; margin-top:2px;}
+.idcard .photo-wrap{margin-top:-40px; text-align:center; position:relative; z-index:2;}
+.idcard .photo-wrap img{width:88px;height:88px;border-radius:50%; object-fit:cover; border:4px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,.2); background:#eee;}
+.idcard .body{padding:6px 20px 18px; text-align:center;}
+.idcard .pname{font-family:var(--font-display); font-weight:700; font-size:18px; margin-top:6px;}
+.idcard .prole{display:inline-block; margin-top:4px; padding:3px 12px; border-radius:20px; font-size:11px; font-weight:700; background:var(--gold-light); color:#8A5A0A;}
+.idcard .meta-row{display:flex; justify-content:center; gap:18px; margin-top:12px; font-size:11.5px; color:var(--ink-soft);}
+.idcard .meta-row b{display:block; color:var(--ink); font-size:13px;}
+.idcard .qr-wrap{margin-top:14px; padding-top:14px; border-top:1.5px dashed var(--line); display:flex; align-items:center; justify-content:center; gap:12px;}
+.idcard .qr-wrap canvas{width:78px !important; height:78px !important;}
+.idcard .uid{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); text-align:left;}
+.idcard .foot{background:var(--maroon-deep); color:#fff; text-align:center; font-size:9.5px; padding:6px; letter-spacing:.5px;}
+
+/* ---------- Report grid ---------- */
+.report-toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px;}
+.report-toolbar .field{margin-bottom:0; min-width:150px;}
+.stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px;}
+.stat-box{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; text-align:center;}
+.stat-box .num{font-family:var(--font-display); font-size:26px; font-weight:800; color:var(--maroon);}
+.stat-box .lbl{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+
+/* ---------- Toast ---------- */
+.toast-wrap{position:fixed; bottom:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:10px;}
+.toast{background:var(--ink); color:#fff; padding:12px 18px; border-radius:10px; font-size:13.5px; box-shadow:0 10px 20px rgba(0,0,0,.25); animation:pop .2s ease;}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+
+/* ---------- Modal ---------- */
+.modal-bg{position:fixed; inset:0; background:rgba(20,10,15,.5); backdrop-filter:blur(2px); z-index:70; display:flex; align-items:center; justify-content:center; padding:18px;}
+.modal-box{background:#fff; border-radius:18px; max-width:480px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:0 30px 60px rgba(0,0,0,.35); animation:pop .2s ease;}
+.modal-head{display:flex; justify-content:space-between; align-items:center; padding:18px 22px; border-bottom:1px solid var(--line);}
+.modal-body{padding:22px;}
+
+/* ---------- Settings sections ---------- */
+.settings-section{margin-bottom:30px; padding-bottom:26px; border-bottom:1px solid var(--line);}
+.settings-section:last-child{border-bottom:none;}
+.settings-section h3{font-size:16px; margin-bottom:4px;}
+.settings-section .hint{font-size:12.5px; color:var(--ink-soft); margin-bottom:14px;}
+.toggle-row{display:flex; align-items:center; justify-content:space-between; padding:12px 0;}
+.switch{position:relative; width:46px; height:26px; background:#DDD3BE; border-radius:20px; transition:.2s; flex-shrink:0;}
+.switch.on{background:var(--maroon);}
+.switch .knob{position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.switch.on .knob{left:23px;}
+
+.empty-state{text-align:center; padding:50px 20px; color:var(--ink-soft);}
+.empty-state .em{font-size:40px; margin-bottom:10px;}
+
+.small-note{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+.tag-x{cursor:pointer;}
+a{color:var(--maroon);}
+.spin{width:34px;height:34px;border:3px solid var(--line); border-top-color:var(--maroon); border-radius:50%; animation:sp 0.8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading-txt{margin-top:14px; font-size:13.5px; color:var(--ink-soft);}
+
+@media print{
+  body *{visibility:hidden;}
+  #printArea, #printArea *{visibility:visible;}
+  #printArea{position:absolute; left:0; top:0;}
+}
 </style>
 </head>
 <body>
 
-<!-- ============================================================
-     TOAST
-============================================================ -->
-<div class="toast" id="toast"></div>
-
-<!-- ============================================================
-     SCREEN 1 : AUTH (Register / Login)
-============================================================ -->
-<div class="screen active" id="screen-auth">
-  <div class="pennant-banner">
-    <div class="moon-badge"></div>
-    <h1>हाजिर</h1>
-    <p>अनुहार र QR कोड मार्फत हाजिरी प्रणाली</p>
+<!-- =============================================================== -->
+<!-- LOADING -->
+<!-- =============================================================== -->
+<div id="scr-loading" class="screen center-screen">
+  <div style="text-align:center">
+    <div class="brand-mark" style="margin:0 auto 16px;">वि</div>
+    <div class="spin" style="margin:0 auto;"></div>
+    <div class="loading-txt" id="loadingTxt">प्रणाली तयार हुँदैछ...</div>
   </div>
+</div>
 
-  <div class="tabs">
-    <button class="tab-btn active" id="tab-login-btn" onclick="switchAuthTab('login')">लगइन</button>
-    <button class="tab-btn" id="tab-register-btn" onclick="switchAuthTab('register')">दर्ता (Register)</button>
-  </div>
-
-  <div class="auth-wrap">
-    <!-- ---------- LOGIN FORM ---------- -->
-    <div class="card" id="login-card">
-      <h2>स्वागत छ 🙏</h2>
-      <p class="sub">आफ्नो संस्थाको खाता प्रयोग गरी लगइन गर्नुहोस्</p>
-      <div id="login-msg"></div>
-      <div class="field">
-        <label>प्रयोगकर्ता नाम (Username)</label>
-        <input type="text" id="login-username" placeholder="जस्तै: shreesomeschool">
-      </div>
-      <div class="field">
-        <label>पासवर्ड</label>
-        <input type="password" id="login-password" placeholder="●●●●●●●●">
-      </div>
-      <button class="btn btn-primary" onclick="handleLogin()">लगइन गर्नुहोस्</button>
-      <button class="btn btn-ghost" style="margin-top:10px;" onclick="startFaceLoginFlow()">🔒 फेस लक द्वारा खोल्ने</button>
+<!-- =============================================================== -->
+<!-- SETUP (first run) -->
+<!-- =============================================================== -->
+<div id="scr-setup" class="screen center-screen hidden">
+  <div class="setup-wrap">
+    <div style="text-align:center; margin-bottom:18px;">
+      <div class="brand-mark" style="margin:0 auto 12px;">वि</div>
+      <h1 style="font-size:22px;">विद्यालय हाजिर प्रणाली</h1>
+      <div style="color:var(--ink-soft); font-size:13.5px; margin-top:4px;">सुरु गर्नुअघि आफ्नो विद्यालयको विवरण भर्नुहोस्</div>
+      <div class="step-dots"><span id="dot1" class="active"></span><span id="dot2"></span></div>
     </div>
 
-    <!-- ---------- REGISTER FORM ---------- -->
-    <div class="card hidden" id="register-card">
-      <h2>नयाँ संस्था दर्ता</h2>
-      <p class="sub">आफ्नो संस्थाको प्रकार छान्नुहोस्</p>
-      <div id="register-msg"></div>
-      <div class="cat-grid" id="category-grid"></div>
+    <div class="card pad" id="setupStep1">
+      <h3 style="margin-bottom:16px;">१. विद्यालयको विवरण</h3>
+      <div class="field"><label>विद्यालयको नाम *</label><input type="text" id="su_schoolName" placeholder="जस्तै: श्री सरस्वती माध्यमिक विद्यालय"></div>
+      <div class="grid2">
+        <div class="field"><label>ठेगाना</label><input type="text" id="su_address" placeholder="जिल्ला, नगरपालिका"></div>
+        <div class="field"><label>फोन नम्बर</label><input type="text" id="su_phone" placeholder="०१-xxxxxxx"></div>
+      </div>
+      <div class="field">
+        <label>विद्यालयको लोगो (वैकल्पिक)</label>
+        <input type="file" accept="image/*" id="su_logoFile">
+        <img id="su_logoPreview" class="photo-preview square hidden" style="width:80px;height:80px;margin-top:10px;">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="Setup.toStep2()">अगाडि बढ्नुहोस् →</button>
+    </div>
 
-      <div class="field">
-        <label>संस्थाको नाम</label>
-        <input type="text" id="reg-org-name" placeholder="जस्तै: श्री गणेश माध्यमिक विद्यालय">
+    <div class="card pad hidden" id="setupStep2">
+      <h3 style="margin-bottom:4px;">२. प्रधानाध्यापकको विवरण (लक फोटो)</h3>
+      <div class="hint" style="color:var(--ink-soft); font-size:12.5px; margin-bottom:14px;">यो फोटो प्रधानाध्यापकको आफ्नै रेकर्ड र प्रशासन पहुँच (फेस लक) दुवैका लागि प्रयोग हुनेछ।</div>
+      <div class="field"><label>प्रधानाध्यापकको नाम *</label><input type="text" id="su_headName" placeholder="पूरा नाम"></div>
+      <div class="field"><label>फोन नम्बर</label><input type="text" id="su_headPhone"></div>
+
+      <div class="photo-capture">
+        <img id="su_headPhotoPreview" class="photo-preview hidden">
+        <video id="su_headVideo" class="cam-feed hidden" autoplay playsinline muted></video>
+        <canvas id="su_headCanvas" class="hidden"></canvas>
+        <div id="su_headCamPlaceholder" style="padding:30px 0; color:var(--ink-soft); font-size:13px;">फोटो खिच्न वा अपलोड गर्न तलको बटन थिच्नुहोस्</div>
+        <div class="cam-controls">
+          <button class="btn btn-outline btn-sm" onclick="Camera.open('su_head')">📷 क्यामेरा खोल्नुहोस्</button>
+          <button class="btn btn-outline btn-sm hidden" id="su_head_switchBtn" onclick="Camera.switch('su_head')">🔄 अगाडि/पछाडि</button>
+          <button class="btn btn-gold btn-sm hidden" id="su_head_captureBtn" onclick="Camera.capture('su_head')">खिच्नुहोस्</button>
+          <label class="btn btn-outline btn-sm" style="margin:0;">फाइल छान्नुहोस्<input type="file" accept="image/*" id="su_headFile" class="hidden"></label>
+        </div>
       </div>
-      <div class="field">
-        <label>प्रयोगकर्ता नाम (Username)</label>
-        <input type="text" id="reg-username" placeholder="unique username">
+
+      <div class="field" style="margin-top:16px;"><label>प्रशासन पासवर्ड सेट गर्नुहोस् *</label><input type="password" id="su_adminPass" placeholder="कम्तीमा ४ अक्षर"></div>
+
+      <div style="display:flex; gap:10px; margin-top:6px;">
+        <button class="btn btn-outline" onclick="Setup.toStep1()">← फिर्ता</button>
+        <button class="btn btn-primary btn-block" onclick="Setup.finish()">प्रणाली सुरु गर्नुहोस् ✓</button>
       </div>
-      <div class="field">
-        <label>पासवर्ड</label>
-        <input type="password" id="reg-password" placeholder="कम्तिमा ४ अक्षर">
-      </div>
-      <button class="btn btn-primary" onclick="handleRegister()">दर्ता गर्नुहोस्</button>
     </div>
   </div>
 </div>
 
-<!-- ============================================================
-     SCREEN 2 : APP (Dashboard after login)
-============================================================ -->
-<div class="screen" id="screen-app">
-  <div class="app-shell">
-    <div class="topbar">
-      <div class="org-info">
-        <div class="org-avatar" id="org-avatar">क</div>
-        <div>
-          <div class="org-name" id="topbar-org-name">-</div>
-          <div class="org-cat" id="topbar-org-cat">-</div>
-        </div>
+<!-- =============================================================== -->
+<!-- ADMIN LOGIN -->
+<!-- =============================================================== -->
+<div id="scr-adminlogin" class="screen center-screen hidden">
+  <div class="card pad" style="max-width:380px; width:100%;">
+    <div style="text-align:center; margin-bottom:14px;">
+      <img id="al_headPhoto" class="photo-preview" style="width:76px;height:76px;">
+      <h3 style="margin-top:10px;">प्रशासन पहुँच</h3>
+      <div class="small-note" id="al_headName"></div>
+    </div>
+    <div id="al_faceBlock">
+      <video id="al_video" class="cam-feed hidden" autoplay playsinline muted style="max-width:260px;"></video>
+      <canvas id="al_canvas" class="hidden"></canvas>
+      <button class="btn btn-gold btn-block" id="al_faceBtn" onclick="AdminAuth.startFace()" style="margin-top:10px;">🙂 अनुहार स्क्यान गरेर खोल्नुहोस्</button>
+      <div id="al_faceMsg" class="small-note" style="text-align:center; margin-top:8px;"></div>
+    </div>
+    <div style="text-align:center; margin:14px 0; color:var(--ink-soft); font-size:12px;">— अथवा —</div>
+    <div class="field"><label>प्रशासन पासवर्ड</label><input type="password" id="al_pass" placeholder="पासवर्ड लेख्नुहोस्"></div>
+    <button class="btn btn-primary btn-block" onclick="AdminAuth.loginPassword()">पासवर्डले खोल्नुहोस्</button>
+    <button class="btn btn-ghost btn-block" onclick="Router.go('kiosk')" style="margin-top:6px;">← हाजिर स्क्यानरमा फर्कनुहोस्</button>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- KIOSK (Attendance Scan) -->
+<!-- =============================================================== -->
+<div id="scr-kiosk" class="screen hidden">
+  <div class="topbar">
+    <div class="school-id">
+      <img id="ks_logo" src="">
+      <div>
+        <div class="nm" id="ks_schoolName">—</div>
+        <div class="sub">हाजिर स्क्यानर</div>
       </div>
-      <button class="icon-btn" onclick="handleLogout()" title="लगआउट">⏻</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="clock" id="ks_clock">--:--:--</div>
+      <button class="icon-btn" title="प्रशासन" onclick="Router.go('adminlogin')">🔒</button>
+    </div>
+  </div>
+
+  <div class="kiosk-wrap">
+    <div class="kiosk-stage">
+      <video id="ks_video" autoplay playsinline muted></video>
+      <div class="kiosk-overlay">
+        <div class="scan-frame"><div class="scan-line"></div></div>
+      </div>
+    </div>
+    <div class="kiosk-status">
+      <div class="big" id="ks_bigStatus">QR कोड देखाउनुहोस्</div>
+      <div class="small" id="ks_smallStatus">कार्डको QR क्यामेरा अगाडि राख्नुहोस्</div>
+    </div>
+    <div class="cam-controls">
+      <button class="btn btn-outline btn-sm" onclick="Kiosk.switchCam()">🔄 क्यामेरा बदल्नुहोस्</button>
+      <button class="btn btn-outline btn-sm" onclick="Kiosk.manualEntry()">⌨️ म्यानुअल ID</button>
+    </div>
+    <canvas id="ks_canvas" class="hidden"></canvas>
+  </div>
+</div>
+
+<!-- Result flash overlay -->
+<div id="resultFlash" class="result-flash hidden">
+  <div class="result-card" id="resultCardInner"></div>
+</div>
+
+<!-- =============================================================== -->
+<!-- ADMIN SHELL -->
+<!-- =============================================================== -->
+<div id="scr-admin" class="screen hidden">
+  <div class="admin-shell">
+    <div class="sidebar">
+      <div class="side-head">
+        <img id="ad_logo" src="" style="width:34px;height:34px;border-radius:9px;object-fit:cover;">
+        <div><div class="nm" id="ad_schoolName">—</div><div class="sub">प्रशासन प्यानल</div></div>
+      </div>
+      <button class="side-link active" data-tab="overview" onclick="AdminUI.tab('overview')"><span class="em">📊</span> सिंहावलोकन</button>
+      <button class="side-link" data-tab="register" onclick="AdminUI.tab('register')"><span class="em">📝</span> दर्ता गर्नुहोस्</button>
+      <button class="side-link" data-tab="people" onclick="AdminUI.tab('people')"><span class="em">👥</span> सबै व्यक्ति</button>
+      <button class="side-link" data-tab="idcards" onclick="AdminUI.tab('idcards')"><span class="em">🪪</span> आईडी कार्ड</button>
+      <button class="side-link" data-tab="reports" onclick="AdminUI.tab('reports')"><span class="em">📈</span> हाजिर रिपोर्ट</button>
+      <button class="side-link" data-tab="settings" onclick="AdminUI.tab('settings')"><span class="em">⚙️</span> सेटिङ</button>
+      <div class="spacer"></div>
+      <button class="side-link" onclick="Router.go('kiosk')"><span class="em">📷</span> स्क्यानरमा जानुहोस्</button>
+      <button class="side-link" onclick="AdminAuth.logout()"><span class="em">🚪</span> लगआउट</button>
     </div>
 
-    <div class="container">
-
-      <!-- ============ VIEW: HOME / DASHBOARD ============ -->
-      <div class="view active" id="view-home">
-        <h3 class="section-title">ड्यासबोर्ड</h3>
-        <div class="stat-grid">
-          <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl" id="stat-total-lbl">कुल दर्ता</div></div>
-          <div class="stat-card"><div class="num" id="stat-today">0</div><div class="lbl">आज उपस्थित</div></div>
-          <div class="stat-card"><div class="num" id="stat-absent">0</div><div class="lbl">आज अनुपस्थित</div></div>
-          <div class="stat-card"><div class="num" id="stat-pct">0%</div><div class="lbl">आजको दर</div></div>
-        </div>
-
-        <h3 class="section-title">छिटो कार्य</h3>
-        <div class="quick-grid">
-          <div class="quick-btn" onclick="goView('view-register-person')"><span class="ico">🧑‍💼</span><span class="txt" id="qb-register-label">व्यक्ति दर्ता</span></div>
-          <div class="quick-btn" onclick="goView('view-idcards')"><span class="ico">🪪</span><span class="txt">परिचय पत्र</span></div>
-          <div class="quick-btn" onclick="goView('view-scan')"><span class="ico">📷</span><span class="txt">हाजिरी लगाउने</span></div>
-          <div class="quick-btn" onclick="goView('view-reports')"><span class="ico">📊</span><span class="txt">रिपोर्ट</span></div>
-        </div>
-
-        <div class="pagoda-divider gold" style="margin:22px 0;"></div>
-        <h3 class="section-title">आजको हाजिरी</h3>
-        <div class="person-list" id="today-attendance-list"></div>
-      </div>
-
-      <!-- ============ VIEW: REGISTER PERSON ============ -->
-      <div class="view" id="view-register-person">
-        <h3 class="section-title" id="rp-title">व्यक्ति दर्ता गर्नुहोस्</h3>
-        <div class="card" style="margin:0 0 16px;">
-          <div id="rp-msg"></div>
-
-          <div class="cam-wrap" id="rp-cam-wrap">
-            <video id="rp-video" autoplay playsinline muted></video>
-            <div class="frame-guide"></div>
-          </div>
-          <img class="photo-preview" id="rp-photo-preview">
-          <div class="cam-controls">
-            <button class="btn btn-secondary btn-sm" style="flex:1" onclick="startCamera('rp-video','user')">🤳 अगाडिको क्यामेरा</button>
-            <button class="btn btn-secondary btn-sm" style="flex:1" onclick="startCamera('rp-video','environment')">📷 पछाडिको क्यामेरा</button>
-          </div>
-          <div class="cam-controls">
-            <button class="btn btn-gold" id="rp-capture-btn" onclick="capturePersonPhoto()">📸 फोटो खिच्नुहोस्</button>
-            <button class="btn btn-ghost hidden" id="rp-retake-btn" onclick="retakePersonPhoto()">🔄 फेरि खिच्ने</button>
-          </div>
-
-          <div class="field">
-            <label>पूरा नाम</label>
-            <input type="text" id="rp-name" placeholder="व्यक्तिको नाम">
-          </div>
-          <div class="field">
-            <label>उमेर</label>
-            <input type="number" id="rp-age" placeholder="उमेर">
-          </div>
-          <div class="field">
-            <label>फोन नम्बर</label>
-            <input type="text" id="rp-phone" placeholder="98XXXXXXXX">
-          </div>
-          <div class="field">
-            <label>ठेगाना</label>
-            <input type="text" id="rp-address" placeholder="ठेगाना">
-          </div>
-          <div class="field">
-            <label id="rp-field1-label">फिल्ड १</label>
-            <input type="text" id="rp-field1">
-          </div>
-          <div class="field">
-            <label id="rp-field2-label">फिल्ड २</label>
-            <input type="text" id="rp-field2">
-          </div>
-
-          <button class="btn btn-primary" onclick="savePerson()">✅ दर्ता गरी ID कार्ड बनाउनुहोस्</button>
+    <div class="main-area">
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="tab-pane">
+        <div class="page-head"><div><h2>सिंहावलोकन</h2><div class="desc" id="ov_dateLine"></div></div></div>
+        <div class="stat-row" id="ov_stats"></div>
+        <div class="card pad">
+          <h3 style="margin-bottom:14px;">आजको हाजिर लगत</h3>
+          <div class="table-wrap"><table class="data" id="ov_todayTable"><thead><tr><th>नाम</th><th>भूमिका</th><th>कक्षा</th><th>समय</th><th>स्थिति</th></tr></thead><tbody></tbody></table></div>
         </div>
       </div>
 
-      <!-- ============ VIEW: ID CARDS ============ -->
-      <div class="view" id="view-idcards">
-        <h3 class="section-title">परिचय पत्रहरू</h3>
-        <div class="person-list" id="idcard-person-list"></div>
-      </div>
-
-      <!-- ============ VIEW: SCAN ATTENDANCE ============ -->
-      <div class="view" id="view-scan">
-        <h3 class="section-title">हाजिरी लगाउनुहोस्</h3>
-        <div class="scan-tabs">
-          <button class="scan-tab active" id="scan-tab-qr" onclick="switchScanTab('qr')">📱 QR स्क्यान</button>
-          <button class="scan-tab" id="scan-tab-face" onclick="switchScanTab('face')">🙂 फेस स्क्यान</button>
-        </div>
-
-        <div id="scan-qr-panel">
-          <div id="qr-reader"></div>
-          <div class="scan-result" id="qr-scan-result"></div>
-        </div>
-
-        <div id="scan-face-panel" class="hidden">
-          <div class="face-status" id="face-scan-status">क्यामेरा सुरु गर्दै...</div>
-          <div class="cam-wrap">
-            <video id="scan-video" autoplay playsinline muted></video>
-            <canvas class="overlay" id="scan-overlay"></canvas>
+      <!-- REGISTER -->
+      <div id="tab-register" class="tab-pane hidden">
+        <div class="page-head"><div><h2>नयाँ व्यक्ति दर्ता गर्नुहोस्</h2><div class="desc">विद्यार्थी, शिक्षक वा प्रधानाध्यापक दर्ता गर्नुहोस्</div></div></div>
+        <div class="card pad" style="max-width:640px;">
+          <div class="field">
+            <label>भूमिका *</label>
+            <select id="rg_role" onchange="AdminUI.roleChange()">
+              <option value="student">विद्यार्थी</option>
+              <option value="teacher">शिक्षक</option>
+              <option value="head">प्रधानाध्यापक / प्रशासक</option>
+            </select>
           </div>
-          <div class="scan-result" id="face-scan-result"></div>
+          <div class="field"><label>पूरा नाम *</label><input type="text" id="rg_name" placeholder="जस्तै: राम बहादुर श्रेष्ठ"></div>
+          <div class="grid2" id="rg_classSectionRow">
+            <div class="field"><label>कक्षा</label><select id="rg_class"></select></div>
+            <div class="field"><label>सेक्सन</label><select id="rg_section"></select></div>
+          </div>
+          <div class="field"><label>फोन नम्बर</label><input type="tel" id="rg_phone"></div>
+
+          <div class="field">
+            <label>फोटो (हाजिरका लागि अनिवार्य) *</label>
+            <div class="photo-capture">
+              <img id="rg_photoPreview" class="photo-preview hidden">
+              <video id="rg_video" class="cam-feed hidden" autoplay playsinline muted></video>
+              <canvas id="rg_canvas" class="hidden"></canvas>
+              <div id="rg_camPlaceholder" style="padding:30px 0; color:var(--ink-soft); font-size:13px;">फोटो खिच्नुहोस्</div>
+              <div class="cam-controls">
+                <button class="btn btn-outline btn-sm" onclick="Camera.open('rg')">📷 क्यामेरा खोल्नुहोस्</button>
+                <button class="btn btn-outline btn-sm hidden" id="rg_switchBtn" onclick="Camera.switch('rg')">🔄 अगाडि/पछाडि</button>
+                <button class="btn btn-gold btn-sm hidden" id="rg_captureBtn" onclick="Camera.capture('rg')">खिच्नुहोस्</button>
+                <label class="btn btn-outline btn-sm" style="margin:0;">फाइल छान्नुहोस्<input type="file" accept="image/*" id="rg_file" class="hidden"></label>
+              </div>
+              <div id="rg_faceCheckMsg" class="small-note"></div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="Registration.save()">✓ दर्ता गर्नुहोस्</button>
         </div>
       </div>
 
-      <!-- ============ VIEW: REPORTS ============ -->
-      <div class="view" id="view-reports">
-        <h3 class="section-title">महिनावारी रिपोर्ट</h3>
+      <!-- PEOPLE LIST -->
+      <div id="tab-people" class="tab-pane hidden">
+        <div class="page-head"><div><h2>सबै दर्ता भएका व्यक्ति</h2><div class="desc" id="pp_count"></div></div></div>
         <div class="report-toolbar">
-          <select id="report-month"></select>
-          <select id="report-year"></select>
-          <button class="btn btn-secondary btn-sm" onclick="renderReportTable()">🔍 हेर्नुहोस्</button>
-          <button class="btn btn-gold btn-sm" onclick="exportReportExcel()">⬇️ Excel Download</button>
+          <div class="field"><label>भूमिका</label><select id="pp_filterRole" onchange="AdminUI.renderPeople()"><option value="">सबै</option><option value="student">विद्यार्थी</option><option value="teacher">शिक्षक</option><option value="head">प्रधानाध्यापक</option></select></div>
+          <div class="field"><label>कक्षा</label><select id="pp_filterClass" onchange="AdminUI.renderPeople()"><option value="">सबै</option></select></div>
+          <div class="field" style="flex:1;"><label>खोज्नुहोस्</label><input type="text" id="pp_search" placeholder="नाम खोज्नुहोस्..." oninput="AdminUI.renderPeople()"></div>
         </div>
-        <div class="table-wrap">
-          <table class="report" id="report-table"></table>
-        </div>
+        <div class="person-grid" id="pp_grid"></div>
       </div>
 
-      <!-- ============ VIEW: SETTINGS ============ -->
-      <div class="view" id="view-settings">
-        <h3 class="section-title">सेटिङ</h3>
-        <div class="card" style="margin:0;">
-          <div class="field">
-            <label>फेस लक (Face Lock) — फेस मिलेमा मात्र लगइन खुल्ने</label>
-            <button class="btn btn-secondary" id="facelock-toggle-btn" onclick="toggleFaceLock()">लोड हुँदैछ...</button>
-          </div>
-          <div class="field">
-            <label>संस्थाको जानकारी</label>
-            <div id="settings-org-info" style="font-size:13.5px; color:var(--ink-soft); line-height:1.8;"></div>
-          </div>
-          <button class="btn btn-danger" onclick="handleLogout()">⏻ लगआउट गर्नुहोस्</button>
+      <!-- ID CARDS -->
+      <div id="tab-idcards" class="tab-pane hidden">
+        <div class="page-head"><div><h2>आईडी कार्ड जेनेरेटर</h2><div class="desc">QR कोड सहित सुन्दर आईडी कार्ड बनाउनुहोस्</div></div></div>
+        <div class="report-toolbar">
+          <div class="field"><label>व्यक्ति छान्नुहोस्</label><select id="id_person" style="min-width:260px;" onchange="IDCards.render()"></select></div>
+          <button class="btn btn-outline btn-sm" onclick="IDCards.printCurrent()">🖨️ प्रिन्ट गर्नुहोस्</button>
+          <button class="btn btn-outline btn-sm" onclick="IDCards.downloadCurrent()">⬇️ PNG डाउनलोड</button>
         </div>
+        <div id="id_cardHolder" style="display:flex; justify-content:center; padding:30px 0;"></div>
+        <div class="small-note" style="text-align:center;">आईडी कार्डमा भएको QR कोड र दर्ता गरिएको फोटो अनुसार मात्र हाजिर लाग्नेछ।</div>
       </div>
 
-    </div>
-  </div>
+      <!-- REPORTS -->
+      <div id="tab-reports" class="tab-pane hidden">
+        <div class="page-head"><div><h2>हाजिर रिपोर्ट</h2><div class="desc">महिना वा वर्षअनुसार हाजिर हेर्नुहोस् र Excel डाउनलोड गर्नुहोस्</div></div></div>
+        <div class="report-toolbar">
+          <div class="field"><label>प्रकार</label><select id="rp_scope" onchange="Reports.render()"><option value="class">कक्षा अनुसार</option><option value="person">व्यक्ति अनुसार</option><option value="all">सबै (शिक्षक/हेड)</option></select></div>
+          <div class="field" id="rp_classField"><label>कक्षा</label><select id="rp_class" onchange="Reports.render()"></select></div>
+          <div class="field" id="rp_personField" style="display:none;"><label>व्यक्ति</label><select id="rp_person" onchange="Reports.render()"></select></div>
+          <div class="field"><label>वर्ष</label><select id="rp_year" onchange="Reports.render()"></select></div>
+          <div class="field"><label>महिना</label><select id="rp_month" onchange="Reports.render()"></select></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+          <button class="btn btn-gold btn-sm" onclick="Reports.exportMonth()">⬇️ महिनाको Excel डाउनलोड</button>
+          <button class="btn btn-gold btn-sm" onclick="Reports.exportYear()">⬇️ वार्षिक Excel डाउनलोड</button>
+        </div>
+        <div class="stat-row" id="rp_stats"></div>
+        <div class="table-wrap"><table class="data" id="rp_table"></table></div>
+      </div>
 
-  <div class="bottom-nav">
-    <button class="nav-btn active" data-view="view-home" onclick="goView('view-home')"><span class="ico">🏠</span><span class="txt">गृह</span></button>
-    <button class="nav-btn" data-view="view-register-person" onclick="goView('view-register-person')"><span class="ico">🧑‍💼</span><span class="txt">दर्ता</span></button>
-    <button class="nav-btn" data-view="view-scan" onclick="goView('view-scan')"><span class="ico">📷</span><span class="txt">हाजिरी</span></button>
-    <button class="nav-btn" data-view="view-reports" onclick="goView('view-reports')"><span class="ico">📊</span><span class="txt">रिपोर्ट</span></button>
-    <button class="nav-btn" data-view="view-settings" onclick="goView('view-settings')"><span class="ico">⚙️</span><span class="txt">सेटिङ</span></button>
+      <!-- SETTINGS -->
+      <div id="tab-settings" class="tab-pane hidden">
+        <div class="page-head"><div><h2>सेटिङ</h2><div class="desc">प्रणालीका सबै नियन्त्रणहरू यहाँबाट मिलाउनुहोस्</div></div></div>
+
+        <div class="card pad">
+          <div class="settings-section">
+            <h3>विद्यालयको विवरण</h3>
+            <div class="grid2">
+              <div class="field"><label>विद्यालयको नाम</label><input type="text" id="st_schoolName"></div>
+              <div class="field"><label>फोन</label><input type="text" id="st_phone"></div>
+            </div>
+            <div class="field"><label>ठेगाना</label><input type="text" id="st_address"></div>
+            <div class="field"><label>लोगो बदल्नुहोस्</label><input type="file" accept="image/*" id="st_logoFile"></div>
+            <button class="btn btn-outline btn-sm" onclick="SettingsUI.saveSchool()">सुरक्षित गर्नुहोस्</button>
+          </div>
+
+          <div class="settings-section">
+            <h3>कक्षा व्यवस्थापन</h3>
+            <div class="hint">आफ्नो विद्यालयका कक्षाहरू थप्नुहोस् (जस्तै: कक्षा १, कक्षा २...)</div>
+            <div style="display:flex; gap:8px;"><input type="text" id="st_newClass" placeholder="नयाँ कक्षाको नाम" style="flex:1; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);"><button class="btn btn-outline btn-sm" onclick="SettingsUI.addClass()">+ थप्नुहोस्</button></div>
+            <div class="chip-row" id="st_classChips"></div>
+          </div>
+
+          <div class="settings-section">
+            <h3>सेक्सन व्यवस्थापन</h3>
+            <div class="hint">यदि कक्षा सेक्सनमा बाँडिएको छ भने (जस्तै: A, B, C)</div>
+            <div style="display:flex; gap:8px;"><input type="text" id="st_newSection" placeholder="नयाँ सेक्सनको नाम" style="flex:1; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line);"><button class="btn btn-outline btn-sm" onclick="SettingsUI.addSection()">+ थप्नुहोस्</button></div>
+            <div class="chip-row" id="st_sectionChips"></div>
+          </div>
+
+          <div class="settings-section">
+            <h3>हाजिर समय (बिहान/साँझ)</h3>
+            <div class="hint">बिहानको समयभित्र हाजिर लगाए पूरा (P) मानिनेछ। बिहानको समय सकिएदेखि "दिउँसो" समयसम्म हाजिर लगाए हाफ (H) मानिनेछ। दिउँसोको समय सकिएदेखि साँझको समय सुरु नहुँदासम्म हाजिर पूर्ण रूपमा बन्द रहन्छ। साँझको समय सुरु भएपछि मात्र साँझको हाफ (H) हाजिर लाग्नेछ, र साँझको समय सकिएपछि हाजिर पूर्ण रूपमा बन्द हुन्छ।</div>
+            <div class="grid2">
+              <div class="field"><label>बिहानको हाजिर सुरु (Full)</label><input type="time" id="st_mStart"></div>
+              <div class="field"><label>बिहानको हाजिर सकिने (यसपछि Full बन्द हुन्छ)</label><input type="time" id="st_mEnd"></div>
+            </div>
+            <div class="field"><label>दिउँसोको समय (यहाँसम्म हाजिर लगाए Half मानिने, यसपछि बन्द)</label><input type="time" id="st_middayEnd"></div>
+            <div class="grid2">
+              <div class="field"><label>साँझको हाजिर सुरु (Half, यसअघि लाग्दैन)</label><input type="time" id="st_aStart"></div>
+              <div class="field"><label>साँझको हाजिर सकिने (यसपछि सबै हाजिर बन्द)</label><input type="time" id="st_aEnd"></div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="SettingsUI.saveTimes()">समय सुरक्षित गर्नुहोस्</button>
+          </div>
+
+          <div class="settings-section">
+            <h3>साप्ताहिक बिदा र विशेष बिदा</h3>
+            <div class="field"><label>साप्ताहिक बिदाको दिन</label>
+              <select id="st_weeklyOff">
+                <option value="6">शनिबार</option><option value="0">आइतबार</option><option value="1">सोमबार</option>
+                <option value="2">मंगलबार</option><option value="3">बुधबार</option><option value="4">बिहीबार</option><option value="5">शुक्रबार</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:8px; align-items:flex-end;">
+              <div class="field" style="margin:0;"><label>विशेष बिदाको मिति थप्नुहोस्</label><input type="date" id="st_newHoliday"></div>
+              <button class="btn btn-outline btn-sm" onclick="SettingsUI.addHoliday()">+ थप्नुहोस्</button>
+            </div>
+            <div class="chip-row" id="st_holidayChips"></div>
+            <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="SettingsUI.saveWeeklyOff()">साप्ताहिक बिदा सुरक्षित गर्नुहोस्</button>
+          </div>
+
+          <div class="settings-section">
+            <h3>सुरक्षा</h3>
+            <div class="toggle-row">
+              <div><b>फेस लक (प्रशासन पहुँचका लागि)</b><div class="small-note">अफ गरे पासवर्डले मात्र प्रशासनमा छिर्न मिल्छ</div></div>
+              <div class="switch" id="st_faceLockSwitch" onclick="SettingsUI.toggleFaceLock()"><div class="knob"></div></div>
+            </div>
+            <div class="toggle-row">
+              <div><b>हाजिरका लागि अनुहार प्रमाणिकरण अनिवार्य</b><div class="small-note">अफ गरे केवल QR स्क्यानले मात्रै हाजिर लाग्छ</div></div>
+              <div class="switch" id="st_faceAttSwitch" onclick="SettingsUI.toggleFaceAttendance()"><div class="knob"></div></div>
+            </div>
+            <div class="field" style="margin-top:14px;"><label>प्रशासन पासवर्ड परिवर्तन गर्नुहोस्</label><input type="password" id="st_newPass" placeholder="नयाँ पासवर्ड"></div>
+            <button class="btn btn-outline btn-sm" onclick="SettingsUI.changePassword()">पासवर्ड परिवर्तन गर्नुहोस्</button>
+          </div>
+
+          <div class="settings-section">
+            <h3>डाटा व्यवस्थापन</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="DataMgmt.backup()">⬇️ ब्याकअप डाउनलोड (JSON)</button>
+              <label class="btn btn-outline btn-sm" style="margin:0;">⬆️ ब्याकअप रिस्टोर<input type="file" accept=".json" class="hidden" id="dm_restoreFile" onchange="DataMgmt.restore(event)"></label>
+              <button class="btn btn-danger btn-sm" onclick="DataMgmt.resetAll()">⚠️ सबै डाटा मेटाउनुहोस्</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ============================================================
-     MODAL : ID CARD PREVIEW
-============================================================ -->
-<div class="modal-overlay" id="idcard-modal">
-  <div class="modal-box">
-    <h3>परिचय पत्र</h3>
-    <div class="idcard" id="idcard-render-target"></div>
-    <div class="btn-row" style="margin-top:16px;">
-      <button class="btn btn-gold" onclick="downloadIdCard()">⬇️ Image डाउनलोड</button>
-      <button class="btn btn-ghost" onclick="closeModal('idcard-modal')">बन्द गर्नुहोस्</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============================================================
-     MODAL : FACE LOGIN (Face Lock)
-============================================================ -->
-<div class="modal-overlay" id="facelogin-modal">
-  <div class="modal-box">
-    <h3>🔒 फेस लक</h3>
-    <div class="face-status" id="facelogin-status">क्यामेरा सुरु गर्दै...</div>
-    <div class="cam-wrap">
-      <video id="facelogin-video" autoplay playsinline muted></video>
-      <canvas class="overlay" id="facelogin-overlay"></canvas>
-    </div>
-    <button class="btn btn-ghost" style="margin-top:10px;" onclick="closeFaceLoginModal()">रद्द गर्नुहोस्</button>
-  </div>
-</div>
+<div id="toastWrap" class="toast-wrap"></div>
+<div id="modalHost"></div>
+<div id="printArea"></div>
 
 <script>
-/* =====================================================================
-   1. CONSTANTS & CATEGORY CONFIG
-   ===================================================================== */
-const CATEGORIES = [
-  {id:'company',  label:'कम्पनी',            ico:'🏢', personLabel:'कर्मचारी', f1:'विभाग (Department)',      f2:'पद (Designation)'},
-  {id:'school',   label:'स्कुल/कलेज',         ico:'🎓', personLabel:'विद्यार्थी', f1:'कक्षा/Section',            f2:'रोल नम्बर'},
-  {id:'shop',     label:'पसल',               ico:'🛍️', personLabel:'कर्मचारी', f1:'पसलको प्रकार',             f2:'पद'},
-  {id:'contract', label:'ठेक्कापट्टा',        ico:'🏗️', personLabel:'कामदार',  f1:'साइटको नाम',               f2:'भूमिका (Role)'},
-  {id:'hospital', label:'अस्पताल/क्लिनिक',    ico:'🏥', personLabel:'कर्मचारी', f1:'विभाग',                    f2:'पद'},
-  {id:'bank',     label:'बैंक/फाइनान्स',      ico:'🏦', personLabel:'कर्मचारी', f1:'शाखा (Branch)',            f2:'पद'},
-  {id:'govt',     label:'सरकारी कार्यालय',    ico:'🏛️', personLabel:'कर्मचारी', f1:'शाखा/सेक्सन',              f2:'पद'},
-  {id:'ngo',      label:'गैरसरकारी संस्था',   ico:'🤝', personLabel:'सदस्य',   f1:'परियोजना (Project)',        f2:'पद'},
-  {id:'hotel',    label:'होटल/रेस्टुरेन्ट',   ico:'🏨', personLabel:'कर्मचारी', f1:'विभाग',                    f2:'पद'},
-  {id:'factory',  label:'कारखाना/उद्योग',     ico:'🏭', personLabel:'कामदार',  f1:'विभाग',                    f2:'सिफ्ट (Shift)'},
-];
-const NEPALI_MONTHS = ['जनवरी','फेब्रुअरी','मार्च','अप्रिल','मे','जुन','जुलाई','अगस्ट','सेप्टेम्बर','अक्टोबर','नोभेम्बर','डिसेम्बर'];
-const LATE_THRESHOLD = '10:00'; // after this time-of-day => marked Late
+/* =========================================================================
+   APP STATE & CONSTANTS
+   ========================================================================= */
+const ROLE_LABEL = {student:'विद्यार्थी', teacher:'शिक्षक', head:'प्रधानाध्यापक'};
+const NEP_MONTHS = ['जनवरी','फेब्रुअरी','मार्च','अप्रिल','मे','जुन','जुलाई','अगस्ट','सेप्टेम्बर','अक्टोबर','नोभेम्बर','डिसेम्बर'];
+let STATE = {
+  school:null, settings:null, people:[], attendance:[],
+  faceModelsLoaded:false,
+  currentAdmin:false
+};
+let CAM = { stream:null, facing:'user', target:null, capturedDataUrl:null };
+let KIOSK = { stream:null, facing:'environment', running:false, loopHandle:null, mode:'qr', matchedPerson:null, lastScanTs:0, busy:false };
 
-let DB = null;
-let currentOrg = null;                 // logged-in org record
-let selectedCategoryId = null;         // during registration
-let mediaStream = null;                // generic active stream reference
-let capturedPhotoDataUrl = null;
-let faceApiModelsLoaded = false;
-let personsCache = [];                 // cached persons of current org
-let scanDebounce = {};                 // personId -> last marked timestamp (face scan)
-let html5QrInstance = null;
-let currentScanTab = 'qr';
-let faceLoginStream = null;
-let faceLoginInterval = null;
-let scanFaceInterval = null;
-
-/* =====================================================================
-   2. INDEXEDDB LAYER
-   ===================================================================== */
+/* =========================================================================
+   INDEXEDDB LAYER
+   ========================================================================= */
+const DB_NAME='SchoolAttendanceDB', DB_VER=1;
+let dbInstance=null;
 function openDB(){
   return new Promise((resolve,reject)=>{
-    const req = indexedDB.open('HajirAttendanceDB', 1);
+    const req = indexedDB.open(DB_NAME, DB_VER);
     req.onupgradeneeded = (e)=>{
       const db = e.target.result;
-      if(!db.objectStoreNames.contains('org')){
-        db.createObjectStore('org', {keyPath:'id'});
-      }
-      if(!db.objectStoreNames.contains('persons')){
-        const s = db.createObjectStore('persons', {keyPath:'id', autoIncrement:true});
-        s.createIndex('orgId','orgId',{unique:false});
-      }
-      if(!db.objectStoreNames.contains('attendance')){
-        const s = db.createObjectStore('attendance', {keyPath:'id', autoIncrement:true});
-        s.createIndex('orgId','orgId',{unique:false});
-        s.createIndex('personId','personId',{unique:false});
-        s.createIndex('date','date',{unique:false});
-      }
+      if(!db.objectStoreNames.contains('config')) db.createObjectStore('config',{keyPath:'key'});
+      if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings',{keyPath:'key'});
+      if(!db.objectStoreNames.contains('people')) db.createObjectStore('people',{keyPath:'id', autoIncrement:true});
+      if(!db.objectStoreNames.contains('attendance')) db.createObjectStore('attendance',{keyPath:'id', autoIncrement:true});
     };
-    req.onsuccess = (e)=>{ DB = e.target.result; resolve(DB); };
+    req.onsuccess = (e)=>{ dbInstance = e.target.result; resolve(dbInstance); };
     req.onerror = (e)=> reject(e);
   });
 }
-function txStore(name, mode='readonly'){
-  return DB.transaction(name, mode).objectStore(name);
+function txStore(storeName, mode='readonly'){
+  const tx = dbInstance.transaction(storeName, mode);
+  return tx.objectStore(storeName);
 }
-function dbGetAll(storeName, indexName, indexValue){
-  return new Promise((resolve,reject)=>{
-    const store = txStore(storeName);
-    const target = indexName ? store.index(indexName) : store;
-    const req = indexValue!==undefined ? target.getAll(indexValue) : target.getAll();
-    req.onsuccess = ()=> resolve(req.result || []);
-    req.onerror = (e)=> reject(e);
-  });
-}
-function dbGet(storeName, key){
-  return new Promise((resolve,reject)=>{
-    const req = txStore(storeName).get(key);
-    req.onsuccess = ()=> resolve(req.result || null);
-    req.onerror = (e)=> reject(e);
-  });
-}
-function dbPut(storeName, value){
-  return new Promise((resolve,reject)=>{
-    const req = txStore(storeName,'readwrite').put(value);
-    req.onsuccess = ()=> resolve(req.result);
-    req.onerror = (e)=> reject(e);
-  });
-}
-function dbCountAll(storeName){
-  return new Promise((resolve,reject)=>{
-    const req = txStore(storeName).count();
-    req.onsuccess = ()=> resolve(req.result);
-    req.onerror = (e)=> reject(e);
-  });
+function dbGet(store,key){ return new Promise((res,rej)=>{ const r=txStore(store).get(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbPut(store,val){ return new Promise((res,rej)=>{ const r=txStore(store,'readwrite').put(val); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbDelete(store,key){ return new Promise((res,rej)=>{ const r=txStore(store,'readwrite').delete(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbAll(store){ return new Promise((res,rej)=>{ const r=txStore(store).getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbClear(store){ return new Promise((res,rej)=>{ const r=txStore(store,'readwrite').clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+
+/* =========================================================================
+   TOAST
+   ========================================================================= */
+function toast(msg, type=''){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast '+type;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
 }
 
-/* =====================================================================
-   3. UTILITIES
-   ===================================================================== */
-function showToast(msg, ms=2200){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=> t.classList.remove('show'), ms);
-}
-function todayStr(d=new Date()){
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-function timeStr(d=new Date()){
-  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
-}
-async function sha256(text){
-  const enc = new TextEncoder().encode(text);
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-function getCategory(id){ return CATEGORIES.find(c=>c.id===id) || CATEGORIES[0]; }
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
-function openModal(id){ document.getElementById(id).classList.add('show'); }
-
-/* Compress a canvas/video frame down to a reasonably small base64 JPEG */
-function canvasToCompressedDataUrl(canvas, maxDim=360, quality=0.72){
-  let {width,height} = canvas;
-  const scale = Math.min(1, maxDim/Math.max(width,height));
-  const outW = Math.round(width*scale), outH = Math.round(height*scale);
-  const out = document.createElement('canvas');
-  out.width = outW; out.height = outH;
-  out.getContext('2d').drawImage(canvas,0,0,outW,outH);
-  return out.toDataURL('image/jpeg', quality);
-}
-
-/* =====================================================================
-   4. AUTH TAB SWITCHING + CATEGORY GRID
-   ===================================================================== */
-function switchAuthTab(which){
-  document.getElementById('tab-login-btn').classList.toggle('active', which==='login');
-  document.getElementById('tab-register-btn').classList.toggle('active', which==='register');
-  document.getElementById('login-card').classList.toggle('hidden', which!=='login');
-  document.getElementById('register-card').classList.toggle('hidden', which!=='register');
-}
-function renderCategoryGrid(){
-  const grid = document.getElementById('category-grid');
-  grid.innerHTML = CATEGORIES.map(c=>`
-    <div class="cat-chip" data-cat="${c.id}" onclick="selectCategory('${c.id}')">
-      <span class="ico">${c.ico}</span>${c.label}
-    </div>`).join('');
-}
-function selectCategory(id){
-  selectedCategoryId = id;
-  document.querySelectorAll('.cat-chip').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.cat===id);
-  });
-}
-
-/* =====================================================================
-   5. REGISTER / LOGIN HANDLERS
-   ===================================================================== */
-async function handleRegister(){
-  const msgBox = document.getElementById('register-msg');
-  msgBox.innerHTML = '';
-  const name = document.getElementById('reg-org-name').value.trim();
-  const username = document.getElementById('reg-username').value.trim();
-  const password = document.getElementById('reg-password').value;
-
-  if(!selectedCategoryId){ return msgBox.innerHTML = '<div class="msg error">कृपया संस्थाको प्रकार छान्नुहोस्।</div>'; }
-  if(!name || !username || password.length<4){ return msgBox.innerHTML = '<div class="msg error">कृपया सबै फिल्ड सही तरिकाले भर्नुहोस् (पासवर्ड कम्तिमा ४ अक्षर)।</div>'; }
-
-  const existing = await dbGet('org', username);
-  if(existing){ return msgBox.innerHTML = '<div class="msg error">यो प्रयोगकर्ता नाम पहिले नै प्रयोग भइसकेको छ।</div>'; }
-
-  const passwordHash = await sha256(password);
-  const org = {
-    id: username,
-    orgName: name,
-    category: selectedCategoryId,
-    passwordHash,
-    faceLockEnabled: false,
-    createdAt: Date.now()
-  };
-  await dbPut('org', org);
-  msgBox.innerHTML = '<div class="msg ok">🎉 दर्ता सफल भयो! अब लगइन गर्नुहोस्।</div>';
-  setTimeout(()=>{ switchAuthTab('login'); document.getElementById('login-username').value = username; }, 900);
-}
-
-async function handleLogin(){
-  const msgBox = document.getElementById('login-msg');
-  msgBox.innerHTML = '';
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  if(!username || !password){ return msgBox.innerHTML = '<div class="msg error">प्रयोगकर्ता नाम र पासवर्ड भर्नुहोस्।</div>'; }
-
-  const org = await dbGet('org', username);
-  if(!org){ return msgBox.innerHTML = '<div class="msg error">खाता फेला परेन। कृपया पहिले दर्ता गर्नुहोस्।</div>'; }
-  const hash = await sha256(password);
-  if(hash !== org.passwordHash){ return msgBox.innerHTML = '<div class="msg error">पासवर्ड मिलेन।</div>'; }
-
-  await enterApp(org);
-}
-
-async function enterApp(org){
-  currentOrg = org;
-  sessionStorage.setItem('hajir_active_org', org.id);
-  document.getElementById('screen-auth').classList.remove('active');
-  document.getElementById('screen-app').classList.add('active');
-
-  const cat = getCategory(org.category);
-  document.getElementById('org-avatar').textContent = org.orgName.charAt(0);
-  document.getElementById('topbar-org-name').textContent = org.orgName;
-  document.getElementById('topbar-org-cat').textContent = cat.ico + ' ' + cat.label;
-  document.getElementById('stat-total-lbl').textContent = 'कुल ' + cat.personLabel;
-  document.getElementById('qb-register-label').textContent = cat.personLabel + ' दर्ता';
-  document.getElementById('rp-title').textContent = 'नयाँ ' + cat.personLabel + ' दर्ता';
-  document.getElementById('rp-field1-label').textContent = cat.f1;
-  document.getElementById('rp-field2-label').textContent = cat.f2;
-
-  await refreshPersonsCache();
-  await renderDashboard();
-  populateReportSelectors();
-  await refreshFaceLockButton();
-  goView('view-home');
-}
-
-function handleLogout(){
-  stopAllCameras();
-  sessionStorage.removeItem('hajir_active_org');
-  currentOrg = null;
-  document.getElementById('screen-app').classList.remove('active');
-  document.getElementById('screen-auth').classList.add('active');
-  document.getElementById('login-password').value = '';
-  switchAuthTab('login');
-}
-
-/* =====================================================================
-   6. VIEW / NAV SWITCHING
-   ===================================================================== */
-function goView(viewId){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(viewId).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewId));
-
-  stopAllCameras(); // safety: stop any running camera when navigating away
-
-  if(viewId==='view-register-person'){ resetPersonForm(); startCamera('rp-video','user'); }
-  if(viewId==='view-idcards'){ renderIdCardList(); }
-  if(viewId==='view-scan'){ initScanView(); }
-  if(viewId==='view-reports'){ renderReportTable(); }
-  if(viewId==='view-settings'){ renderSettingsView(); }
-  if(viewId==='view-home'){ renderDashboard(); }
-}
-
-/* =====================================================================
-   7. CAMERA HELPERS (generic start/stop, front/back toggle)
-   ===================================================================== */
-async function startCamera(videoId, facingMode='user'){
-  stopStreamOnVideo(videoId);
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ideal:facingMode}, width:{ideal:640}, height:{ideal:480} },
-      audio:false
+/* =========================================================================
+   ROUTER
+   ========================================================================= */
+const Router = {
+  go(screen){
+    ['loading','setup','adminlogin','kiosk','admin'].forEach(s=>{
+      document.getElementById('scr-'+s).classList.add('hidden');
     });
-    const video = document.getElementById(videoId);
-    video.srcObject = stream;
-    video._stream = stream;
-    await video.play().catch(()=>{});
-  }catch(err){
-    showToast('क्यामेरा खोल्न सकिएन: ' + err.message);
+    document.getElementById('scr-'+screen).classList.remove('hidden');
+    if(screen==='kiosk'){ Kiosk.start(); AdminAuth.stopFaceCam(); }
+    else { Kiosk.stop(); }
+    if(screen!=='adminlogin'){ AdminAuth.stopFaceCam(); }
   }
-}
-function stopStreamOnVideo(videoId){
-  const video = document.getElementById(videoId);
-  if(video && video._stream){
-    video._stream.getTracks().forEach(t=>t.stop());
-    video._stream = null;
-    video.srcObject = null;
-  }
-}
-function stopAllCameras(){
-  ['rp-video','scan-video','facelogin-video'].forEach(stopStreamOnVideo);
-  if(html5QrInstance){
-    try{ html5QrInstance.stop().catch(()=>{}); }catch(e){}
-  }
-  if(scanFaceInterval){ clearInterval(scanFaceInterval); scanFaceInterval=null; }
-  if(faceLoginInterval){ clearInterval(faceLoginInterval); faceLoginInterval=null; }
-}
+};
 
-/* =====================================================================
-   8. FACE-API.JS MODEL LOADING (tiny + fast)
-   ===================================================================== */
-async function loadFaceApiModels(){
-  if(faceApiModelsLoaded) return true;
-  const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+/* =========================================================================
+   INIT / BOOTSTRAP
+   ========================================================================= */
+async function boot(){
+  await openDB();
+  document.getElementById('loadingTxt').textContent = 'अनुहार पहिचान मोडेल डाउनलोड हुँदैछ...';
   try{
+    const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
     await Promise.all([
       faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
       faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
     ]);
-    faceApiModelsLoaded = true;
-    return true;
+    STATE.faceModelsLoaded = true;
   }catch(err){
-    showToast('फेस मोडेल लोड हुन सकेन (इन्टरनेट जाँच्नुहोस्)');
-    return false;
+    console.warn('Face model load failed, continuing without face recognition', err);
+    STATE.faceModelsLoaded = false;
+    toast('अनुहार पहिचान मोडेल लोड हुन सकेन (इन्टरनेट जाँच्नुहोस्) — QR मात्र प्रयोग हुनेछ','error');
   }
-}
-function fastDetectorOptions(){
-  return new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
-}
 
-/* =====================================================================
-   9. PERSON REGISTRATION (photo capture + dynamic fields + save)
-   ===================================================================== */
-function resetPersonForm(){
-  capturedPhotoDataUrl = null;
-  document.getElementById('rp-photo-preview').classList.remove('show');
-  document.getElementById('rp-photo-preview').style.display = 'none';
-  document.getElementById('rp-cam-wrap').style.display = 'block';
-  document.getElementById('rp-capture-btn').classList.remove('hidden');
-  document.getElementById('rp-retake-btn').classList.add('hidden');
-  ['rp-name','rp-age','rp-phone','rp-address','rp-field1','rp-field2'].forEach(id=>document.getElementById(id).value='');
+  STATE.school = await dbGet('config','school');
+  STATE.settings = await dbGet('settings','settings');
+  STATE.people = await dbAll('people');
+  STATE.attendance = await dbAll('attendance');
+
+  if(!STATE.school){
+    Router.go('setup');
+    document.getElementById('scr-loading').classList.add('hidden');
+    document.getElementById('scr-setup').classList.remove('hidden');
+    return;
+  }
+  if(!STATE.settings){
+    STATE.settings = defaultSettings();
+    await dbPut('settings', STATE.settings);
+  }
+  if(STATE.settings.middayEnd===undefined){
+    STATE.settings.middayEnd = '11:00';
+    await dbPut('settings', STATE.settings);
+  }
+  applyBranding();
+  Router.go('kiosk');
+  document.getElementById('scr-loading').classList.add('hidden');
+  startClock();
 }
-function capturePersonPhoto(){
-  const video = document.getElementById('rp-video');
-  if(!video.srcObject){ return showToast('पहिले क्यामेरा खोल्नुहोस्'); }
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video,0,0);
-  capturedPhotoDataUrl = canvasToCompressedDataUrl(canvas, 400, 0.75);
-
-  document.getElementById('rp-photo-preview').src = capturedPhotoDataUrl;
-  document.getElementById('rp-photo-preview').style.display = 'block';
-  document.getElementById('rp-cam-wrap').style.display = 'none';
-  document.getElementById('rp-capture-btn').classList.add('hidden');
-  document.getElementById('rp-retake-btn').classList.remove('hidden');
-  stopStreamOnVideo('rp-video');
-}
-function retakePersonPhoto(){
-  capturedPhotoDataUrl = null;
-  document.getElementById('rp-photo-preview').style.display = 'none';
-  document.getElementById('rp-cam-wrap').style.display = 'block';
-  document.getElementById('rp-capture-btn').classList.remove('hidden');
-  document.getElementById('rp-retake-btn').classList.add('hidden');
-  startCamera('rp-video','user');
-}
-
-async function computeFaceDescriptorFromDataUrl(dataUrl){
-  const ok = await loadFaceApiModels();
-  if(!ok) return null;
-  const img = await new Promise((res,rej)=>{
-    const im = new Image(); im.onload=()=>res(im); im.onerror=rej; im.src = dataUrl;
-  });
-  const detection = await faceapi.detectSingleFace(img, fastDetectorOptions())
-    .withFaceLandmarks(true)
-    .withFaceDescriptor();
-  return detection ? Array.from(detection.descriptor) : null;
-}
-
-async function savePerson(){
-  const msgBox = document.getElementById('rp-msg');
-  msgBox.innerHTML = '';
-  if(!capturedPhotoDataUrl){ return msgBox.innerHTML = '<div class="msg error">कृपया पहिले फोटो खिच्नुहोस्।</div>'; }
-  const name = document.getElementById('rp-name').value.trim();
-  if(!name){ return msgBox.innerHTML = '<div class="msg error">नाम आवश्यक छ।</div>'; }
-
-  msgBox.innerHTML = '<div class="msg ok">फेस डाटा प्रशोधन हुँदैछ...</div>';
-  const faceDescriptor = await computeFaceDescriptorFromDataUrl(capturedPhotoDataUrl);
-
-  const person = {
-    orgId: currentOrg.id,
-    name,
-    age: document.getElementById('rp-age').value.trim(),
-    phone: document.getElementById('rp-phone').value.trim(),
-    address: document.getElementById('rp-address').value.trim(),
-    field1: document.getElementById('rp-field1').value.trim(),
-    field2: document.getElementById('rp-field2').value.trim(),
-    photo: capturedPhotoDataUrl,
-    faceDescriptor,
-    createdAt: Date.now()
+function defaultSettings(){
+  return {
+    key:'settings',
+    classes:['कक्षा १','कक्षा २','कक्षा ३','कक्षा ४','कक्षा ५'],
+    sections:['A','B'],
+    morningStart:'06:00', morningEnd:'09:30',
+    middayEnd:'11:00',
+    afternoonStart:'15:00', afternoonEnd:'16:00',
+    weeklyOff:6, holidays:[],
+    faceLockEnabled:true, faceAttendanceEnabled:true
   };
-  const newId = await dbPut('persons', person);
-  person.id = newId;
+}
+function applyBranding(){
+  const logo = STATE.school.logo || 'https://api.iconify.design/mdi/school.svg?color=%237A1229';
+  document.getElementById('ks_logo').src = logo;
+  document.getElementById('ks_schoolName').textContent = STATE.school.name;
+  document.getElementById('ad_logo').src = logo;
+  document.getElementById('ad_schoolName').textContent = STATE.school.name;
+}
+function startClock(){
+  function tick(){
+    const now = new Date();
+    document.getElementById('ks_clock').innerHTML = now.toLocaleTimeString('ne-NP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + '<br>' + now.toLocaleDateString('en-CA');
+  }
+  tick(); setInterval(tick,1000);
+}
+window.addEventListener('load', boot);
 
-  await refreshPersonsCache();
-  msgBox.innerHTML = `<div class="msg ok">✅ ${name} सफलतापूर्वक दर्ता भयो!</div>`;
-  showToast('दर्ता सम्पन्न भयो — ID कार्ड तयार भयो');
-  openIdCardModal(person.id);
-  resetPersonForm();
-}
-
-async function refreshPersonsCache(){
-  personsCache = await dbGetAll('persons','orgId', currentOrg.id);
-}
-
-/* =====================================================================
-   10. QR CODE GENERATION + ID CARD
-   ===================================================================== */
-function qrPayloadFor(person){
-  return JSON.stringify({ o: currentOrg.id, p: person.id });
-}
-function renderIdCardHTML(person){
-  const cat = getCategory(currentOrg.category);
-  const qrDivId = 'qrgen-' + person.id + '-' + Math.floor(Math.random()*99999);
-  const html = `
-    <div class="idcard-head">
-      <div class="org">${currentOrg.orgName}</div>
-      <div class="cat">${cat.ico} ${cat.label} · ${cat.personLabel} परिचय पत्र</div>
-    </div>
-    <div class="idcard-body">
-      <img class="photo" src="${person.photo}">
-      <div class="details">
-        <div class="name">${person.name}</div>
-        <div class="row">${cat.f1}: ${person.field1 || '-'}</div>
-        <div class="row">${cat.f2}: ${person.field2 || '-'}</div>
-        <div class="row">फोन: ${person.phone || '-'}</div>
-      </div>
-    </div>
-    <div class="idcard-foot">
-      <div>
-        <div id="${qrDivId}" style="display:flex; justify-content:center;"></div>
-        <div class="idno">ID: ${String(person.id).padStart(5,'0')}</div>
-      </div>
-    </div>`;
-  return {html, qrDivId};
-}
-function openIdCardModal(personId){
-  const person = personsCache.find(p=>p.id===personId);
-  if(!person) return;
-  const target = document.getElementById('idcard-render-target');
-  const {html, qrDivId} = renderIdCardHTML(person);
-  target.innerHTML = html;
-  target.dataset.personId = personId;
-  requestAnimationFrame(()=>{
-    new QRCode(document.getElementById(qrDivId), {
-      text: qrPayloadFor(person), width:110, height:110,
-      colorDark:'#0B2E6B', colorLight:'#ffffff'
+/* =========================================================================
+   CAMERA HELPER (generic, used for setup/register capture)
+   target: 'su_head' | 'rg'
+   ========================================================================= */
+const Camera = {
+  async open(target){
+    CAM.target = target;
+    try{
+      CAM.facing = 'user';
+      const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:CAM.facing}, audio:false});
+      CAM.stream = stream;
+      const video = document.getElementById(target+'_video') || document.getElementById(target+'Video');
+      video.srcObject = stream;
+      video.classList.remove('hidden');
+      const ph = document.getElementById(target+'_camPlaceholder') || document.getElementById(target+'CamPlaceholder');
+      if(ph) ph.classList.add('hidden');
+      const prev = document.getElementById(target+'_photoPreview') || document.getElementById(target+'PhotoPreview');
+      if(prev) prev.classList.add('hidden');
+      const swBtn = document.getElementById(target+'_switchBtn') || document.getElementById(target+'_switchBtn');
+      const capBtn = document.getElementById(target+'_captureBtn');
+      if(swBtn) swBtn.classList.remove('hidden');
+      if(capBtn) capBtn.classList.remove('hidden');
+    }catch(err){
+      toast('क्यामेरा खोल्न सकिएन: '+err.message,'error');
+    }
+  },
+  async switch(target){
+    CAM.facing = CAM.facing==='user' ? 'environment' : 'user';
+    if(CAM.stream) CAM.stream.getTracks().forEach(t=>t.stop());
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:CAM.facing}, audio:false});
+      CAM.stream = stream;
+      const video = document.getElementById(target+'_video') || document.getElementById(target+'Video');
+      video.srcObject = stream;
+    }catch(err){ toast('क्यामेरा बदल्न सकिएन','error'); }
+  },
+  capture(target){
+    const video = document.getElementById(target+'_video') || document.getElementById(target+'Video');
+    const canvas = document.getElementById(target+'_canvas') || document.getElementById(target+'Canvas');
+    const w = video.videoWidth||480, h = video.videoHeight||480;
+    canvas.width=w; canvas.height=h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video,0,0,w,h);
+    const dataUrl = canvas.toDataURL('image/jpeg',0.85);
+    CAM.capturedDataUrl = dataUrl;
+    const prev = document.getElementById(target+'_photoPreview') || document.getElementById(target+'PhotoPreview');
+    prev.src = dataUrl;
+    prev.classList.remove('hidden');
+    video.classList.add('hidden');
+    Camera.stop();
+    if(target==='rg') Registration.tempPhoto = dataUrl;
+    if(target==='su_head') Setup.tempHeadPhoto = dataUrl;
+    if(target==='rg') Registration.checkFace(dataUrl);
+  },
+  stop(){
+    if(CAM.stream){ CAM.stream.getTracks().forEach(t=>t.stop()); CAM.stream=null; }
+  }
+};
+// file upload fallback handlers
+document.addEventListener('change', (e)=>{
+  if(e.target.id==='su_headFile'){
+    fileToDataUrl(e.target.files[0]).then(d=>{
+      Setup.tempHeadPhoto = d;
+      const prev = document.getElementById('su_headPhotoPreview');
+      prev.src=d; prev.classList.remove('hidden');
+      document.getElementById('su_headVideo').classList.add('hidden');
+      document.getElementById('su_headCamPlaceholder').classList.add('hidden');
     });
-  });
-  openModal('idcard-modal');
-}
-function downloadIdCard(){
-  const target = document.getElementById('idcard-render-target');
-  const personId = target.dataset.personId;
-  const person = personsCache.find(p=>String(p.id)===String(personId));
-  html2canvas(target, {backgroundColor:'#ffffff', scale:2}).then(canvas=>{
-    const link = document.createElement('a');
-    link.download = `IDCard_${person ? person.name : personId}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  });
-}
-async function renderIdCardList(){
-  const cat = getCategory(currentOrg.category);
-  const list = document.getElementById('idcard-person-list');
-  if(personsCache.length===0){
-    list.innerHTML = `<div class="empty-state"><span class="ico">🪪</span>अहिलेसम्म कुनै ${cat.personLabel} दर्ता गरिएको छैन।</div>`;
-    return;
   }
-  list.innerHTML = personsCache.map(p=>`
-    <div class="person-row">
-      <img src="${p.photo}">
-      <div class="info">
-        <div class="name">${p.name}</div>
-        <div class="meta">${cat.f1}: ${p.field1 || '-'} · ID: ${String(p.id).padStart(5,'0')}</div>
-      </div>
-      <div class="actions">
-        <button class="btn btn-secondary btn-sm" onclick="openIdCardModal(${p.id})">हेर्ने</button>
-      </div>
-    </div>`).join('');
-}
-
-/* =====================================================================
-   11. DASHBOARD RENDER
-   ===================================================================== */
-async function renderDashboard(){
-  const cat = getCategory(currentOrg.category);
-  const today = todayStr();
-  const allAttendance = await dbGetAll('attendance','orgId', currentOrg.id);
-  const todaysRecords = allAttendance.filter(a=>a.date===today);
-  const presentIds = new Set(todaysRecords.map(a=>a.personId));
-
-  document.getElementById('stat-total').textContent = personsCache.length;
-  document.getElementById('stat-today').textContent = presentIds.size;
-  document.getElementById('stat-absent').textContent = Math.max(personsCache.length - presentIds.size, 0);
-  const pct = personsCache.length ? Math.round((presentIds.size/personsCache.length)*100) : 0;
-  document.getElementById('stat-pct').textContent = pct + '%';
-
-  const listEl = document.getElementById('today-attendance-list');
-  if(todaysRecords.length===0){
-    listEl.innerHTML = `<div class="empty-state"><span class="ico">📋</span>आज अझै कसैको हाजिरी लागेको छैन।</div>`;
-    return;
+  if(e.target.id==='rg_file'){
+    fileToDataUrl(e.target.files[0]).then(d=>{
+      Registration.tempPhoto = d;
+      const prev = document.getElementById('rg_photoPreview');
+      prev.src=d; prev.classList.remove('hidden');
+      document.getElementById('rg_video').classList.add('hidden');
+      document.getElementById('rg_camPlaceholder').classList.add('hidden');
+      Registration.checkFace(d);
+    });
   }
-  const sorted = [...todaysRecords].sort((a,b)=> b.time.localeCompare(a.time));
-  listEl.innerHTML = sorted.slice(0,20).map(rec=>{
-    const person = personsCache.find(p=>p.id===rec.personId);
-    if(!person) return '';
-    return `<div class="person-row">
-      <img src="${person.photo}">
-      <div class="info">
-        <div class="name">${person.name}</div>
-        <div class="meta">${rec.time} · ${rec.method==='qr'?'QR स्क्यान':'फेस स्क्यान'}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* =====================================================================
-   12. ATTENDANCE MARKING (shared logic)
-   ===================================================================== */
-async function markAttendance(personId, method){
-  const today = todayStr();
-  const existingToday = await dbGetAll('attendance','orgId', currentOrg.id);
-  const already = existingToday.find(a=>a.personId===personId && a.date===today);
-  if(already){
-    return {status:'duplicate', record: already};
+  if(e.target.id==='su_logoFile'){
+    fileToDataUrl(e.target.files[0]).then(d=>{
+      Setup.tempLogo = d;
+      const prev = document.getElementById('su_logoPreview');
+      prev.src=d; prev.classList.remove('hidden');
+    });
   }
-  const record = {
-    orgId: currentOrg.id, personId, date: today, time: timeStr(), method
-  };
-  const id = await dbPut('attendance', record);
-  record.id = id;
-  return {status:'marked', record};
-}
-
-/* =====================================================================
-   13. SCAN VIEW — TAB SWITCH + QR SCANNER + FACE SCANNER
-   ===================================================================== */
-function switchScanTab(which){
-  currentScanTab = which;
-  document.getElementById('scan-tab-qr').classList.toggle('active', which==='qr');
-  document.getElementById('scan-tab-face').classList.toggle('active', which==='face');
-  document.getElementById('scan-qr-panel').classList.toggle('hidden', which!=='qr');
-  document.getElementById('scan-face-panel').classList.toggle('hidden', which!=='face');
-  stopAllCameras();
-  if(which==='qr') startQrScanner(); else startFaceScanner();
-}
-function initScanView(){
-  switchScanTab(currentScanTab);
-}
-function startQrScanner(){
-  const resultBox = document.getElementById('qr-scan-result');
-  resultBox.className = 'scan-result';
-  html5QrInstance = new Html5Qrcode('qr-reader');
-  const config = { fps: 12, qrbox: 230 };
-  html5QrInstance.start(
-    { facingMode: 'environment' },
-    config,
-    async (decodedText)=>{
-      try{
-        const payload = JSON.parse(decodedText);
-        if(payload.o !== currentOrg.id){
-          resultBox.textContent = '❌ यो QR यस संस्थाको होइन।';
-          resultBox.className = 'scan-result show err';
-          return;
-        }
-        const person = personsCache.find(p=>p.id===payload.p);
-        if(!person){
-          resultBox.textContent = '❌ व्यक्ति फेला परेन।';
-          resultBox.className = 'scan-result show err';
-          return;
-        }
-        const res = await markAttendance(person.id, 'qr');
-        if(res.status==='marked'){
-          resultBox.textContent = `✅ ${person.name} — हाजिरी लाग्यो (${res.record.time})`;
-          resultBox.className = 'scan-result show ok';
-          showToast('हाजिरी सफलतापूर्वक लाग्यो ✅');
-          renderDashboard();
-        }else{
-          resultBox.textContent = `⚠️ ${person.name} — आजको हाजिरी पहिले नै लागिसकेको छ (${res.record.time})`;
-          resultBox.className = 'scan-result show dup';
-        }
-      }catch(e){
-        resultBox.textContent = '❌ अमान्य QR कोड।';
-        resultBox.className = 'scan-result show err';
-      }
-    },
-    ()=>{ /* ignore per-frame scan errors */ }
-  ).catch(err=>{
-    showToast('QR क्यामेरा सुरु हुन सकेन: ' + err);
+  if(e.target.id==='st_logoFile'){
+    fileToDataUrl(e.target.files[0]).then(d=>{ SettingsUI.tempLogo = d; toast('लोगो तयार, सुरक्षित गर्नुहोस् थिच्नुहोस्'); });
+  }
+});
+function fileToDataUrl(file){
+  return new Promise((res)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result);
+    r.readAsDataURL(file);
   });
 }
+async function getFaceDescriptor(dataUrl){
+  if(!STATE.faceModelsLoaded) return null;
+  try{
+    const img = await faceapi.fetchImage(dataUrl);
+    const det = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+    if(!det) return null;
+    return Array.from(det.descriptor);
+  }catch(e){ console.warn(e); return null; }
+}
+function euclideanDist(a,b){
+  let sum=0; for(let i=0;i<a.length;i++){ sum += (a[i]-b[i])**2; } return Math.sqrt(sum);
+}
 
-async function startFaceScanner(){
-  const statusEl = document.getElementById('face-scan-status');
-  const resultBox = document.getElementById('face-scan-result');
-  statusEl.textContent = 'फेस मोडेल लोड हुँदैछ...';
-  statusEl.className = 'face-status';
-  const ok = await loadFaceApiModels();
-  if(!ok){ statusEl.textContent = '❌ मोडेल लोड भएन। इन्टरनेट जडान जाँच्नुहोस्।'; return; }
+/* =========================================================================
+   SETUP FLOW
+   ========================================================================= */
+const Setup = {
+  tempLogo:null, tempHeadPhoto:null,
+  toStep2(){
+    const name = document.getElementById('su_schoolName').value.trim();
+    if(!name){ toast('विद्यालयको नाम लेख्नुहोस्','error'); return; }
+    document.getElementById('setupStep1').classList.add('hidden');
+    document.getElementById('setupStep2').classList.remove('hidden');
+    document.getElementById('dot1').classList.remove('active');
+    document.getElementById('dot2').classList.add('active');
+  },
+  toStep1(){
+    document.getElementById('setupStep2').classList.add('hidden');
+    document.getElementById('setupStep1').classList.remove('hidden');
+    document.getElementById('dot2').classList.remove('active');
+    document.getElementById('dot1').classList.add('active');
+  },
+  async finish(){
+    const headName = document.getElementById('su_headName').value.trim();
+    const pass = document.getElementById('su_adminPass').value;
+    if(!headName){ toast('प्रधानाध्यापकको नाम लेख्नुहोस्','error'); return; }
+    if(!pass || pass.length<4){ toast('पासवर्ड कम्तीमा ४ अक्षरको हुनुपर्छ','error'); return; }
+    if(!Setup.tempHeadPhoto){ toast('प्रधानाध्यापकको फोटो खिच्नुहोस्','error'); return; }
 
-  await startCamera('scan-video','environment');
-  statusEl.textContent = '🔍 अनुहार खोज्दैछ...';
+    const school = {
+      key:'school',
+      name: document.getElementById('su_schoolName').value.trim(),
+      address: document.getElementById('su_address').value.trim(),
+      phone: document.getElementById('su_phone').value.trim(),
+      logo: Setup.tempLogo || '',
+      adminPassword: pass
+    };
+    await dbPut('config', school);
+    STATE.school = school;
 
-  const video = document.getElementById('scan-video');
-  const overlay = document.getElementById('scan-overlay');
+    STATE.settings = defaultSettings();
+    await dbPut('settings', STATE.settings);
 
-  scanFaceInterval = setInterval(async ()=>{
-    if(!video.srcObject) return;
-    const detection = await faceapi.detectSingleFace(video, fastDetectorOptions())
-      .withFaceLandmarks(true).withFaceDescriptor();
+    const descriptor = await getFaceDescriptor(Setup.tempHeadPhoto);
+    const head = {
+      role:'head', name:headName, class:'', section:'',
+      phone: document.getElementById('su_headPhone').value.trim(),
+      photo: Setup.tempHeadPhoto, descriptor: descriptor,
+      uid: genUID('HD'), createdAt: new Date().toISOString()
+    };
+    const id = await dbPut('people', head);
+    head.id = id;
+    STATE.people.push(head);
+    await dbPut('config', {...school, headmasterId:id});
+    STATE.school.headmasterId = id;
 
-    const ctx = overlay.getContext('2d');
-    overlay.width = video.clientWidth; overlay.height = video.clientHeight;
-    ctx.clearRect(0,0,overlay.width, overlay.height);
+    toast('प्रणाली सफलतापूर्वक तयार भयो!','success');
+    applyBranding();
+    Router.go('kiosk');
+    startClock();
+  }
+};
+function genUID(prefix){
+  return prefix+'-'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase();
+}
 
-    if(!detection){
-      statusEl.textContent = '🔍 अनुहार खोज्दैछ...';
-      statusEl.className = 'face-status';
+/* =========================================================================
+   ADMIN AUTH (face lock or password)
+   ========================================================================= */
+const AdminAuth = {
+  faceStream:null, faceLoopHandle:null,
+  enter(){
+    const head = STATE.people.find(p=>p.id===STATE.school.headmasterId);
+    document.getElementById('al_headPhoto').src = head ? head.photo : '';
+    document.getElementById('al_headName').textContent = head ? head.name : '';
+    document.getElementById('al_faceBlock').classList.toggle('hidden', !STATE.settings.faceLockEnabled);
+    document.getElementById('al_pass').value='';
+    Router.go('adminlogin');
+  },
+  async startFace(){
+    if(!STATE.faceModelsLoaded){ toast('अनुहार पहिचान उपलब्ध छैन, पासवर्ड प्रयोग गर्नुहोस्','error'); return; }
+    try{
+      const video = document.getElementById('al_video');
+      const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}, audio:false});
+      AdminAuth.faceStream = stream;
+      video.srcObject = stream; video.classList.remove('hidden');
+      document.getElementById('al_faceMsg').textContent = 'अनुहार क्यामेरा अगाडि राख्नुहोस्...';
+      AdminAuth.faceLoopHandle = setInterval(AdminAuth.tryMatch, 900);
+    }catch(err){ toast('क्यामेरा खोल्न सकिएन','error'); }
+  },
+  async tryMatch(){
+    const video = document.getElementById('al_video');
+    const canvas = document.getElementById('al_canvas');
+    if(!video.videoWidth) return;
+    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+    canvas.getContext('2d').drawImage(video,0,0);
+    const dataUrl = canvas.toDataURL('image/jpeg',0.8);
+    const desc = await getFaceDescriptor(dataUrl);
+    if(!desc){ return; }
+    const head = STATE.people.find(p=>p.id===STATE.school.headmasterId);
+    if(!head || !head.descriptor){ document.getElementById('al_faceMsg').textContent='प्रधानाध्यापकको फेस डाटा फेला परेन'; return; }
+    const dist = euclideanDist(desc, head.descriptor);
+    if(dist < 0.5){
+      AdminAuth.stopFaceCam();
+      toast('अनुहार पहिचान सफल','success');
+      AdminAuth.grant();
+    } else {
+      document.getElementById('al_faceMsg').textContent = 'मिलेन, फेरि प्रयास गर्दै...';
+    }
+  },
+  stopFaceCam(){
+    if(AdminAuth.faceLoopHandle){ clearInterval(AdminAuth.faceLoopHandle); AdminAuth.faceLoopHandle=null; }
+    if(AdminAuth.faceStream){ AdminAuth.faceStream.getTracks().forEach(t=>t.stop()); AdminAuth.faceStream=null; }
+    const video = document.getElementById('al_video');
+    if(video) video.classList.add('hidden');
+  },
+  loginPassword(){
+    const pass = document.getElementById('al_pass').value;
+    if(pass === STATE.school.adminPassword){ AdminAuth.grant(); }
+    else toast('पासवर्ड मिलेन','error');
+  },
+  grant(){
+    STATE.currentAdmin = true;
+    AdminUI.tab('overview');
+    Router.go('admin');
+  },
+  logout(){ STATE.currentAdmin=false; Router.go('kiosk'); }
+};
+
+/* =========================================================================
+   ADMIN UI (tabs)
+   ========================================================================= */
+const AdminUI = {
+  tab(name){
+    document.querySelectorAll('.side-link[data-tab]').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.add('hidden'));
+    document.getElementById('tab-'+name).classList.remove('hidden');
+    if(name==='overview') AdminUI.renderOverview();
+    if(name==='register') AdminUI.fillRoleSelects();
+    if(name==='people') AdminUI.renderPeople();
+    if(name==='idcards') IDCards.init();
+    if(name==='reports') Reports.init();
+    if(name==='settings') SettingsUI.init();
+  },
+  roleChange(){ AdminUI.fillRoleSelects(); },
+  fillRoleSelects(){
+    const role = document.getElementById('rg_role').value;
+    document.getElementById('rg_classSectionRow').style.display = role==='student' ? 'grid' : (role==='teacher'?'grid':'none');
+    const classSel = document.getElementById('rg_class'), secSel = document.getElementById('rg_section');
+    classSel.innerHTML = '<option value="">—</option>'+STATE.settings.classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+    secSel.innerHTML = '<option value="">—</option>'+STATE.settings.sections.map(s=>`<option value="${s}">${s}</option>`).join('');
+  },
+  renderOverview(){
+    const today = todayStr();
+    document.getElementById('ov_dateLine').textContent = new Date().toLocaleDateString('ne-NP',{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    const totalStudents = STATE.people.filter(p=>p.role==='student').length;
+    const totalTeachers = STATE.people.filter(p=>p.role==='teacher').length;
+    const todayAtt = STATE.attendance.filter(a=>a.date===today);
+    const presentIds = new Set(todayAtt.map(a=>a.personId));
+    const stats = [
+      {num:totalStudents, lbl:'कुल विद्यार्थी'},
+      {num:totalTeachers, lbl:'कुल शिक्षक'},
+      {num:presentIds.size, lbl:'आज उपस्थित'},
+      {num:todayAtt.filter(a=>a.status==='P').length, lbl:'पूरा (P) हाजिर'},
+      {num:todayAtt.filter(a=>a.status==='H').length, lbl:'हाफ (H) हाजिर'}
+    ];
+    document.getElementById('ov_stats').innerHTML = stats.map(s=>`<div class="stat-box"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('');
+    const tbody = document.querySelector('#ov_todayTable tbody');
+    tbody.innerHTML = todayAtt.slice().reverse().map(a=>{
+      const p = STATE.people.find(pp=>pp.id===a.personId);
+      if(!p) return '';
+      return `<tr><td>${p.name}</td><td><span class="badge ${p.role}">${ROLE_LABEL[p.role]}</span></td><td>${p.class||'-'}${p.section?'-'+p.section:''}</td><td>${a.time}</td><td><span class="badge ${a.status.toLowerCase()}">${a.status==='P'?'पूरा':'हाफ'}</span></td></tr>`;
+    }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);">आज अझै कसैको हाजिर लागेको छैन</td></tr>';
+  },
+  renderPeople(){
+    document.getElementById('pp_count').textContent = STATE.people.length + ' जना दर्ता भएका';
+    const classSel = document.getElementById('pp_filterClass');
+    if(classSel.options.length<=1){
+      classSel.innerHTML = '<option value="">सबै</option>'+STATE.settings.classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+    }
+    const role = document.getElementById('pp_filterRole').value;
+    const cls = document.getElementById('pp_filterClass').value;
+    const q = document.getElementById('pp_search').value.toLowerCase();
+    let list = STATE.people.filter(p=>{
+      if(role && p.role!==role) return false;
+      if(cls && p.class!==cls) return false;
+      if(q && !p.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    const grid = document.getElementById('pp_grid');
+    if(!list.length){ grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="em">🗂️</div>कोही फेला परेन</div>'; return; }
+    grid.innerHTML = list.map(p=>`
+      <div class="person-card">
+        <img src="${p.photo}">
+        <div class="nm">${p.name}</div>
+        <div class="rl">${ROLE_LABEL[p.role]} ${p.class?('· '+p.class+(p.section?'-'+p.section:'')):''}</div>
+        <div style="display:flex; gap:6px; justify-content:center; margin-top:8px;">
+          <button class="btn btn-ghost btn-sm" style="padding:5px 8px;" onclick="AdminUI.viewPerson(${p.id})">हेर्नुहोस्</button>
+          <button class="btn btn-ghost btn-sm" style="padding:5px 8px; color:var(--red);" onclick="AdminUI.deletePerson(${p.id})">मेटाउनुहोस्</button>
+        </div>
+      </div>`).join('');
+  },
+  viewPerson(id){
+    document.getElementById('id_person').value = id;
+    AdminUI.tab('idcards');
+    IDCards.render();
+  },
+  async deletePerson(id){
+    if(id===STATE.school.headmasterId){ toast('प्रधानाध्यापकलाई मेटाउन मिल्दैन','error'); return; }
+    if(!confirm('साँच्चै मेटाउने हो? यससँग सम्बन्धित हाजिर रेकर्ड पनि हट्नेछ।')) return;
+    await dbDelete('people', id);
+    STATE.people = STATE.people.filter(p=>p.id!==id);
+    const attToRemove = STATE.attendance.filter(a=>a.personId===id);
+    for(const a of attToRemove){ await dbDelete('attendance', a.id); }
+    STATE.attendance = STATE.attendance.filter(a=>a.personId!==id);
+    toast('मेटाइयो','success');
+    AdminUI.renderPeople();
+  }
+};
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+/* =========================================================================
+   REGISTRATION
+   ========================================================================= */
+const Registration = {
+  tempPhoto:null,
+  async checkFace(dataUrl){
+    const msg = document.getElementById('rg_faceCheckMsg');
+    if(!STATE.faceModelsLoaded){ msg.textContent=''; return; }
+    msg.textContent = 'अनुहार जाँच हुँदैछ...';
+    const desc = await getFaceDescriptor(dataUrl);
+    if(!desc){ msg.textContent = '⚠️ अनुहार फेला परेन, फेरि स्पष्ट फोटो खिच्नुहोस्।'; msg.style.color='var(--red)'; }
+    else { msg.textContent = '✓ अनुहार पहिचान भयो, हाजिरका लागि तयार।'; msg.style.color='var(--green)'; }
+    Registration.tempDescriptor = desc;
+  },
+  async save(){
+    const role = document.getElementById('rg_role').value;
+    const name = document.getElementById('rg_name').value.trim();
+    const cls = document.getElementById('rg_class').value;
+    const sec = document.getElementById('rg_section').value;
+    const phone = document.getElementById('rg_phone').value.trim();
+    if(!name){ toast('नाम लेख्नुहोस्','error'); return; }
+    if(!Registration.tempPhoto){ toast('फोटो खिच्नुहोस्','error'); return; }
+    let descriptor = Registration.tempDescriptor;
+    if(descriptor===undefined) descriptor = await getFaceDescriptor(Registration.tempPhoto);
+
+    const person = {
+      role, name, class:cls, section:sec, phone,
+      photo: Registration.tempPhoto, descriptor,
+      uid: genUID(role==='student'?'ST':role==='teacher'?'TC':'HD'),
+      createdAt: new Date().toISOString()
+    };
+    const id = await dbPut('people', person);
+    person.id = id;
+    STATE.people.push(person);
+    toast('दर्ता सफल भयो!','success');
+    Registration.reset();
+  },
+  reset(){
+    document.getElementById('rg_name').value='';
+    document.getElementById('rg_phone').value='';
+    document.getElementById('rg_photoPreview').classList.add('hidden');
+    document.getElementById('rg_camPlaceholder').classList.remove('hidden');
+    document.getElementById('rg_faceCheckMsg').textContent='';
+    Registration.tempPhoto=null; Registration.tempDescriptor=undefined;
+  }
+};
+
+/* =========================================================================
+   ID CARDS
+   ========================================================================= */
+const IDCards = {
+  init(){
+    const sel = document.getElementById('id_person');
+    sel.innerHTML = STATE.people.map(p=>`<option value="${p.id}">${p.name} — ${ROLE_LABEL[p.role]}${p.class?(' '+p.class):''}</option>`).join('');
+    IDCards.render();
+  },
+  render(){
+    const id = parseInt(document.getElementById('id_person').value);
+    const p = STATE.people.find(pp=>pp.id===id);
+    const holder = document.getElementById('id_cardHolder');
+    if(!p){ holder.innerHTML=''; return; }
+    holder.innerHTML = `
+      <div class="idcard" id="theIdCard">
+        <div class="head">
+          <div class="snm">${STATE.school.name}</div>
+          <div class="saddr">${STATE.school.address||''}</div>
+        </div>
+        <div class="photo-wrap"><img src="${p.photo}"></div>
+        <div class="body">
+          <div class="pname">${p.name}</div>
+          <div class="prole">${ROLE_LABEL[p.role]}</div>
+          <div class="meta-row">
+            ${p.class?`<div>कक्षा<b>${p.class}${p.section?'-'+p.section:''}</b></div>`:''}
+            <div>फोन<b>${p.phone||'-'}</b></div>
+          </div>
+          <div class="qr-wrap">
+            <canvas id="idcard_qr"></canvas>
+            <div class="uid">ID:<br>${p.uid}</div>
+          </div>
+        </div>
+        <div class="foot">यो कार्ड विद्यालयको सम्पत्ति हो · हराए फिर्ता गर्नुहोस्</div>
+      </div>`;
+    QRCode.toCanvas(document.getElementById('idcard_qr'), p.uid, {width:130, margin:1, color:{dark:'#5A0D1F', light:'#ffffff'}});
+  },
+  printCurrent(){
+    const card = document.getElementById('theIdCard');
+    if(!card) return;
+    document.getElementById('printArea').innerHTML = card.outerHTML;
+    window.print();
+  },
+  downloadCurrent(){
+    toast('टिप: प्रिन्ट विन्डोबाट "Save as PDF" गरेर पनि सुरक्षित गर्न सकिन्छ। PNG डाउनलोडका लागि स्क्रिनसट सिफारिस गरिन्छ।','');
+    IDCards.printCurrent();
+  }
+};
+
+/* =========================================================================
+   KIOSK — QR + FACE ATTENDANCE
+   ========================================================================= */
+const Kiosk = {
+  async start(){
+    if(KIOSK.running) return;
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:KIOSK.facing}, audio:false});
+      KIOSK.stream = stream;
+      const video = document.getElementById('ks_video');
+      video.srcObject = stream;
+      KIOSK.running = true;
+      Kiosk.setStatus('QR कोड देखाउनुहोस्','कार्डको QR क्यामेरा अगाडि राख्नुहोस्');
+      KIOSK.loopHandle = setInterval(Kiosk.scanLoop, 350);
+    }catch(err){
+      Kiosk.setStatus('क्यामेरा उपलब्ध छैन', err.message);
+    }
+  },
+  stop(){
+    if(KIOSK.loopHandle){ clearInterval(KIOSK.loopHandle); KIOSK.loopHandle=null; }
+    if(KIOSK.stream){ KIOSK.stream.getTracks().forEach(t=>t.stop()); KIOSK.stream=null; }
+    KIOSK.running=false;
+  },
+  async switchCam(){
+    KIOSK.facing = KIOSK.facing==='environment' ? 'user' : 'environment';
+    Kiosk.stop();
+    Kiosk.start();
+  },
+  setStatus(big,small){
+    document.getElementById('ks_bigStatus').textContent = big;
+    document.getElementById('ks_smallStatus').textContent = small;
+  },
+  scanLoop(){
+    if(KIOSK.busy) return;
+    const video = document.getElementById('ks_video');
+    const canvas = document.getElementById('ks_canvas');
+    if(!video.videoWidth) return;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const code = jsQR(imgData.data, imgData.width, imgData.height);
+    if(code && code.data){
+      const uid = code.data.trim();
+      const now = Date.now();
+      if(now - KIOSK.lastScanTs < 4000) return;
+      KIOSK.lastScanTs = now;
+      Kiosk.handleUID(uid);
+    }
+  },
+  manualEntry(){
+    const uid = prompt('व्यक्तिको ID लेख्नुहोस्:');
+    if(uid) Kiosk.handleUID(uid.trim());
+  },
+  async handleUID(uid){
+    const person = STATE.people.find(p=>p.uid===uid);
+    if(!person){
+      Kiosk.flashResult('err','❌','फेला परेन','यो QR कोड कुनै दर्ता भएको व्यक्तिसँग मिलेन');
       return;
     }
-    statusEl.textContent = '✅ अनुहार भेटियो — पहिचान गर्दै...';
-    statusEl.className = 'face-status detected';
+    KIOSK.busy = true;
+    Kiosk.setStatus('पहिचान हुँदैछ...', person.name);
 
-    const box = detection.detection.box;
-    const scaleX = overlay.width / video.videoWidth, scaleY = overlay.height / video.videoHeight;
-    ctx.strokeStyle = '#F2B705'; ctx.lineWidth = 3;
-    ctx.strokeRect(box.x*scaleX, box.y*scaleY, box.width*scaleX, box.height*scaleY);
-
-    // Match against enrolled persons
-    let best = null, bestDist = 999;
-    for(const p of personsCache){
-      if(!p.faceDescriptor) continue;
-      const dist = faceapi.euclideanDistance(detection.descriptor, p.faceDescriptor);
-      if(dist < bestDist){ bestDist = dist; best = p; }
+    if(STATE.settings.faceAttendanceEnabled && STATE.faceModelsLoaded && person.descriptor){
+      const liveDesc = await Kiosk.captureLiveFace();
+      if(!liveDesc){
+        Kiosk.flashResult('warn','⚠️','अनुहार भेटिएन','कृपया क्यामेरा तिर सीधा हेर्नुहोस् र फेरि स्क्यान गर्नुहोस्');
+        KIOSK.busy=false; return;
+      }
+      const dist = euclideanDist(liveDesc, person.descriptor);
+      if(dist > 0.55){
+        Kiosk.flashResult('err','❌','अनुहार मिलेन', person.name+'को QR हो तर अनुहार मिलेन');
+        KIOSK.busy=false; return;
+      }
     }
-    if(best && bestDist < 0.55){
-      statusEl.textContent = `🙂 पहिचान भयो: ${best.name}`;
-      statusEl.className = 'face-status matched';
-      const lastMark = scanDebounce[best.id] || 0;
-      if(Date.now() - lastMark > 8000){
-        scanDebounce[best.id] = Date.now();
-        const res = await markAttendance(best.id, 'face');
-        if(res.status==='marked'){
-          resultBox.textContent = `✅ ${best.name} — हाजिरी लाग्यो (${res.record.time})`;
-          resultBox.className = 'scan-result show ok';
-          showToast('हाजिरी सफलतापूर्वक लाग्यो ✅');
-          renderDashboard();
-        }else{
-          resultBox.textContent = `⚠️ ${best.name} — आजको हाजिरी पहिले नै लागिसकेको छ`;
-          resultBox.className = 'scan-result show dup';
+    Kiosk.markAttendance(person);
+  },
+  captureLiveFace(){
+    return new Promise(async (resolve)=>{
+      const video = document.getElementById('ks_video');
+      const canvas = document.getElementById('ks_canvas');
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video,0,0);
+      const dataUrl = canvas.toDataURL('image/jpeg',0.85);
+      const desc = await getFaceDescriptor(dataUrl);
+      resolve(desc);
+    });
+  },
+  async markAttendance(person){
+    const now = new Date();
+    const date = todayStr();
+    const timeStr = now.toTimeString().slice(0,5);
+    const dow = now.getDay();
+
+    if(dow === parseInt(STATE.settings.weeklyOff) || STATE.settings.holidays.includes(date)){
+      Kiosk.flashResult('warn','📅','आज बिदा','आज विद्यालय बिदा भएकोले हाजिर लाग्दैन');
+      KIOSK.busy=false; return;
+    }
+    const already = STATE.attendance.find(a=>a.personId===person.id && a.date===date);
+    if(already){
+      const stLabel = already.status==='H' ? 'हाफ (H)' : 'पूरा (P)';
+      const sessLabel = already.session==='morning' ? 'बिहान' : (already.session==='midday' ? 'दिउँसो' : 'साँझ');
+      Kiosk.flashResult('warn','ℹ️','पहिल्यै हाजिर लागेको', person.name+'को आजको हाजिर पहिल्यै लागिसकेको छ — '+stLabel+', '+sessLabel+' '+already.time);
+      KIOSK.busy=false; return;
+    }
+    const {morningStart,morningEnd,middayEnd,afternoonStart,afternoonEnd} = STATE.settings;
+    let session=null, status=null;
+    if(timeStr<morningStart){
+      Kiosk.flashResult('warn','⏰','अझै समय भएको छैन','हाजिर समय सुरु हुन बाँकी छ'); KIOSK.busy=false; return;
+    } else if(timeStr>=morningStart && timeStr<=morningEnd){
+      session='morning'; status='P';
+    } else if(timeStr>morningEnd && timeStr<=middayEnd){
+      session='midday'; status='H';
+    } else if(timeStr>middayEnd && timeStr<afternoonStart){
+      Kiosk.flashResult('warn','⏳','हाजिर अस्थायी रूपमा बन्द','दिउँसोको समय सकियो। साँझको हाजिर '+afternoonStart+' बजेपछि मात्र खुल्नेछ'); KIOSK.busy=false; return;
+    } else if(timeStr>=afternoonStart && timeStr<=afternoonEnd){
+      session='evening'; status='H';
+    } else {
+      Kiosk.flashResult('err','⏰','हाजिर समय सकियो','आजको लागि हाजिर लगाउने समय समाप्त भएको छ'); KIOSK.busy=false; return;
+    }
+
+    const record = {personId:person.id, date, session, time:timeStr, status};
+    const id = await dbPut('attendance', record);
+    record.id=id;
+    STATE.attendance.push(record);
+
+    const statusLine = status==='P' ? 'पूरा (P) हाजिर लाग्यो' : 'हाफ (H) हाजिर लाग्यो — ढिलो/साँझको प्रवेश';
+    Kiosk.flashResult(status==='P'?'ok':'warn', status==='P'?'✓':'½', person.name, `${ROLE_LABEL[person.role]} ${person.class?('· '+person.class+(person.section?'-'+person.section:'')):''}<br>${statusLine} — ${timeStr}`, person.photo);
+    KIOSK.busy=false;
+  },
+  flashResult(type, badge, title, sub, photo){
+    const overlay = document.getElementById('resultFlash');
+    const inner = document.getElementById('resultCardInner');
+    inner.innerHTML = `
+      ${photo?`<img src="${photo}">`:''}
+      <div class="result-badge ${type==='ok'?'ok':(type==='err'?'err':'warn')}">${badge}</div>
+      <div style="font-family:var(--font-display); font-weight:700; font-size:19px;">${title}</div>
+      <div style="font-size:13px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">${sub}</div>
+    `;
+    overlay.classList.remove('hidden');
+    setTimeout(()=>{ overlay.classList.add('hidden'); Kiosk.setStatus('QR कोड देखाउनुहोस्','कार्डको QR क्यामेरा अगाडि राख्नुहोस्'); }, 2600);
+  }
+};
+
+/* =========================================================================
+   REPORTS
+   ========================================================================= */
+const Reports = {
+  init(){
+    const classSel = document.getElementById('rp_class');
+    classSel.innerHTML = STATE.settings.classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+    const personSel = document.getElementById('rp_person');
+    personSel.innerHTML = STATE.people.map(p=>`<option value="${p.id}">${p.name} (${ROLE_LABEL[p.role]})</option>`).join('');
+    const yearSel = document.getElementById('rp_year');
+    const curYear = new Date().getFullYear();
+    yearSel.innerHTML = [curYear-1,curYear,curYear+1].map(y=>`<option value="${y}" ${y===curYear?'selected':''}>${y}</option>`).join('');
+    const monthSel = document.getElementById('rp_month');
+    monthSel.innerHTML = NEP_MONTHS.map((m,i)=>`<option value="${i}" ${i===new Date().getMonth()?'selected':''}>${m}</option>`).join('');
+    document.getElementById('rp_scope').onchange = ()=>{
+      const scope = document.getElementById('rp_scope').value;
+      document.getElementById('rp_classField').style.display = scope==='class'?'block':'none';
+      document.getElementById('rp_personField').style.display = scope==='person'?'block':'none';
+      Reports.render();
+    };
+    Reports.render();
+  },
+  getPeopleForScope(){
+    const scope = document.getElementById('rp_scope').value;
+    if(scope==='class'){
+      const cls = document.getElementById('rp_class').value;
+      return STATE.people.filter(p=>p.role==='student' && p.class===cls);
+    }
+    if(scope==='person'){
+      const id = parseInt(document.getElementById('rp_person').value);
+      return STATE.people.filter(p=>p.id===id);
+    }
+    return STATE.people.filter(p=>p.role==='teacher' || p.role==='head');
+  },
+  daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); },
+  isHolidayDate(dateStr){
+    const d = new Date(dateStr);
+    return d.getDay()===parseInt(STATE.settings.weeklyOff) || STATE.settings.holidays.includes(dateStr);
+  },
+  statusFor(personId, dateStr){
+    if(Reports.isHolidayDate(dateStr)) return 'O';
+    const rec = STATE.attendance.find(a=>a.personId===personId && a.date===dateStr);
+    if(rec) return rec.status==='H' ? 'H' : 'P';
+    const today = todayStr();
+    if(dateStr > today) return '';
+    return 'A';
+  },
+  render(){
+    const year = parseInt(document.getElementById('rp_year').value);
+    const month = parseInt(document.getElementById('rp_month').value);
+    const people = Reports.getPeopleForScope();
+    const days = Reports.daysInMonth(year, month);
+
+    let totalP=0, totalH=0, totalA=0, totalO=0;
+    let head = '<thead><tr><th>नाम</th>';
+    for(let d=1; d<=days; d++) head += `<th>${d}</th>`;
+    head += '<th>जम्मा उपस्थित</th></tr></thead>';
+    let body = '<tbody>';
+    people.forEach(p=>{
+      body += `<tr><td><b>${p.name}</b>${p.class?(' <span style="color:var(--ink-soft);font-size:11px;">'+p.class+(p.section?'-'+p.section:'')+'</span>'):''}</td>`;
+      let pCount=0, hCount=0;
+      for(let d=1; d<=days; d++){
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const st = Reports.statusFor(p.id, dateStr);
+        if(st==='P'){pCount++; totalP++;}
+        if(st==='H'){hCount++; totalH++;}
+        if(st==='A') totalA++;
+        if(st==='O') totalO++;
+        body += `<td><span class="badge ${st.toLowerCase()||''}">${st}</span></td>`;
+      }
+      body += `<td><b>${(pCount+hCount*0.5)}/${days}</b> <span style="color:var(--ink-soft); font-size:11px;">(P:${pCount} H:${hCount})</span></td></tr>`;
+    });
+    body += '</tbody>';
+    document.getElementById('rp_table').innerHTML = head+body;
+    document.getElementById('rp_stats').innerHTML = `
+      <div class="stat-box"><div class="num">${people.length}</div><div class="lbl">व्यक्ति संख्या</div></div>
+      <div class="stat-box"><div class="num">${totalP}</div><div class="lbl">कुल पूरा हाजिर (P)</div></div>
+      <div class="stat-box"><div class="num">${totalH}</div><div class="lbl">कुल हाफ हाजिर (H)</div></div>
+      <div class="stat-box"><div class="num">${totalA}</div><div class="lbl">कुल अनुपस्थित (A)</div></div>
+      <div class="stat-box"><div class="num">${totalO}</div><div class="lbl">बिदा दिनहरू (O)</div></div>
+    `;
+  },
+  exportMonth(){
+    const year = parseInt(document.getElementById('rp_year').value);
+    const month = parseInt(document.getElementById('rp_month').value);
+    const people = Reports.getPeopleForScope();
+    const days = Reports.daysInMonth(year, month);
+    Reports.buildExcel(people, year, [month], `${STATE.school.name}_${NEP_MONTHS[month]}_${year}_हाजिर.xlsx`);
+  },
+  exportYear(){
+    const year = parseInt(document.getElementById('rp_year').value);
+    const people = Reports.getPeopleForScope();
+    const months = [...Array(12).keys()];
+    Reports.buildExcel(people, year, months, `${STATE.school.name}_${year}_वार्षिक_हाजिर.xlsx`);
+  },
+  buildExcel(people, year, months, filename){
+    const wb = XLSX.utils.book_new();
+    const maroon = { fgColor:{rgb:"7A1229"} };
+    const gold = { fgColor:{rgb:"F0D28C"} };
+    const redFill = { fgColor:{rgb:"FBEAEA"} };
+    const greenFill = { fgColor:{rgb:"E7F5EC"} };
+    const headerFont = { bold:true, color:{rgb:"FFFFFF"}, sz:12 };
+    const titleFont = { bold:true, color:{rgb:"5A0D1F"}, sz:16 };
+    const thinBorder = { top:{style:"thin",color:{rgb:"D0C6A8"}}, bottom:{style:"thin",color:{rgb:"D0C6A8"}}, left:{style:"thin",color:{rgb:"D0C6A8"}}, right:{style:"thin",color:{rgb:"D0C6A8"}} };
+
+    months.forEach(month=>{
+      const days = Reports.daysInMonth(year, month);
+      const aoa = [];
+      aoa.push([STATE.school.name]);
+      aoa.push([`हाजिर विवरण — ${NEP_MONTHS[month]} ${year}`]);
+      aoa.push([]);
+      const headerRow = ['नाम / कक्षा'];
+      for(let d=1; d<=days; d++) headerRow.push(d);
+      headerRow.push('जम्मा (P)','जम्मा (H)','जम्मा (A)','जम्मा (O)','जम्मा अंक');
+      aoa.push(headerRow);
+      people.forEach(p=>{
+        const row = [p.name + (p.class?(' ('+p.class+(p.section?'-'+p.section:'')+')'):'')];
+        let pC=0,hC=0,aC=0,oC=0;
+        for(let d=1; d<=days; d++){
+          const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const st = Reports.statusFor(p.id, dateStr);
+          if(st==='P') pC++; if(st==='H') hC++; if(st==='A') aC++; if(st==='O') oC++;
+          row.push(st);
+        }
+        row.push(pC,hC,aC,oC,(pC+hC*0.5));
+        aoa.push(row);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{wch:26}, ...Array(days).fill({wch:4}), {wch:8},{wch:8},{wch:8},{wch:8},{wch:9}];
+      const lastCol = days + 5;
+      ws['!merges'] = [
+        {s:{r:0,c:0}, e:{r:0,c:lastCol}},
+        {s:{r:1,c:0}, e:{r:1,c:lastCol}}
+      ];
+      ws['A1'].s = { font:titleFont, alignment:{horizontal:"center"} };
+      ws['A2'].s = { font:{italic:true,color:{rgb:"6B6470"}}, alignment:{horizontal:"center"} };
+
+      const headerRowIdx = 3;
+      for(let c=0;c<headerRow.length;c++){
+        const cellRef = XLSX.utils.encode_cell({r:headerRowIdx, c});
+        if(ws[cellRef]) ws[cellRef].s = { font:headerFont, fill:maroon, alignment:{horizontal:"center"}, border:thinBorder };
+      }
+      for(let r=4; r<aoa.length; r++){
+        for(let c=0; c<headerRow.length; c++){
+          const cellRef = XLSX.utils.encode_cell({r,c});
+          const cell = ws[cellRef];
+          if(!cell) continue;
+          let style = { border:thinBorder, alignment:{horizontal:c===0?"left":"center"} };
+          if(c>0 && c<=days){
+            if(cell.v==='P') style.fill = greenFill;
+            else if(cell.v==='H') style.fill = { fgColor:{rgb:"FDF0DC"} };
+            else if(cell.v==='A') style.fill = redFill;
+            else if(cell.v==='O') style.fill = { fgColor:{rgb:"F6D5D5"} };
+          }
+          if(c===0) style.font = {bold:true};
+          cell.s = style;
         }
       }
-    }
-  }, 700); // fast polling for low detection delay
-}
-
-/* =====================================================================
-   14. FACE LOCK (login unlock via face) & SETTINGS
-   ===================================================================== */
-async function refreshFaceLockButton(){
-  const btn = document.getElementById('facelock-toggle-btn');
-  btn.textContent = currentOrg.faceLockEnabled ? '✅ फेस लक सक्रिय (निष्क्रिय गर्न थिच्नुहोस्)' : '🔓 फेस लक निष्क्रिय (सक्रिय गर्न थिच्नुहोस्)';
-}
-async function toggleFaceLock(){
-  currentOrg.faceLockEnabled = !currentOrg.faceLockEnabled;
-  await dbPut('org', currentOrg);
-  refreshFaceLockButton();
-  showToast(currentOrg.faceLockEnabled ? 'फेस लक सक्रिय गरियो' : 'फेस लक निष्क्रिय गरियो');
-}
-function renderSettingsView(){
-  const cat = getCategory(currentOrg.category);
-  document.getElementById('settings-org-info').innerHTML = `
-    <b>संस्था:</b> ${currentOrg.orgName}<br>
-    <b>प्रकार:</b> ${cat.ico} ${cat.label}<br>
-    <b>प्रयोगकर्ता नाम:</b> ${currentOrg.id}`;
-  refreshFaceLockButton();
-}
-
-/* Face-lock login flow (from the auth screen, before a session exists) */
-async function startFaceLoginFlow(){
-  openModal('facelogin-modal');
-  const statusEl = document.getElementById('facelogin-status');
-  statusEl.textContent = 'मोडेल लोड हुँदैछ...';
-  const ok = await loadFaceApiModels();
-  if(!ok){ statusEl.textContent = '❌ मोडेल लोड भएन।'; return; }
-
-  await startCamera('facelogin-video','user');
-  faceLoginStream = document.getElementById('facelogin-video').srcObject;
-  statusEl.textContent = '🔍 अनुहार खोज्दैछ...';
-
-  // Gather all orgs' persons that have faceLockEnabled + descriptors
-  const allOrgs = await dbGetAll('org');
-  const lockEnabledOrgs = allOrgs.filter(o=>o.faceLockEnabled);
-  let candidatePersons = [];
-  for(const o of lockEnabledOrgs){
-    const ps = await dbGetAll('persons','orgId', o.id);
-    ps.forEach(p=> candidatePersons.push({...p, __org:o}));
+      const sheetName = (NEP_MONTHS[month]+' '+year).slice(0,31);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+    XLSX.writeFile(wb, filename);
+    toast('Excel फाइल डाउनलोड भयो','success');
   }
+};
 
-  const video = document.getElementById('facelogin-video');
-  const overlay = document.getElementById('facelogin-overlay');
-  faceLoginInterval = setInterval(async ()=>{
-    if(!video.srcObject) return;
-    const detection = await faceapi.detectSingleFace(video, fastDetectorOptions())
-      .withFaceLandmarks(true).withFaceDescriptor();
-    const ctx = overlay.getContext('2d');
-    overlay.width = video.clientWidth; overlay.height = video.clientHeight;
-    ctx.clearRect(0,0,overlay.width, overlay.height);
-    if(!detection) return;
-
-    let best=null, bestDist=999;
-    for(const p of candidatePersons){
-      if(!p.faceDescriptor) continue;
-      const dist = faceapi.euclideanDistance(detection.descriptor, p.faceDescriptor);
-      if(dist<bestDist){ bestDist=dist; best=p; }
-    }
-    if(best && bestDist < 0.5){
-      statusEl.textContent = `✅ पहिचान भयो: ${best.name} — खोल्दैछ...`;
-      clearInterval(faceLoginInterval); faceLoginInterval=null;
-      setTimeout(async ()=>{
-        closeFaceLoginModal();
-        await enterApp(best.__org);
-      }, 600);
-    }
-  }, 700);
-}
-function closeFaceLoginModal(){
-  closeModal('facelogin-modal');
-  stopStreamOnVideo('facelogin-video');
-  if(faceLoginInterval){ clearInterval(faceLoginInterval); faceLoginInterval=null; }
-}
-
-/* =====================================================================
-   15. REPORTS + EXCEL EXPORT
-   ===================================================================== */
-function populateReportSelectors(){
-  const monthSel = document.getElementById('report-month');
-  const yearSel = document.getElementById('report-year');
-  const now = new Date();
-  monthSel.innerHTML = NEPALI_MONTHS.map((m,i)=>`<option value="${i}" ${i===now.getMonth()?'selected':''}>${m}</option>`).join('');
-  const years = [now.getFullYear()-1, now.getFullYear(), now.getFullYear()+1];
-  yearSel.innerHTML = years.map(y=>`<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}</option>`).join('');
-}
-function daysInMonth(year, monthIdx){ return new Date(year, monthIdx+1, 0).getDate(); }
-
-async function renderReportTable(){
-  const cat = getCategory(currentOrg.category);
-  const month = parseInt(document.getElementById('report-month').value);
-  const year = parseInt(document.getElementById('report-year').value);
-  const numDays = daysInMonth(year, month);
-  const allAttendance = await dbGetAll('attendance','orgId', currentOrg.id);
-
-  const table = document.getElementById('report-table');
-  if(personsCache.length===0){
-    table.innerHTML = `<tr><td style="padding:24px;">कुनै डाटा उपलब्ध छैन।</td></tr>`;
-    return;
+/* =========================================================================
+   SETTINGS
+   ========================================================================= */
+const SettingsUI = {
+  tempLogo:null,
+  init(){
+    document.getElementById('st_schoolName').value = STATE.school.name;
+    document.getElementById('st_phone').value = STATE.school.phone||'';
+    document.getElementById('st_address').value = STATE.school.address||'';
+    document.getElementById('st_mStart').value = STATE.settings.morningStart;
+    document.getElementById('st_mEnd').value = STATE.settings.morningEnd;
+    document.getElementById('st_middayEnd').value = STATE.settings.middayEnd;
+    document.getElementById('st_aStart').value = STATE.settings.afternoonStart;
+    document.getElementById('st_aEnd').value = STATE.settings.afternoonEnd;
+    document.getElementById('st_weeklyOff').value = STATE.settings.weeklyOff;
+    document.getElementById('st_faceLockSwitch').classList.toggle('on', STATE.settings.faceLockEnabled);
+    document.getElementById('st_faceAttSwitch').classList.toggle('on', STATE.settings.faceAttendanceEnabled);
+    SettingsUI.renderChips();
+  },
+  renderChips(){
+    document.getElementById('st_classChips').innerHTML = STATE.settings.classes.map((c,i)=>`<div class="chip">${c}<button onclick="SettingsUI.removeClass(${i})">✕</button></div>`).join('');
+    document.getElementById('st_sectionChips').innerHTML = STATE.settings.sections.map((s,i)=>`<div class="chip">${s}<button onclick="SettingsUI.removeSection(${i})">✕</button></div>`).join('');
+    document.getElementById('st_holidayChips').innerHTML = STATE.settings.holidays.map((h,i)=>`<div class="chip gold">${h}<button onclick="SettingsUI.removeHoliday(${i})">✕</button></div>`).join('');
+  },
+  async saveSchool(){
+    STATE.school.name = document.getElementById('st_schoolName').value.trim();
+    STATE.school.phone = document.getElementById('st_phone').value.trim();
+    STATE.school.address = document.getElementById('st_address').value.trim();
+    if(SettingsUI.tempLogo) STATE.school.logo = SettingsUI.tempLogo;
+    await dbPut('config', STATE.school);
+    applyBranding();
+    toast('विद्यालय विवरण सुरक्षित भयो','success');
+  },
+  async addClass(){
+    const v = document.getElementById('st_newClass').value.trim();
+    if(!v) return;
+    if(!STATE.settings.classes.includes(v)) STATE.settings.classes.push(v);
+    document.getElementById('st_newClass').value='';
+    await dbPut('settings', STATE.settings);
+    SettingsUI.renderChips();
+  },
+  async removeClass(i){ STATE.settings.classes.splice(i,1); await dbPut('settings', STATE.settings); SettingsUI.renderChips(); },
+  async addSection(){
+    const v = document.getElementById('st_newSection').value.trim();
+    if(!v) return;
+    if(!STATE.settings.sections.includes(v)) STATE.settings.sections.push(v);
+    document.getElementById('st_newSection').value='';
+    await dbPut('settings', STATE.settings);
+    SettingsUI.renderChips();
+  },
+  async removeSection(i){ STATE.settings.sections.splice(i,1); await dbPut('settings', STATE.settings); SettingsUI.renderChips(); },
+  async saveTimes(){
+    STATE.settings.morningStart = document.getElementById('st_mStart').value;
+    STATE.settings.morningEnd = document.getElementById('st_mEnd').value;
+    STATE.settings.middayEnd = document.getElementById('st_middayEnd').value;
+    STATE.settings.afternoonStart = document.getElementById('st_aStart').value;
+    STATE.settings.afternoonEnd = document.getElementById('st_aEnd').value;
+    await dbPut('settings', STATE.settings);
+    toast('समय सुरक्षित भयो','success');
+  },
+  async addHoliday(){
+    const v = document.getElementById('st_newHoliday').value;
+    if(!v) return;
+    if(!STATE.settings.holidays.includes(v)) STATE.settings.holidays.push(v);
+    await dbPut('settings', STATE.settings);
+    SettingsUI.renderChips();
+  },
+  async removeHoliday(i){ STATE.settings.holidays.splice(i,1); await dbPut('settings', STATE.settings); SettingsUI.renderChips(); },
+  async saveWeeklyOff(){
+    STATE.settings.weeklyOff = parseInt(document.getElementById('st_weeklyOff').value);
+    await dbPut('settings', STATE.settings);
+    toast('साप्ताहिक बिदा सुरक्षित भयो','success');
+  },
+  async toggleFaceLock(){
+    STATE.settings.faceLockEnabled = !STATE.settings.faceLockEnabled;
+    await dbPut('settings', STATE.settings);
+    document.getElementById('st_faceLockSwitch').classList.toggle('on', STATE.settings.faceLockEnabled);
+  },
+  async toggleFaceAttendance(){
+    STATE.settings.faceAttendanceEnabled = !STATE.settings.faceAttendanceEnabled;
+    await dbPut('settings', STATE.settings);
+    document.getElementById('st_faceAttSwitch').classList.toggle('on', STATE.settings.faceAttendanceEnabled);
+  },
+  async changePassword(){
+    const p = document.getElementById('st_newPass').value;
+    if(!p || p.length<4){ toast('पासवर्ड कम्तीमा ४ अक्षरको हुनुपर्छ','error'); return; }
+    STATE.school.adminPassword = p;
+    await dbPut('config', STATE.school);
+    document.getElementById('st_newPass').value='';
+    toast('पासवर्ड परिवर्तन भयो','success');
   }
+};
 
-  let headerRow = `<tr><th class="name-col">${cat.personLabel} को नाम</th>`;
-  for(let d=1; d<=numDays; d++) headerRow += `<th>${d}</th>`;
-  headerRow += `<th>जम्मा उपस्थित</th></tr>`;
-
-  let bodyRows = '';
-  for(const p of personsCache){
-    let row = `<tr><td class="name-col">${p.name}</td>`;
-    let presentCount = 0;
-    for(let d=1; d<=numDays; d++){
-      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const rec = allAttendance.find(a=>a.personId===p.id && a.date===dateStr);
-      if(rec){
-        presentCount++;
-        const isLate = rec.time > LATE_THRESHOLD + ':00';
-        row += isLate ? `<td class="cell-l">L</td>` : `<td class="cell-p">P</td>`;
-      }else{
-        const isFuture = new Date(year, month, d) > new Date();
-        row += isFuture ? `<td>-</td>` : `<td class="cell-a">A</td>`;
-      }
-    }
-    row += `<td><b>${presentCount}/${numDays}</b></td></tr>`;
-    bodyRows += row;
+/* =========================================================================
+   DATA MANAGEMENT (backup/restore/reset)
+   ========================================================================= */
+const DataMgmt = {
+  async backup(){
+    const data = { school:STATE.school, settings:STATE.settings, people:STATE.people, attendance:STATE.attendance, exportedAt:new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+    saveAs(blob, `${STATE.school.name}_backup_${todayStr()}.json`);
+    toast('ब्याकअप डाउनलोड भयो','success');
+  },
+  restore(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async ()=>{
+      try{
+        const data = JSON.parse(reader.result);
+        if(!confirm('रिस्टोर गर्दा हालको सबै डाटा बदलिनेछ। अगाडि बढ्ने हो?')) return;
+        await dbClear('people'); await dbClear('attendance');
+        await dbPut('config', data.school);
+        await dbPut('settings', data.settings);
+        for(const p of data.people){ const {id, ...rest} = p; await dbPut('people', p.id?p:rest); }
+        for(const a of data.attendance){ const {id, ...rest} = a; await dbPut('attendance', a.id?a:rest); }
+        STATE.school = data.school; STATE.settings = data.settings;
+        STATE.people = await dbAll('people'); STATE.attendance = await dbAll('attendance');
+        applyBranding();
+        toast('डाटा रिस्टोर भयो','success');
+        AdminUI.tab('overview');
+      }catch(err){ toast('फाइल पढ्न सकिएन','error'); }
+    };
+    reader.readAsText(file);
+  },
+  async resetAll(){
+    if(!confirm('साँच्चै सबै डाटा (विद्यालय, व्यक्ति, हाजिर) मेटाउने हो? यो फिर्ता हुँदैन!')) return;
+    if(!confirm('निश्चित हुनुहुन्छ? यो कार्य अपरिवर्तनीय छ।')) return;
+    await dbClear('config'); await dbClear('settings'); await dbClear('people'); await dbClear('attendance');
+    location.reload();
   }
-  table.innerHTML = headerRow + bodyRows;
-}
-
-function exportReportExcel(){
-  const cat = getCategory(currentOrg.category);
-  const month = parseInt(document.getElementById('report-month').value);
-  const year = parseInt(document.getElementById('report-year').value);
-  const table = document.getElementById('report-table');
-  if(!table.innerHTML || personsCache.length===0){ return showToast('निर्यात गर्न डाटा छैन'); }
-
-  const wb = XLSX.utils.table_to_book(table, {sheet: 'Attendance'});
-  const fileName = `Attendance_${currentOrg.orgName}_${NEPALI_MONTHS[month]}_${year}.xlsx`;
-  XLSX.writeFile(wb, fileName);
-  showToast('Excel डाउनलोड सुरु भयो ⬇️');
-}
-
-/* =====================================================================
-   16. BOOTSTRAP — restore session if any, otherwise show auth screen
-   ===================================================================== */
-async function bootstrap(){
-  renderCategoryGrid();
-  await openDB();
-
-  const activeId = sessionStorage.getItem('hajir_active_org');
-  if(activeId){
-    const org = await dbGet('org', activeId);
-    if(org){ await enterApp(org); return; }
-  }
-}
-bootstrap();
-
-/* Stop cameras politely if tab is hidden, restart cleanly when shown again is left
-   to explicit navigation (goView) to avoid unexpected relights while user reads reports. */
-document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden){ stopAllCameras(); }
-});
+};
 </script>
 </body>
 </html>
