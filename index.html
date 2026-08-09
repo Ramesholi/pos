@@ -3,1925 +3,1281 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>हिमाल विद्यालय हाजिर प्रणाली</title>
+<title>मेरो हाजिर — व्यक्तिगत उपस्थिति व्यवस्थापन</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
 :root{
-  --maroon:#83192A;
-  --maroon-dark:#5E1220;
-  --himal:#0B3D66;
-  --himal-deep:#082A47;
-  --ivory:#F7F1E6;
-  --paper:#FFFDF8;
-  --ink:#241C15;
-  --ink-soft:#5A5148;
-  --gold:#C79A3B;
-  --gold-soft:#E8D9B0;
-  --pine:#2F5D3A;
-  --pine-soft:#DDEBDD;
-  --rose:#A23B3B;
-  --rose-soft:#F4DEDE;
-  --amber:#B6812B;
-  --amber-soft:#F3E4C4;
-  --stone:#E7DFCE;
-  --stone-line:#D8CDB4;
-  --shadow: 0 10px 30px -12px rgba(36,28,21,0.28);
-  --radius: 14px;
-  --font-display:'Noto Serif Devanagari', serif;
-  --font-body:'Noto Sans Devanagari','Poppins',sans-serif;
-  --font-mono:'JetBrains Mono', monospace;
+  --sindoor:#A31621;
+  --sindoor-dark:#7A0F18;
+  --nepal-blue:#0B3D91;
+  --gold:#C9A227;
+  --gold-light:#E8C766;
+  --ivory:#FBF6EC;
+  --ivory-2:#F4EBD8;
+  --ink:#2A211C;
+  --ink-soft:#5B4F45;
+  --success:#3E7C4A;
+  --warning:#D9822B;
+  --danger:#A31621;
+  --card-radius:18px;
+  --shadow-1: 0 4px 18px rgba(42,33,28,.08);
+  --shadow-2: 0 12px 34px rgba(42,33,28,.16);
 }
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
-  font-family:var(--font-body);
-  background:var(--ivory);
+  font-family:'Noto Sans Devanagari','Segoe UI',sans-serif;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(201,162,39,.10), transparent 40%),
+    radial-gradient(circle at 88% 92%, rgba(163,22,33,.08), transparent 45%),
+    var(--ivory);
   color:var(--ink);
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
-::selection{background:var(--gold-soft);}
+h1,h2,h3,.display{font-family:'Yatra One','Noto Sans Devanagari',sans-serif; font-weight:400; letter-spacing:.3px;}
 button{font-family:inherit;cursor:pointer;}
 input,select,textarea{font-family:inherit;}
-a{color:inherit;}
+::selection{background:var(--gold-light);}
+
+/* ---------- utility ---------- */
 .hidden{display:none !important;}
-
-/* ---------- Himalayan skyline divider (signature motif) ---------- */
-.skyline{
-  width:100%; height:22px; display:block;
-  background: linear-gradient(180deg, transparent 0%, transparent 100%);
-}
-.skyline svg{width:100%;height:100%;display:block;}
-
-/* ---------- App shell ---------- */
-#app{min-height:100vh;display:flex;flex-direction:column;}
-.topbar{
-  background: linear-gradient(135deg,var(--himal-deep) 0%, var(--himal) 55%, var(--maroon-dark) 130%);
-  color:#fff; padding:14px 18px 26px; position:relative; overflow:hidden;
-}
-.topbar .row{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:2;}
-.brand{display:flex;align-items:center;gap:10px;}
-.brand-logo{width:42px;height:42px;border-radius:10px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;color:var(--himal-deep);font-size:18px;overflow:hidden;flex-shrink:0;}
-.brand-logo img{width:100%;height:100%;object-fit:cover;}
-.brand-text .school-name{font-family:var(--font-display);font-weight:700;font-size:16px;line-height:1.2;}
-.brand-text .school-sub{font-size:11px;opacity:.8;letter-spacing:.02em;}
-.top-actions{display:flex;gap:8px;}
-.icon-btn{
-  background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.25); color:#fff;
-  width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;
-  transition:.15s;
-}
-.icon-btn:active{transform:scale(.94); background:rgba(255,255,255,0.26);}
-.topbar-ridge{position:absolute;left:0;right:0;bottom:-1px;height:24px;z-index:1;}
-.topbar-ridge svg{width:100%;height:100%;display:block;}
-
-main{flex:1; padding:18px 16px 90px; max-width:1180px; width:100%; margin:0 auto;}
-
-/* ---------- Cards ---------- */
-.card{
-  background:var(--paper); border:1px solid var(--stone-line); border-radius:var(--radius);
-  padding:18px; box-shadow:var(--shadow); margin-bottom:16px;
-}
-.card-title{font-family:var(--font-display);font-weight:700;font-size:17px;margin:0 0 4px;color:var(--maroon-dark);}
-.card-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
-.section-eyebrow{
-  font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold);
-  font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:6px;
-}
-.section-eyebrow::before{content:"";width:16px;height:2px;background:var(--gold);display:inline-block;}
-
-.grid{display:grid; gap:14px;}
-.grid-2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
-.grid-3{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
-.grid-4{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
-
-/* ---------- Buttons ---------- */
+.screen{display:none;}
+.screen.active{display:block;}
+.container{max-width:1080px;margin:0 auto;padding:0 18px;}
 .btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:11px 18px; border-radius:10px; border:none; font-weight:600; font-size:14px;
-  transition:.15s; text-decoration:none;
+  border:none;border-radius:12px;padding:12px 20px;font-size:15px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease, background .2s ease;
 }
 .btn:active{transform:scale(.97);}
-.btn-primary{background:var(--maroon); color:#fff;}
-.btn-primary:hover{background:var(--maroon-dark);}
-.btn-himal{background:var(--himal); color:#fff;}
-.btn-gold{background:var(--gold); color:var(--himal-deep);}
-.btn-outline{background:transparent; border:1.5px solid var(--stone-line); color:var(--ink);}
-.btn-outline:hover{border-color:var(--maroon);color:var(--maroon);}
-.btn-ghost{background:var(--stone); color:var(--ink);}
-.btn-danger{background:var(--rose); color:#fff;}
-.btn-sm{padding:7px 12px;font-size:12.5px;border-radius:8px;}
+.btn-primary{background:linear-gradient(135deg,var(--sindoor),var(--sindoor-dark));color:#fff;box-shadow:0 6px 16px rgba(163,22,33,.30);}
+.btn-primary:hover{box-shadow:0 8px 20px rgba(163,22,33,.4);}
+.btn-gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#3a2c05;box-shadow:0 6px 16px rgba(201,162,39,.30);}
+.btn-outline{background:transparent;border:2px solid var(--sindoor);color:var(--sindoor);}
+.btn-ghost{background:rgba(42,33,28,.06);color:var(--ink);}
+.btn-blue{background:linear-gradient(135deg,#124baf,var(--nepal-blue));color:#fff;box-shadow:0 6px 16px rgba(11,61,145,.28);}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:9px;}
 .btn-block{width:100%;}
-.btn:disabled{opacity:.5; cursor:not-allowed;}
-.btn-row{display:flex; gap:10px; flex-wrap:wrap;}
-
-/* ---------- Forms ---------- */
-.field{margin-bottom:14px;}
-.field label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;}
-.field input[type=text], .field input[type=number], .field input[type=password], .field input[type=date], .field input[type=time], .field select, .field textarea{
-  width:100%; padding:11px 12px; border-radius:9px; border:1.5px solid var(--stone-line); background:var(--paper);
-  font-size:14.5px; color:var(--ink); outline:none; transition:.15s;
+.btn-icon{width:40px;height:40px;padding:0;border-radius:10px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;border-radius:11px;border:1.5px solid #E3D6BE;background:#fff;
+  font-size:15px;color:var(--ink);outline:none;transition:border .15s;
 }
-.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--himal); box-shadow:0 0 0 3px rgba(11,61,102,0.12);}
-.field-row{display:flex; gap:10px;}
-.field-row > *{flex:1;}
-.hint{font-size:11.5px; color:var(--ink-soft); margin-top:5px;}
-.toggle-row{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--stone-line);}
-.toggle-row:last-child{border-bottom:none;}
-.toggle-label{font-size:14px; font-weight:600;}
-.toggle-desc{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
-.switch{position:relative; width:46px; height:26px; flex-shrink:0;}
-.switch input{opacity:0; width:0; height:0;}
-.slider{position:absolute;inset:0;background:var(--stone-line);border-radius:999px;transition:.2s;cursor:pointer;}
-.slider::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
-.switch input:checked + .slider{background:var(--pine);}
-.switch input:checked + .slider::before{transform:translateX(20px);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--sindoor);}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700;}
+.chip-present{background:#E5F3E7;color:var(--success);}
+.chip-late{background:#FBEBD9;color:var(--warning);}
+.chip-absent{background:#F8E3E3;color:var(--danger);}
+.card{background:#fff;border-radius:var(--card-radius);box-shadow:var(--shadow-1);padding:22px;}
 
-/* ---------- Badges / chips ---------- */
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;}
-.badge-pine{background:var(--pine-soft); color:var(--pine);}
-.badge-rose{background:var(--rose-soft); color:var(--rose);}
-.badge-amber{background:var(--amber-soft); color:var(--amber);}
-.badge-gold{background:var(--gold-soft); color:#7A5C1E;}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--stone);font-size:12.5px;font-weight:600;border:1px solid var(--stone-line);}
-.chip button{background:none;border:none;color:var(--rose);font-weight:800;padding:0;font-size:13px;}
+/* ---------- Nepali corner mandala motif ---------- */
+.mandala-corner{position:absolute;width:90px;height:90px;pointer-events:none;opacity:.5;}
+.mandala-corner svg{width:100%;height:100%;}
+.mandala-tl{top:-10px;left:-10px;}
+.mandala-br{bottom:-10px;right:-10px;transform:rotate(180deg);}
 
-/* ---------- Bottom nav ---------- */
-.bottom-nav{
-  position:fixed; bottom:0; left:0; right:0; background:var(--paper); border-top:1px solid var(--stone-line);
-  display:flex; z-index:50; box-shadow:0 -6px 20px rgba(36,28,21,0.08);
+/* ---------- AUTH SCREEN ---------- */
+#authScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 16px;
 }
-.nav-item{
-  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 2px 8px;
-  color:var(--ink-soft); background:none; border:none; font-size:10.5px; font-weight:600;
+.auth-wrap{width:100%;max-width:960px;display:grid;grid-template-columns:1.05fr 1fr;gap:0;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-2);}
+.auth-hero{
+  background:
+    linear-gradient(180deg, rgba(11,15,26,.35), rgba(11,15,26,.65)),
+    linear-gradient(135deg,var(--sindoor-dark),var(--sindoor) 55%, var(--gold) 130%);
+  color:#fff;padding:44px 38px;position:relative;overflow:hidden;
 }
-.nav-item .nav-ic{font-size:19px;}
-.nav-item.active{color:var(--maroon);}
-.nav-item.active .nav-ic{transform:translateY(-1px);}
-
-@media (min-width:860px){
-  .bottom-nav{
-    position:fixed; top:0; bottom:0; left:0; right:auto; width:220px; flex-direction:column;
-    border-top:none; border-right:1px solid var(--stone-line); padding-top:18px; align-items:stretch;
-  }
-  .nav-item{flex-direction:row; justify-content:flex-start; gap:12px; padding:13px 22px; font-size:14px; border-radius:0 999px 999px 0;}
-  .nav-item.active{background:var(--stone); }
-  #app{padding-left:220px;}
-  main{padding-top:18px;}
-  .topbar{display:none;}
-  .desktop-topbar{display:flex !important;}
+.auth-hero .pagoda-mark{width:64px;height:64px;margin-bottom:18px;}
+.auth-hero h1{font-size:34px;margin:0 0 6px;}
+.auth-hero p{font-size:14.5px;line-height:1.7;opacity:.92;max-width:320px;}
+.auth-hero .feat{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:13.5px;opacity:.95;}
+.auth-hero .feat b{display:block;font-size:14px;}
+.auth-panel{background:#fff;padding:40px 36px;position:relative;}
+.auth-tabs{display:flex;background:var(--ivory-2);border-radius:12px;padding:4px;margin-bottom:26px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:9px;font-weight:700;font-size:14.5px;background:none;border:none;color:var(--ink-soft);}
+.auth-tab.active{background:#fff;color:var(--sindoor);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.auth-form{display:none;}
+.auth-form.active{display:block;}
+.face-capture-box{
+  border:2px dashed #E3D6BE;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px;background:var(--ivory);
 }
-.desktop-topbar{display:none; align-items:center; justify-content:space-between; padding:16px 26px; background:var(--paper); border-bottom:1px solid var(--stone-line); position:sticky; top:0; z-index:40;}
+.cam-frame{position:relative;width:100%;max-width:260px;aspect-ratio:1/1;margin:0 auto 10px;border-radius:14px;overflow:hidden;background:#111;border:3px solid var(--gold);}
+.cam-frame video, .cam-frame canvas{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+.cam-frame.round{border-radius:50%;}
+.face-status{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-top:4px;}
+.face-status.ok{color:var(--success);}
+.face-status.bad{color:var(--danger);}
+.small-note{font-size:12px;color:var(--ink-soft);line-height:1.6;}
 
-/* ---------- Lock / Login screen ---------- */
-.lock-screen{
-  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
-  background: radial-gradient(circle at 50% -10%, #123a5c 0%, var(--himal-deep) 45%, var(--maroon-dark) 100%);
-  position:relative; overflow:hidden;
+/* ---------- PAGODA HEADER (signature) ---------- */
+.pagoda-header{
+  position:relative;background:linear-gradient(135deg,var(--sindoor-dark),var(--sindoor));
+  color:#fff;padding:16px 0 26px;
 }
-.lock-ridge{position:absolute; bottom:0; left:0; right:0;}
-.lock-ridge svg{width:100%;display:block;}
-.lock-card{
-  position:relative; z-index:3; background:var(--paper); border-radius:20px; padding:32px 26px;
-  width:100%; max-width:380px; box-shadow:0 30px 60px -20px rgba(0,0,0,0.55); text-align:center;
+.pagoda-header::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:16px;
+  background:var(--sindoor);
+  clip-path:polygon(0% 0%,4% 100%,8% 0%,12% 100%,16% 0%,20% 100%,24% 0%,28% 100%,32% 0%,36% 100%,40% 0%,44% 100%,48% 0%,52% 100%,56% 0%,60% 100%,64% 0%,68% 100%,72% 0%,76% 100%,80% 0%,84% 100%,88% 0%,92% 100%,96% 0%,100% 100%,100% 0%);
 }
-.lock-photo{
-  width:96px; height:96px; border-radius:50%; margin:0 auto 14px; border:4px solid var(--gold);
-  overflow:hidden; background:var(--stone); display:flex; align-items:center; justify-content:center; font-size:34px;
+.header-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .bell{width:34px;height:34px;transform-origin:top center;}
+.brand h1{font-size:21px;margin:0;color:#fff;}
+.brand small{display:block;font-size:11px;opacity:.85;font-weight:400;font-family:'Noto Sans Devanagari';}
+.user-pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);padding:6px 8px 6px 14px;border-radius:999px;}
+.user-pill .avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#3a2c05;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+.nav-tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 0 0;}
+.nav-tab{
+  background:rgba(255,255,255,.10);border:none;color:#fff;padding:9px 15px;border-radius:10px;
+  font-size:13.5px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:6px;
 }
-.lock-photo img{width:100%;height:100%;object-fit:cover;}
-.lock-school{font-family:var(--font-display); font-weight:700; font-size:19px; color:var(--maroon-dark); margin:0 0 2px;}
-.lock-hm{font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;}
+.nav-tab.active{background:#fff;color:var(--sindoor);}
 
-/* ---------- Camera / capture ---------- */
-.cam-wrap{position:relative; width:100%; aspect-ratio:4/3; background:#10151a; border-radius:14px; overflow:hidden; margin-bottom:10px;}
-.cam-wrap video, .cam-wrap canvas, .cam-wrap img.cam-preview{width:100%; height:100%; object-fit:cover; display:block;}
-.cam-overlay-frame{position:absolute; inset:10%; border:2.5px dashed rgba(255,255,255,0.55); border-radius:16px; pointer-events:none;}
-.cam-status{position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:center;}
-.cam-status span{background:rgba(0,0,0,0.55); color:#fff; font-size:12px; padding:6px 14px; border-radius:999px; font-weight:600;}
-.cam-controls{display:flex; gap:8px; justify-content:center;}
+main{padding:26px 0 100px;}
+.view{display:none;}
+.view.active{display:block;animation:fadein .35s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-/* ---------- ID card ---------- */
-.idcard{
-  width:100%; max-width:340px; margin:0 auto; border-radius:16px; overflow:hidden;
-  background:var(--paper); border:1px solid var(--stone-line); box-shadow:var(--shadow); position:relative;
+.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.section-title h2{font-size:22px;margin:0;}
+.section-title .sub{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+
+/* dashboard */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:16px;padding:18px;box-shadow:var(--shadow-1);position:relative;overflow:hidden;border-top:4px solid var(--gold);}
+.stat-card b{font-size:26px;display:block;}
+.stat-card span{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+.stat-card.blue{border-top-color:var(--nepal-blue);}
+.stat-card.red{border-top-color:var(--sindoor);}
+.stat-card.gold{border-top-color:var(--gold);}
+.today-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(120deg,#fff,var(--ivory-2));}
+.today-card .date-big{font-size:15px;font-weight:700;}
+.today-card .date-big .wd{color:var(--sindoor);}
+
+/* mark attendance */
+.mark-wrap{display:grid;grid-template-columns:340px 1fr;gap:22px;}
+@media(max-width:800px){.mark-wrap{grid-template-columns:1fr;}}
+.purpose-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.purpose-opt{padding:9px 14px;border-radius:10px;border:1.5px solid #E3D6BE;background:#fff;font-size:13.5px;font-weight:600;color:var(--ink-soft);}
+.purpose-opt.sel{border-color:var(--sindoor);background:#FBEAE9;color:var(--sindoor);}
+
+/* stamp overlay */
+#stampOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:999;background:rgba(42,33,28,.35);backdrop-filter:blur(2px);}
+.stamp{
+  width:190px;height:190px;border-radius:50%;border:6px solid var(--sindoor);color:var(--sindoor);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  transform:scale(2.6) rotate(-18deg);opacity:0;background:rgba(255,255,255,.9);
+  box-shadow:0 0 0 4px #fff inset, 0 14px 30px rgba(0,0,0,.25);
+  animation:stampDown .55s cubic-bezier(.2,1.4,.4,1) forwards;
 }
-.idcard-head{
-  background:linear-gradient(120deg,var(--himal-deep),var(--himal) 60%, var(--maroon-dark));
-  color:#fff; padding:14px 14px 30px; text-align:center; position:relative;
+.stamp b{font-size:20px;font-family:'Yatra One';}
+.stamp span{font-size:12px;font-weight:700;margin-top:4px;}
+@keyframes stampDown{
+  0%{transform:scale(2.6) rotate(-18deg);opacity:0;}
+  60%{transform:scale(.92) rotate(-8deg);opacity:1;}
+  80%{transform:scale(1.05) rotate(-10deg);}
+  100%{transform:scale(1) rotate(-9deg);opacity:1;}
 }
-.idcard-head .sname{font-family:var(--font-display); font-weight:700; font-size:15px;}
-.idcard-head .saddr{font-size:10px; opacity:.85;}
-.idcard-ridge{position:absolute; left:0; right:0; bottom:-1px;}
-.idcard-ridge svg{width:100%; display:block;}
-.idcard-body{padding:0 18px 18px; margin-top:-22px; text-align:center; position:relative; z-index:2;}
-.idcard-photo{width:88px; height:88px; border-radius:14px; border:4px solid var(--gold); overflow:hidden; margin:0 auto 8px; background:var(--stone);}
-.idcard-photo img{width:100%;height:100%;object-fit:cover;}
-.idcard-name{font-weight:700; font-size:16px;}
-.idcard-role{font-size:11px; color:var(--gold-soft); background:var(--himal-deep); display:inline-block; padding:2px 10px; border-radius:999px; margin-top:3px;}
-.idcard-meta{font-size:11.5px; color:var(--ink-soft); margin-top:8px; line-height:1.6;}
-.idcard-qr{margin:12px auto 4px; width:120px; height:120px; background:#fff; padding:6px; border-radius:10px; border:1px solid var(--stone-line);}
-.idcard-id{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft); letter-spacing:.05em;}
 
-/* ---------- Table ---------- */
-.table-wrap{overflow-x:auto; border-radius:10px; border:1px solid var(--stone-line);}
-table{width:100%; border-collapse:collapse; font-size:13px;}
-th,td{padding:9px 10px; text-align:center; border-bottom:1px solid var(--stone-line); white-space:nowrap;}
-th{background:var(--stone); font-weight:700; color:var(--maroon-dark); font-size:11.5px; text-transform:uppercase; letter-spacing:.02em;}
-tr:last-child td{border-bottom:none;}
-td.name-cell, th.name-cell{text-align:left; position:sticky; left:0; background:var(--paper); z-index:1;}
-th.name-cell{background:var(--stone);}
-.cell-p{color:var(--pine); font-weight:800;}
-.cell-pp{color:var(--pine); font-weight:800; background:var(--pine-soft);}
-.cell-h{color:var(--amber); font-weight:800;}
-.cell-a{color:var(--rose); font-weight:800;}
-.cell-hol{color:var(--rose); font-weight:800; background:var(--rose-soft);}
+/* records */
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center;}
+.filter-bar input,.filter-bar select{padding:9px 12px;border-radius:10px;border:1.5px solid #E3D6BE;font-size:13.5px;background:#fff;}
+table.rec-table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-1);}
+table.rec-table th{background:var(--ivory-2);text-align:left;font-size:12.5px;padding:12px 14px;color:var(--ink-soft);}
+table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9D6;}
+.row-actions{display:flex;gap:6px;}
+.rec-cards{display:none;flex-direction:column;gap:10px;}
+.rec-card{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow-1);}
+.rec-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+@media(max-width:720px){table.rec-table{display:none;}.rec-cards{display:flex;}}
 
-/* ---------- Empty / misc ---------- */
-.empty-state{text-align:center; padding:36px 16px; color:var(--ink-soft);}
-.empty-state .ic{font-size:38px; margin-bottom:8px;}
-.toast-wrap{position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; width:92%; max-width:420px;}
-.toast{
-  background:var(--ink); color:#fff; padding:12px 18px; border-radius:10px; font-size:13.5px; font-weight:600;
-  box-shadow:0 10px 25px rgba(0,0,0,.3); display:flex; align-items:center; gap:8px; animation:toastin .25s ease;
-  width:100%;
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(42,33,28,.45);display:none;align-items:center;justify-content:center;z-index:900;padding:16px;}
+.modal-bg.active{display:flex;}
+.modal{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow:auto;box-shadow:var(--shadow-2);}
+.modal h3{margin-top:0;}
+
+/* reports */
+.month-picker{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px;}
+.cal-head{font-size:11.5px;font-weight:700;text-align:center;color:var(--ink-soft);padding:4px 0;}
+.cal-cell{aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--ivory-2);color:var(--ink-soft);}
+.cal-cell.present{background:#E5F3E7;color:var(--success);}
+.cal-cell.late{background:#FBEBD9;color:var(--warning);}
+.cal-cell.off{background:#F1E4E4;color:#b98;opacity:.6;}
+.cal-cell.empty{background:transparent;}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:130px;margin-top:16px;}
+.bar{flex:1;background:linear-gradient(180deg,var(--gold-light),var(--gold));border-radius:4px 4px 0 0;min-height:3px;position:relative;}
+.bar.late{background:linear-gradient(180deg,#F3B871,var(--warning));}
+.bar.absent{background:#eee;}
+
+/* settings */
+.tag-list{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+.tag{display:flex;align-items:center;gap:6px;background:var(--ivory-2);padding:6px 10px 6px 14px;border-radius:999px;font-size:13px;font-weight:600;}
+.tag button{background:none;border:none;color:var(--sindoor);font-weight:800;cursor:pointer;font-size:14px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F1E9D6;}
+.switch{position:relative;width:46px;height:26px;background:#E3D6BE;border-radius:999px;cursor:pointer;transition:.2s;}
+.switch.on{background:var(--success);}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.switch.on::after{left:23px;}
+
+/* bottom nav mobile */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #EEE3CB;padding:8px 4px;z-index:80;box-shadow:0 -6px 18px rgba(0,0,0,.06);}
+.bottom-nav .bn-inner{display:flex;justify-content:space-around;}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--ink-soft);font-size:10.5px;font-weight:700;padding:4px 6px;}
+.bn-item.active{color:var(--sindoor);}
+.bn-item svg{width:20px;height:20px;}
+@media(max-width:720px){
+  .bottom-nav{display:block;}
+  .nav-tabs{display:none;}
+  main{padding-bottom:90px;}
 }
-.toast.success{background:var(--pine);}
-.toast.error{background:var(--rose);}
-.toast.warn{background:var(--amber);}
-@keyframes toastin{from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);}}
-
-.modal-bg{position:fixed; inset:0; background:rgba(20,15,10,0.55); z-index:150; display:flex; align-items:flex-end; justify-content:center;}
-.modal-box{background:var(--paper); border-radius:18px 18px 0 0; width:100%; max-width:520px; max-height:88vh; overflow-y:auto; padding:20px; animation:modalin .2s ease;}
-@keyframes modalin{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
-@media (min-width:640px){
-  .modal-bg{align-items:center;}
-  .modal-box{border-radius:18px;}
+@media(max-width:860px){
+  .auth-wrap{grid-template-columns:1fr;}
+  .auth-hero{display:none;}
 }
-.modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-.modal-head h3{font-family:var(--font-display); margin:0; color:var(--maroon-dark);}
-.close-x{background:var(--stone); border:none; width:32px; height:32px; border-radius:50%; font-size:16px;}
 
-.tabs{display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px;}
-.tab-btn{padding:8px 16px; border-radius:999px; border:1.5px solid var(--stone-line); background:var(--paper); font-size:13px; font-weight:600; white-space:nowrap; color:var(--ink-soft);}
-.tab-btn.active{background:var(--maroon); border-color:var(--maroon); color:#fff;}
+/* toast */
+#toastContainer{position:fixed;top:16px;right:16px;left:16px;z-index:1000;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;}
+.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-2);opacity:0;transform:translateY(-8px);animation:toastIn .3s forwards;max-width:320px;}
+.toast.err{background:var(--danger);}
+.toast.ok{background:var(--success);}
+@keyframes toastIn{to{opacity:1;transform:translateY(0);}}
 
-.list-row{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--stone-line);}
-.list-row:last-child{border-bottom:none;}
-.avatar{width:42px; height:42px; border-radius:10px; background:var(--stone); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--ink-soft);}
-.avatar img{width:100%; height:100%; object-fit:cover;}
-.list-main{flex:1; min-width:0;}
-.list-main .lname{font-weight:700; font-size:14px;}
-.list-main .lsub{font-size:11.5px; color:var(--ink-soft);}
-.list-actions{display:flex; gap:6px;}
-.icon-sm{background:var(--stone); border:none; width:32px; height:32px; border-radius:8px; font-size:13px;}
-.icon-sm.danger{background:var(--rose-soft); color:var(--rose);}
+.loader-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;animation:blink 1s infinite ease-in-out;}
+@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
 
-.stat-box{background:var(--paper); border:1px solid var(--stone-line); border-radius:12px; padding:14px; text-align:center;}
-.stat-box .num{font-family:var(--font-display); font-size:24px; font-weight:800; color:var(--maroon-dark);}
-.stat-box .lbl{font-size:11px; color:var(--ink-soft); margin-top:2px;}
-
-.big-clock{font-family:var(--font-mono); font-size:15px; text-align:center; color:var(--ink-soft); margin-bottom:2px;}
-.spinner{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite; display:inline-block;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-.searchbar{display:flex; gap:8px; margin-bottom:14px;}
-.searchbar input{flex:1;}
-
-textarea{resize:vertical; min-height:70px;}
-.help-note{background:var(--stone); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--ink-soft); line-height:1.6;}
-.link-btn{background:none;border:none;color:var(--himal);font-weight:700;font-size:13px;padding:0;}
+.empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+.empty-state svg{width:56px;height:56px;opacity:.4;margin-bottom:10px;}
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- ============ SETUP WIZARD (first run) ============ -->
-  <div id="view-setup" class="hidden">
-    <div class="lock-screen">
-      <div class="lock-ridge">
-        <svg viewBox="0 0 500 60" preserveAspectRatio="none"><polygon points="0,60 0,38 40,15 80,32 130,8 175,30 220,12 260,34 300,18 340,36 380,14 420,30 460,20 500,38 500,60" fill="#0000001a"/></svg>
+<!-- ================= AUTH SCREEN ================= -->
+<section id="authScreen" class="screen active">
+  <div class="auth-wrap">
+    <div class="auth-hero">
+      <svg class="pagoda-mark" viewBox="0 0 64 64" fill="none"><path d="M32 4l6 10H26l6-10z" fill="#E8C766"/><rect x="30" y="14" width="4" height="8" fill="#E8C766"/><path d="M10 26h44l-4 8H14l-4-8z" fill="#fff"/><path d="M14 34h36l-3 7H17l-3-7z" fill="#fff" opacity=".85"/><rect x="20" y="41" width="24" height="19" rx="2" fill="#fff" opacity=".9"/><rect x="29" y="48" width="6" height="12" fill="#A31621"/></svg>
+      <h1>मेरो हाजिर</h1>
+      <p>तपाईंको दैनिक उपस्थिति, अनुहार पहिचानबाट सुरक्षित रूपमा — सजिलो, सुन्दर र भरपर्दो तरिकाले राख्नुहोस्।</p>
+      <div class="feat"><span>👤</span><div><b>अनुहार लक</b>पासवर्ड बिर्सिए पनि अनुहारले खाता सुरक्षित</div></div>
+      <div class="feat"><span>📸</span><div><b>फेस डिटेक्सन हाजिर</b>क्यामेरा अगाडि उभिनुहोस्, हाजिर आफै बस्छ</div></div>
+      <div class="feat"><span>📊</span><div><b>रिपोर्ट र एक्सेल</b>महिनाको हिसाब र रंगीन एक्सेल डाउनलोड</div></div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">लगइन</button>
+        <button class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">दर्ता गर्नुहोस्</button>
       </div>
-      <div class="lock-card" style="max-width:440px; text-align:left;">
-        <div class="section-eyebrow" style="justify-content:center;">विद्यालय दर्ता</div>
-        <h2 class="lock-school" style="text-align:center;">हाजिर प्रणाली सुरु गरौं</h2>
-        <p class="lock-hm" style="text-align:center;">सुरुमा आफ्नो विद्यालयको विवरण भर्नुहोस्</p>
 
-        <div id="setup-steps">
-          <div class="setup-step" data-step="1">
-            <div class="field"><label>विद्यालयको नाम *</label><input type="text" id="su-schoolname" placeholder="जस्तै: श्री सरस्वती मा.वि."></div>
-            <div class="field"><label>ठेगाना</label><input type="text" id="su-address" placeholder="जिल्ला, नगरपालिका, वडा नं."></div>
-            <div class="field"><label>सम्पर्क नम्बर</label><input type="text" id="su-phone" placeholder="९८XXXXXXXX"></div>
-            <div class="field">
-              <label>विद्यालयको लोगो (वैकल्पिक)</label>
-              <input type="file" accept="image/*" id="su-logo-file">
-            </div>
-            <button class="btn btn-primary btn-block" onclick="Setup.next()">अगाडि बढ्नुहोस् →</button>
-          </div>
+      <!-- LOGIN FORM -->
+      <div class="auth-form active" id="loginForm">
+        <div class="field"><label>प्रयोगकर्ता नाम</label><input id="loginUsername" placeholder="जस्तै: rasmita"></div>
+        <div class="field"><label>पासवर्ड</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+        <button class="btn btn-primary btn-block" onclick="doLogin()">✔ लगइन गर्नुहोस्</button>
+        <p id="loginMsg" class="small-note" style="margin-top:10px;color:var(--danger);"></p>
+      </div>
 
-          <div class="setup-step hidden" data-step="2">
-            <div class="section-eyebrow">प्रधानाध्यापक (लक फोटो)</div>
-            <p class="hint" style="margin-bottom:10px;">यो फोटो एप खोल्दा लक स्क्रिनमा देखिन्छ र प्रधानाध्यापकको खाता स्वतः बन्छ।</p>
-            <div class="field"><label>प्रधानाध्यापकको नाम *</label><input type="text" id="su-hm-name"></div>
-            <div class="field"><label>प्रयोगकर्ता नाम (लगइनको लागि) *</label><input type="text" id="su-hm-username" placeholder="जस्तै: headmaster"></div>
-            <div class="field"><label>पासवर्ड / PIN *</label><input type="password" id="su-hm-pass" placeholder="कम्तिमा ४ अंक/अक्षर"></div>
-            <div class="field">
-              <label>प्रधानाध्यापकको फोटो *</label>
-              <div id="su-hm-photo-zone"></div>
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-outline" onclick="Setup.back()">← पछाडि</button>
-              <button class="btn btn-primary" style="flex:1" onclick="Setup.finish()">प्रणाली सुरु गर्नुहोस् ✓</button>
-            </div>
+      <!-- REGISTER FORM -->
+      <div class="auth-form" id="registerForm">
+        <div class="field"><label>पूरा नाम</label><input id="regFullname" placeholder="जस्तै: रस्मिता श्रेष्ठ"></div>
+        <div class="field"><label>प्रयोगकर्ता नाम</label><input id="regUsername" placeholder="अंग्रेजीमा, स्पेस नराख्नुहोस्"></div>
+        <div class="field"><label>पासवर्ड</label><input id="regPassword" type="password" placeholder="कम्तिमा ४ अक्षर"></div>
+        <div class="face-capture-box">
+          <div class="cam-frame round" id="regCamFrame">
+            <video id="regVideo" autoplay muted playsinline></video>
+            <canvas id="regCanvas"></canvas>
           </div>
+          <div class="face-status" id="regFaceStatus">क्यामेरा सुरु गर्न "अनुहार क्याप्चर" थिच्नुहोस्</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="startRegCam()">📷 क्यामेरा खोल्नुहोस्</button>
+            <button class="btn btn-gold btn-sm" onclick="captureRegFace()">✔ अनुहार क्याप्चर गर्नुहोस्</button>
+          </div>
+          <p class="small-note" style="margin-top:8px;">अनुहार क्याप्चर गर्नाले "फेस लक" र "फेस हाजिर" प्रयोग गर्न मिल्छ। नचाहेमा यो चरण छोड्न सकिन्छ।</p>
         </div>
+        <button class="btn btn-primary btn-block" onclick="doRegister()">🪔 खाता बनाउनुहोस्</button>
+        <p id="regMsg" class="small-note" style="margin-top:10px;color:var(--danger);"></p>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- ============ LOCK / LOGIN SCREEN ============ -->
-  <div id="view-lock" class="hidden">
-    <div class="lock-screen">
-      <div class="lock-ridge">
-        <svg viewBox="0 0 500 60" preserveAspectRatio="none"><polygon points="0,60 0,38 40,15 80,32 130,8 175,30 220,12 260,34 300,18 340,36 380,14 420,30 460,20 500,38 500,60" fill="#0000001a"/></svg>
+<!-- ================= FACE LOCK VERIFY SCREEN ================= -->
+<section id="faceLockScreen" class="screen">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div class="card" style="max-width:380px;width:100%;text-align:center;">
+      <h2>🔒 अनुहार प्रमाणीकरण</h2>
+      <p class="small-note">कृपया क्यामेरामा आफ्नो अनुहार देखाउनुहोस्।</p>
+      <div class="cam-frame round" style="margin-top:14px;">
+        <video id="lockVideo" autoplay muted playsinline></video>
+        <canvas id="lockCanvas"></canvas>
       </div>
-      <div class="lock-card">
-        <div class="lock-photo" id="lock-hm-photo">🏔️</div>
-        <div class="lock-school" id="lock-school-name">विद्यालय</div>
-        <div class="lock-hm" id="lock-hm-name">प्रधानाध्यापक</div>
-
-        <div id="lock-face-zone" class="hidden">
-          <div class="cam-wrap" style="aspect-ratio:1/1; max-width:220px; margin:0 auto 12px;">
-            <video id="lock-face-video" autoplay muted playsinline></video>
-            <div class="cam-overlay-frame" style="inset:6%; border-radius:50%;"></div>
-            <div class="cam-status"><span id="lock-face-status">अनुहार खोजिँदैछ...</span></div>
-          </div>
-          <button class="link-btn" onclick="Lock.showPassword()">बरु पासवर्ड प्रयोग गर्नुहोस्</button>
-        </div>
-
-        <div id="lock-pass-zone">
-          <div class="field" style="text-align:left;"><label>प्रयोगकर्ता नाम</label><input type="text" id="lock-username"></div>
-          <div class="field" style="text-align:left;"><label>पासवर्ड / PIN</label><input type="password" id="lock-password" onkeydown="if(event.key==='Enter')Lock.tryPasswordLogin()"></div>
-          <button class="btn btn-primary btn-block" onclick="Lock.tryPasswordLogin()">लगइन गर्नुहोस्</button>
-          <button class="link-btn" style="margin-top:10px;" id="lock-face-toggle-btn" onclick="Lock.showFace()">फेस लगइन प्रयोग गर्नुहोस्</button>
-        </div>
-        <div id="lock-msg" style="margin-top:10px; font-size:12.5px; color:var(--rose); font-weight:600;"></div>
+      <div class="face-status" id="lockFaceStatus">क्यामेरा सुरु हुँदैछ...</div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-primary btn-block" onclick="verifyFaceLock()">✔ प्रमाणित गर्नुहोस्</button>
       </div>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="cancelFaceLock()">पासवर्डबाट फर्कनुहोस्</button>
     </div>
   </div>
+</section>
 
-  <!-- ============ MAIN APP ============ -->
-  <div id="view-main" class="hidden">
-    <div class="topbar">
-      <div class="row">
-        <div class="brand">
-          <div class="brand-logo" id="tb-logo">वि</div>
-          <div class="brand-text">
-            <div class="school-name" id="tb-schoolname">विद्यालय</div>
-            <div class="school-sub" id="tb-usertag">—</div>
+<!-- ================= MAIN APP ================= -->
+<div id="mainShell" class="screen">
+  <header class="pagoda-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <svg class="bell" id="bellIcon" viewBox="0 0 24 24" fill="none"><path d="M12 2a2 2 0 00-2 2v1.06A6.5 6.5 0 005.5 11v3l-1.4 2.3a1 1 0 00.86 1.5h14.08a1 1 0 00.86-1.5L18.5 14v-3A6.5 6.5 0 0014 5.06V4a2 2 0 00-2-2z" fill="#E8C766"/><path d="M9.5 19a2.5 2.5 0 005 0h-5z" fill="#E8C766"/></svg>
+        <div><h1>मेरो हाजिर</h1><small id="brandDate">—</small></div>
+      </div>
+      <div class="user-pill">
+        <div class="avatar" id="userAvatar">R</div>
+        <div style="line-height:1.2;">
+          <div style="font-size:13px;font-weight:700;" id="userNameLabel">—</div>
+        </div>
+        <button class="btn btn-icon" style="background:rgba(255,255,255,.16);color:#fff;" onclick="doLogout()" title="लगआउट">⏻</button>
+      </div>
+    </div>
+    <div class="container nav-tabs" id="navTabs">
+      <button class="nav-tab active" data-view="dashboardView" onclick="showView('dashboardView')">🏠 ड्यासबोर्ड</button>
+      <button class="nav-tab" data-view="markView" onclick="showView('markView')">📸 हाजिर लगाउनुहोस्</button>
+      <button class="nav-tab" data-view="recordsView" onclick="showView('recordsView')">🗂 रेकर्ड</button>
+      <button class="nav-tab" data-view="reportsView" onclick="showView('reportsView')">📊 रिपोर्ट</button>
+      <button class="nav-tab" data-view="settingsView" onclick="showView('settingsView')">⚙ सेटिङ</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="dashboardView">
+      <div class="section-title">
+        <div><h2>नमस्ते, <span id="dashName">—</span> 🙏</h2><div class="sub">आजको अवस्था र यस महिनाको सारांश</div></div>
+      </div>
+      <div class="card today-card" style="margin-bottom:20px;">
+        <div>
+          <div class="date-big"><span class="wd" id="todayWeekday">—</span> — <span id="todayDate">—</span></div>
+          <div class="small-note" id="todayStatusLine">आजको हाजिर अझै लागेको छैन</div>
+        </div>
+        <button class="btn btn-primary" onclick="showView('markView')">📸 अहिले हाजिर लगाउनुहोस्</button>
+      </div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:10px;"><h2 style="font-size:17px;">हालैका हाजिरहरू</h2><button class="btn btn-ghost btn-sm" onclick="showView('recordsView')">सबै हेर्नुहोस् →</button></div>
+        <div id="recentList"></div>
+      </div>
+    </section>
+
+    <!-- MARK ATTENDANCE -->
+    <section class="view" id="markView">
+      <div class="section-title"><div><h2>हाजिर लगाउनुहोस्</h2><div class="sub">अनुहार पहिचान गरेर वा म्यानुअल रूपमा हाजिर लगाउनुहोस्</div></div></div>
+      <div class="mark-wrap">
+        <div class="card" style="text-align:center;">
+          <div class="cam-frame round" id="markCamFrame">
+            <video id="markVideo" autoplay muted playsinline></video>
+            <canvas id="markCanvas"></canvas>
+          </div>
+          <div class="face-status" id="markFaceStatus">क्यामेरा सुरु गर्नुहोस्</div>
+          <button class="btn btn-outline btn-block" style="margin-top:12px;" onclick="startMarkCam()">📷 क्यामेरा सुरु गर्नुहोस्</button>
+          <button class="btn btn-gold btn-block" style="margin-top:8px;" onclick="scanAndMark()">✔ अनुहार स्क्यान गरी हाजिर लगाउनुहोस्</button>
+        </div>
+        <div class="card">
+          <div class="field">
+            <label>कुन कामको लागि हाजिर?</label>
+            <div class="purpose-grid" id="purposeGrid"></div>
+          </div>
+          <div class="field"><label>समय (आवश्यक भए बदल्नुहोस्)</label><input type="time" id="markTime"></div>
+          <div class="field"><label>टिप्पणी (वैकल्पिक)</label><textarea id="markNote" rows="2" placeholder="जस्तै: अफिस म्यानुअल कारणले ढिलो"></textarea></div>
+          <button class="btn btn-primary btn-block" onclick="manualMark()">✍ म्यानुअल हाजिर लगाउनुहोस् (क्यामेरा बिना)</button>
+          <p class="small-note" style="margin-top:10px;">टिप: सेटिङमा गई कामको प्रकार थप्न/हटाउन सकिन्छ र हाजिर समय/ढिलो सीमा मिलाउन सकिन्छ।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECORDS -->
+    <section class="view" id="recordsView">
+      <div class="section-title"><div><h2>हाजिर रेकर्ड</h2><div class="sub">सम्पादन, मेटाउने, अद्यावधिक सबै यहीँबाट</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openEditModal(null)">+ नयाँ रेकर्ड</button>
+      </div>
+      <div class="filter-bar">
+        <input type="month" id="filterMonth">
+        <select id="filterStatus"><option value="">सबै स्थिति</option><option value="present">उपस्थित</option><option value="late">ढिलो</option><option value="absent">अनुपस्थित</option></select>
+        <input type="text" id="filterSearch" placeholder="🔍 कामको खोजी...">
+        <button class="btn btn-ghost btn-sm" onclick="renderRecords()">फिल्टर लगाउनुहोस्</button>
+      </div>
+      <table class="rec-table">
+        <thead><tr><th>मिति</th><th>समय</th><th>काम</th><th>स्थिति</th><th>टिप्पणी</th><th>कार्य</th></tr></thead>
+        <tbody id="recTableBody"></tbody>
+      </table>
+      <div class="rec-cards" id="recCards"></div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="view" id="reportsView">
+      <div class="section-title"><div><h2>रिपोर्ट तथा हिसाब</h2><div class="sub">महिनाको सारांश र रंगीन एक्सेल डाउनलोड</div></div></div>
+      <div class="month-picker">
+        <input type="month" id="reportMonth">
+        <button class="btn btn-blue btn-sm" onclick="renderReport()">हिसाब गर्नुहोस्</button>
+        <button class="btn btn-gold btn-sm" onclick="exportExcel()">⬇ रंगीन एक्सेल डाउनलोड</button>
+      </div>
+      <div class="stat-grid" id="reportStatGrid"></div>
+      <div class="card">
+        <h3 style="font-size:16px;margin-top:0;">महिनावारी क्यालेन्डर</h3>
+        <div class="calendar-grid" id="reportCalendar"></div>
+        <div style="display:flex;gap:14px;margin-top:12px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;">
+          <span>🟩 उपस्थित</span><span>🟧 ढिलो</span><span>⬜ अनुपस्थित/बिदा</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3 style="font-size:16px;margin-top:0;">दैनिक कामको घण्टा</h3>
+        <div class="bar-chart" id="reportBars"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="settingsView">
+      <div class="section-title"><div><h2>सेटिङ</h2><div class="sub">प्रोफाइल, फेस लक, कामको प्रकार मिलाउनुहोस्</div></div></div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3 style="margin-top:0;font-size:16px;">कामको समय</h3>
+        <div class="field"><label>हाजिर सुरु समय (यसपछि आउनेलाई "ढिलो" मानिन्छ)</label><input type="time" id="setStartTime"></div>
+        <div class="field"><label>ढिलो हुने सीमा (मिनेट)</label><input type="number" id="setLateThreshold" min="0"></div>
+        <button class="btn btn-primary btn-sm" onclick="saveWorkSettings()">सेभ गर्नुहोस्</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3 style="margin-top:0;font-size:16px;">कामको प्रकार / उद्देश्यहरू</h3>
+        <div class="tag-list" id="purposeTagList"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="newPurposeInput" placeholder="जस्तै: फिल्ड भ्रमण">
+          <button class="btn btn-gold btn-sm" onclick="addPurpose()">थप्नुहोस्</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3 style="margin-top:0;font-size:16px;">सुरक्षा</h3>
+        <div class="toggle-row">
+          <div><b>फेस लक</b><div class="small-note">लगइन पछि अनुहार प्रमाणीकरण अनिवार्य गर्नुहोस्</div></div>
+          <div class="switch" id="faceLockSwitch" onclick="toggleFaceLock()"></div>
+        </div>
+        <div style="margin-top:14px;">
+          <div class="cam-frame round" id="setCamFrame" style="width:180px;">
+            <video id="setVideo" autoplay muted playsinline></video>
+            <canvas id="setCanvas"></canvas>
+          </div>
+          <div class="face-status" id="setFaceStatus"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-outline btn-sm" onclick="startSetCam()">📷 क्यामेरा</button>
+            <button class="btn btn-gold btn-sm" onclick="recaptureFace()">पुन: अनुहार क्याप्चर</button>
           </div>
         </div>
-        <div class="top-actions">
-          <button class="icon-btn" onclick="Router.go('settings')" title="सेटिङ">⚙️</button>
-          <button class="icon-btn" onclick="Auth.logout()" title="लगआउट">⏻</button>
-        </div>
       </div>
-      <div class="topbar-ridge">
-        <svg viewBox="0 0 500 30" preserveAspectRatio="none"><polygon points="0,30 0,20 40,7 80,16 130,4 175,15 220,6 260,17 300,9 340,18 380,7 420,15 460,10 500,19 500,30" fill="#F7F1E6"/></svg>
+      <div class="card">
+        <h3 style="margin-top:0;font-size:16px;">खाता</h3>
+        <button class="btn btn-outline btn-block" onclick="doLogout()">⏻ लगआउट</button>
       </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <div class="bn-inner">
+      <button class="bn-item active" data-view="dashboardView" onclick="showView('dashboardView')">🏠<span>ड्यासबोर्ड</span></button>
+      <button class="bn-item" data-view="markView" onclick="showView('markView')">📸<span>हाजिर</span></button>
+      <button class="bn-item" data-view="recordsView" onclick="showView('recordsView')">🗂<span>रेकर्ड</span></button>
+      <button class="bn-item" data-view="reportsView" onclick="showView('reportsView')">📊<span>रिपोर्ट</span></button>
+      <button class="bn-item" data-view="settingsView" onclick="showView('settingsView')">⚙<span>सेटिङ</span></button>
     </div>
-
-    <div class="desktop-topbar">
-      <div class="brand"><div class="brand-logo" id="tb-logo2">वि</div><div class="brand-text"><div class="school-name" id="tb-schoolname2">विद्यालय</div><div class="school-sub" id="tb-usertag2">—</div></div></div>
-      <div class="btn-row"><button class="btn btn-outline btn-sm" onclick="Router.go('settings')">⚙️ सेटिङ</button><button class="btn btn-danger btn-sm" onclick="Auth.logout()">⏻ लगआउट</button></div>
-    </div>
-
-    <main id="main-content"></main>
-
-    <nav class="bottom-nav" id="bottom-nav"></nav>
-  </div>
-
-  <div class="toast-wrap" id="toast-wrap"></div>
-  <div id="modal-root"></div>
+  </nav>
 </div>
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModalBg">
+  <div class="modal">
+    <h3 id="editModalTitle">रेकर्ड सम्पादन</h3>
+    <input type="hidden" id="editRecId">
+    <div class="field"><label>मिति</label><input type="date" id="editDate"></div>
+    <div class="field"><label>समय</label><input type="time" id="editTime"></div>
+    <div class="field"><label>काम</label><select id="editPurpose"></select></div>
+    <div class="field"><label>स्थिति</label><select id="editStatus"><option value="present">उपस्थित</option><option value="late">ढिलो</option><option value="absent">अनुपस्थित</option></select></div>
+    <div class="field"><label>टिप्पणी</label><textarea id="editNote" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary btn-block" onclick="saveEditModal()">सेभ गर्नुहोस्</button>
+      <button class="btn btn-ghost" onclick="closeEditModal()">रद्द</button>
+    </div>
+  </div>
+</div>
+
+<div id="stampOverlay"><div class="stamp"><b>✔ हाजिर भयो</b><span id="stampTime">--:--</span></div></div>
+<div id="toastContainer"></div>
+
 <script>
-/* =========================================================================
-   हिमाल विद्यालय हाजिर प्रणाली — Core Application Script
-   Storage: IndexedDB only (no server, fully offline-capable after first load)
-   ========================================================================= */
+/* ======================================================================
+   मेरो हाजिर — Personal Nepali Attendance App
+   IndexedDB + face-api.js (face lock / face attendance) + ExcelJS export
+====================================================================== */
 
-/* ---------------------------- Utilities ---------------------------- */
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-const uid = () => 'ID-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
-const pad2 = n => String(n).padStart(2,'0');
-const todayStr = (d=new Date()) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-const NEPALI_DIGITS = ['०','१','२','३','४','५','६','७','८','९'];
-const toNepDigits = (n) => String(n).split('').map(c => /[0-9]/.test(c) ? NEPALI_DIGITS[+c] : c).join('');
-const WEEKDAYS_NE = ['आइत','सोम','मंगल','बुध','बिही','शुक्र','शनि'];
-const MONTHS_EN = ['जनवरी','फेब्रुअरी','मार्च','अप्रिल','मे','जुन','जुलाई','अगस्ट','सेप्टेम्बर','अक्टोबर','नोभेम्बर','डिसेम्बर'];
-const ROLE_LABEL = {teacher:'शिक्षक', student:'विद्यार्थी', headmaster:'प्रधानाध्यापक'};
+/* ---------------- constants ---------------- */
+const NP_DIGITS = ['०','१','२','३','४','५','६','७','८','९'];
+const NP_MONTHS = ['जनवरी','फेब्रुअरी','मार्च','अप्रिल','मे','जुन','जुलाई','अगष्ट','सेप्टेम्बर','अक्टोबर','नोभेम्बर','डिसेम्बर'];
+const NP_WEEKDAYS = ['आइतबार','सोमबार','मंगलबार','बुधबार','बिहिबार','शुक्रबार','शनिबार'];
+const NP_WEEKDAYS_SHORT = ['आइत','सोम','मंगल','बुध','बिहि','शुक्र','शनि'];
+const FACE_MATCH_THRESHOLD = 0.6;
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
 
-function timeStrToMinutes(t){ if(!t) return null; const [h,m] = t.split(':').map(Number); return h*60+m; }
-function nowMinutes(d=new Date()){ return d.getHours()*60 + d.getMinutes(); }
-function fmtClock(d=new Date()){ return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; }
+function toNp(num){ return String(num).split('').map(c => /[0-9]/.test(c) ? NP_DIGITS[c] : c).join(''); }
+function pad2(n){ return n<10 ? '0'+n : ''+n; }
+function fmtDate(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function niceDate(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return toNp(d)+' '+NP_MONTHS[m-1]+' '+toNp(y);
+}
+function weekdayOf(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  return new Date(y,m-1,d).getDay();
+}
 
-function toast(msg, type='info', ms=3200){
-  const wrap = $('#toast-wrap');
+/* ---------------- toast ---------------- */
+function toast(msg, type){
   const el = document.createElement('div');
-  el.className = 'toast ' + (type==='success'?'success':type==='error'?'error':type==='warn'?'warn':'');
-  el.innerHTML = `<span>${msg}</span>`;
-  wrap.appendChild(el);
-  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(-8px)'; el.style.transition='.25s'; setTimeout(()=>el.remove(),250); }, ms);
+  el.className = 'toast'+(type?' '+type:'');
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2600);
 }
 
-function fileToDataURL(file){
-  return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-function openModal(html){
-  const root = $('#modal-root');
-  root.innerHTML = `<div class="modal-bg" id="modal-bg-el"><div class="modal-box">${html}</div></div>`;
-  $('#modal-bg-el').addEventListener('click', (e)=>{ if(e.target.id==='modal-bg-el') closeModal(); });
-}
-function closeModal(){ $('#modal-root').innerHTML=''; }
-
-/* ---------------------------- IndexedDB layer ---------------------------- */
-const DB_NAME = 'himal_hajir_db';
-const DB_VERSION = 1;
-let _db = null;
-
-function dbOpen(){
+/* ---------------- IndexedDB layer ---------------- */
+let db = null;
+function openDB(){
   return new Promise((resolve,reject)=>{
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', {keyPath:'key'});
-      if(!db.objectStoreNames.contains('users')){
-        const us = db.createObjectStore('users', {keyPath:'id', autoIncrement:true});
-        us.createIndex('role','role',{unique:false});
-        us.createIndex('qrId','qrId',{unique:true});
-        us.createIndex('classSection', ['class','section'], {unique:false});
+    const req = indexedDB.open('HajirDB', 1);
+    req.onupgradeneeded = (e)=>{
+      const _db = e.target.result;
+      if(!_db.objectStoreNames.contains('users')){
+        const us = _db.createObjectStore('users', {keyPath:'id', autoIncrement:true});
+        us.createIndex('username','username',{unique:true});
       }
-      if(!db.objectStoreNames.contains('attendance')){
-        const as = db.createObjectStore('attendance', {keyPath:'id', autoIncrement:true});
-        as.createIndex('userDate', ['userId','date'], {unique:true});
-        as.createIndex('date','date',{unique:false});
+      if(!_db.objectStoreNames.contains('attendance')){
+        const as = _db.createObjectStore('attendance', {keyPath:'id', autoIncrement:true});
         as.createIndex('userId','userId',{unique:false});
+        as.createIndex('date','date',{unique:false});
       }
-      if(!db.objectStoreNames.contains('holidays')) db.createObjectStore('holidays', {keyPath:'date'});
+      if(!_db.objectStoreNames.contains('settings')){
+        _db.createObjectStore('settings', {keyPath:'userId'});
+      }
     };
-    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
-    req.onerror = (e) => reject(e);
+    req.onsuccess = (e)=>{ db = e.target.result; resolve(db); };
+    req.onerror = (e)=> reject(e);
   });
 }
-function tx(storeNames, mode='readonly'){ return _db.transaction(storeNames, mode); }
-function storeReq(store, method, ...args){
+function tx(store, mode){ return db.transaction(store, mode).objectStore(store); }
+function idbReq(req){ return new Promise((res,rej)=>{ req.onsuccess=()=>res(req.result); req.onerror=()=>rej(req.error); }); }
+
+async function dbAdd(store, obj){ return idbReq(tx(store,'readwrite').add(obj)); }
+async function dbPut(store, obj){ return idbReq(tx(store,'readwrite').put(obj)); }
+async function dbGet(store, key){ return idbReq(tx(store,'readonly').get(key)); }
+async function dbDelete(store, key){ return idbReq(tx(store,'readwrite').delete(key)); }
+async function dbAllByIndex(store, indexName, value){
   return new Promise((resolve,reject)=>{
-    const req = store[method](...args);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = (e) => reject(e);
+    const idx = tx(store,'readonly').index(indexName);
+    const out = [];
+    const req = idx.openCursor(IDBKeyRange.only(value));
+    req.onsuccess = e=>{
+      const cur = e.target.result;
+      if(cur){ out.push(cur.value); cur.continue(); } else resolve(out);
+    };
+    req.onerror = ()=>reject(req.error);
   });
 }
-const DB = {
-  async getSetting(key){ const t = tx('settings'); return storeReq(t.objectStore('settings'),'get',key); },
-  async putSetting(obj){ const t = tx('settings','readwrite'); return storeReq(t.objectStore('settings'),'put',obj); },
-  async addUser(user){ const t = tx('users','readwrite'); return storeReq(t.objectStore('users'),'add',user); },
-  async putUser(user){ const t = tx('users','readwrite'); return storeReq(t.objectStore('users'),'put',user); },
-  async getUser(id){ const t = tx('users'); return storeReq(t.objectStore('users'),'get',id); },
-  async deleteUser(id){ const t = tx('users','readwrite'); return storeReq(t.objectStore('users'),'delete',id); },
-  async allUsers(){ const t = tx('users'); return storeReq(t.objectStore('users'),'getAll'); },
-  async userByQr(qrId){
-    const t = tx('users'); const idx = t.objectStore('users').index('qrId');
-    return storeReq(idx,'get',qrId);
-  },
-  async addAttendance(rec){ const t = tx('attendance','readwrite'); return storeReq(t.objectStore('attendance'),'add',rec); },
-  async putAttendance(rec){ const t = tx('attendance','readwrite'); return storeReq(t.objectStore('attendance'),'put',rec); },
-  async attendanceByUserDate(userId,date){
-    const t = tx('attendance'); const idx = t.objectStore('attendance').index('userDate');
-    return storeReq(idx,'get',[userId,date]);
-  },
-  async attendanceByDate(date){
-    const t = tx('attendance'); const idx = t.objectStore('attendance').index('date');
-    return storeReq(idx,'getAll',date);
-  },
-  async attendanceByUser(userId){
-    const t = tx('attendance'); const idx = t.objectStore('attendance').index('userId');
-    return storeReq(idx,'getAll',userId);
-  },
-  async allAttendance(){ const t = tx('attendance'); return storeReq(t.objectStore('attendance'),'getAll'); },
-  async setHoliday(date,label){ const t = tx('holidays','readwrite'); return storeReq(t.objectStore('holidays'),'put',{date,label:label||'बिदा'}); },
-  async removeHoliday(date){ const t = tx('holidays','readwrite'); return storeReq(t.objectStore('holidays'),'delete',date); },
-  async allHolidays(){ const t = tx('holidays'); return storeReq(t.objectStore('holidays'),'getAll'); },
-};
-
-/* ---------------------------- Global App State ---------------------------- */
-const State = {
-  config: null,        // settings row 'config'
-  users: [],
-  holidays: [],
-  currentUser: null,   // logged in staff/admin (teacher/headmaster) driving the app
-  route: 'dashboard',
-};
-
-const DEFAULT_CONFIG = {
-  key: 'config',
-  schoolName: '', address:'', phone:'', logo:'',
-  headmasterName:'', headmasterUsername:'', headmasterPass:'', headmasterPhoto:'',
-  setupDone:false,
-  faceLockEnabled: true,
-  faceAttendanceEnabled: true,
-  qrAttendanceEnabled: true,
-  times:{
-    morningStart:'07:00', morningEnd:'08:00',   // on-time window -> Full P
-    lunchEnd:'12:30',                            // late morning window ends here -> Half P
-    eveningStart:'15:30', eveningEnd:'16:15'     // evening window -> adds/records evening P
-  },
-  classes: [
-    {name:'कक्षा १', sections:['क']},
-    {name:'कक्षा २', sections:['क']},
-  ],
-  saturdayHoliday: true,
-};
-
-async function loadState(){
-  State.config = await DB.getSetting('config');
-  State.users = await DB.allUsers();
-  State.holidays = await DB.allHolidays();
+async function dbGetByUsername(username){
+  return new Promise((resolve,reject)=>{
+    const idx = tx('users','readonly').index('username');
+    const req = idx.get(username);
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
 }
-</script>
-<script>
-/* ---------------------------- Camera helper ---------------------------- */
-const Cam = {
-  stream:null, facing:'user',
-  async start(videoEl, facing='user'){
-    this.stop();
-    try{
-      const constraints = { video:{ facingMode: facing, width:{ideal:480}, height:{ideal:480} }, audio:false };
-      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoEl.srcObject = this.stream;
-      this.facing = facing;
-      await new Promise(r=>{ videoEl.onloadedmetadata = () => { videoEl.play(); r(); }; });
-      return true;
-    }catch(err){
-      toast('क्यामेरा खोल्न सकिएन: अनुमति जाँच्नुहोस्', 'error');
-      return false;
-    }
-  },
-  stop(){ if(this.stream){ this.stream.getTracks().forEach(t=>t.stop()); this.stream=null; } },
-  async flip(videoEl){ return this.start(videoEl, this.facing==='user'?'environment':'user'); },
-  snap(videoEl){
-    const c = document.createElement('canvas');
-    c.width = videoEl.videoWidth || 480; c.height = videoEl.videoHeight || 480;
-    const ctx = c.getContext('2d');
-    ctx.drawImage(videoEl,0,0,c.width,c.height);
-    return c.toDataURL('image/jpeg', 0.85);
-  }
-};
 
-/* ---------------------------- Face-api.js helper ---------------------------- */
-const Face = {
-  modelsLoaded:false,
-  MODEL_URL: 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights',
-  async loadModels(){
-    if(this.modelsLoaded) return true;
-    try{
-      await faceapi.nets.tinyFaceDetector.loadFromUri(this.MODEL_URL);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(this.MODEL_URL);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(this.MODEL_URL);
-      this.modelsLoaded = true;
-      return true;
-    }catch(err){
-      console.error('Face model load failed', err);
-      return false;
-    }
-  },
-  async getDescriptor(imgOrVideo){
-    const det = await faceapi.detectSingleFace(imgOrVideo, new faceapi.TinyFaceDetectorOptions({inputSize:224}))
-      .withFaceLandmarks().withFaceDescriptor();
-    if(!det) return null;
-    return Array.from(det.descriptor);
-  },
-  distance(a,b){
-    if(!a || !b || a.length!==b.length) return Infinity;
-    let sum=0; for(let i=0;i<a.length;i++){ sum += (a[i]-b[i])**2; }
-    return Math.sqrt(sum);
-  },
-  // lower distance = more similar. ~0.5 threshold typical for face-api.js
-  isMatch(a,b,threshold=0.5){ return this.distance(a,b) <= threshold; }
-};
+/* ---------------- crypto ---------------- */
+async function sha256(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
-/* ---------------------------- QR helper (generation via qrcodejs) ---------------------------- */
-const QR = {
-  renderInto(elId, text){
-    const el = document.getElementById(elId);
-    if(!el) return;
-    el.innerHTML = '';
-    new QRCode(el, { text, width:200, height:200, correctLevel: QRCode.CorrectLevel.M });
-  }
-};
-</script>
-<script>
-/* ---------------------------- Setup wizard ---------------------------- */
-const Setup = {
-  logoData:'', hmPhotoData:'',
-  init(){
-    $('#su-logo-file').addEventListener('change', async (e)=>{
-      const f = e.target.files[0]; if(!f) return;
-      this.logoData = await fileToDataURL(f);
-      toast('लोगो थपियो','success',1500);
-    });
-    this.renderHmPhotoZone();
-  },
-  renderHmPhotoZone(){
-    const zone = $('#su-hm-photo-zone');
-    if(this.hmPhotoData){
-      zone.innerHTML = `
-        <div class="cam-wrap" style="max-width:200px; margin:0 auto;">
-          <img class="cam-preview" src="${this.hmPhotoData}">
-        </div>
-        <button class="btn btn-outline btn-sm btn-block" style="margin-top:8px;" onclick="Setup.hmPhotoData='';Setup.renderHmPhotoZone()">फेरि खिच्नुहोस्</button>`;
-    } else {
-      zone.innerHTML = `
-        <div class="cam-wrap" style="max-width:200px; margin:0 auto;">
-          <video id="su-hm-video" autoplay muted playsinline></video>
-          <div class="cam-overlay-frame"></div>
-        </div>
-        <div class="cam-controls" style="margin-top:8px;">
-          <button class="btn btn-outline btn-sm" onclick="Cam.flip($('#su-hm-video'))">🔄 क्यामेरा बदल्नुहोस्</button>
-          <button class="btn btn-primary btn-sm" onclick="Setup.snapHm()">📸 फोटो खिच्नुहोस्</button>
-        </div>`;
-      Cam.start($('#su-hm-video'),'user');
-    }
-  },
-  async snapHm(){
-    const v = $('#su-hm-video'); if(!v) return;
-    this.hmPhotoData = Cam.snap(v);
-    Cam.stop();
-    this.renderHmPhotoZone();
-  },
-  next(){
-    const name = $('#su-schoolname').value.trim();
-    if(!name){ toast('विद्यालयको नाम आवश्यक छ','error'); return; }
-    $('.setup-step[data-step="1"]').classList.add('hidden');
-    $('.setup-step[data-step="2"]').classList.remove('hidden');
-    this.renderHmPhotoZone();
-  },
-  back(){
-    Cam.stop();
-    $('.setup-step[data-step="2"]').classList.add('hidden');
-    $('.setup-step[data-step="1"]').classList.remove('hidden');
-  },
-  async finish(){
-    const hmName = $('#su-hm-name').value.trim();
-    const hmUser = $('#su-hm-username').value.trim();
-    const hmPass = $('#su-hm-pass').value;
-    if(!hmName || !hmUser || !hmPass){ toast('सबै आवश्यक फिल्ड भर्नुहोस्','error'); return; }
-    if(!this.hmPhotoData){ toast('प्रधानाध्यापकको फोटो खिच्नुहोस्','error'); return; }
-    Cam.stop();
+/* ---------------- state ---------------- */
+let currentUser = null;
+let currentSettings = null;
+let selectedPurpose = null;
+let editingRecId = null;
+let faceApiReady = false;
 
-    const config = Object.assign({}, DEFAULT_CONFIG, {
-      schoolName: $('#su-schoolname').value.trim(),
-      address: $('#su-address').value.trim(),
-      phone: $('#su-phone').value.trim(),
-      logo: this.logoData,
-      headmasterName: hmName,
-      headmasterUsername: hmUser,
-      headmasterPass: hmPass,
-      headmasterPhoto: this.hmPhotoData,
-      setupDone:true,
-    });
-    await DB.putSetting(config);
-
-    // create headmaster as first user record too, so they appear in staff lists / attendance
-    let faceDescriptor = null;
-    try{
-      await Face.loadModels();
-      const img = new Image(); img.src = this.hmPhotoData;
-      await new Promise(r=>{ img.onload=r; });
-      faceDescriptor = await Face.getDescriptor(img);
-    }catch(e){ /* non-blocking */ }
-
-    await DB.addUser({
-      role:'headmaster', name:hmName, class:'', section:'', phone:'',
-      photo:this.hmPhotoData, faceDescriptor, qrId:uid(), username:hmUser, password:hmPass,
-      createdAt: new Date().toISOString(), status:'active'
-    });
-
-    toast('प्रणाली सफलतापूर्वक सुरु भयो! अब लगइन गर्नुहोस्','success');
-    await loadState();
-    App.boot();
-  }
-};
-
-/* ---------------------------- Auth / Lock screen ---------------------------- */
-const Lock = {
-  faceMatchTimer:null,
-  render(){
-    const cfg = State.config;
-    $('#lock-school-name').textContent = cfg.schoolName;
-    $('#lock-hm-name').textContent = 'प्र.अ. ' + cfg.headmasterName;
-    const photoEl = $('#lock-hm-photo');
-    photoEl.innerHTML = cfg.headmasterPhoto ? `<img src="${cfg.headmasterPhoto}">` : '🏔️';
-    $('#lock-msg').textContent = '';
-    if(cfg.faceLockEnabled){
-      this.showFace();
-    } else {
-      this.showPassword();
-    }
-  },
-  showPassword(){
-    this.stopFaceLoop();
-    $('#lock-face-zone').classList.add('hidden');
-    $('#lock-pass-zone').classList.remove('hidden');
-    const toggleBtn = $('#lock-face-toggle-btn');
-    toggleBtn.classList.toggle('hidden', !State.config.faceLockEnabled);
-  },
-  async showFace(){
-    $('#lock-pass-zone').classList.add('hidden');
-    $('#lock-face-zone').classList.remove('hidden');
-    const ok = await Cam.start($('#lock-face-video'),'user');
-    if(!ok){ this.showPassword(); return; }
-    const loaded = await Face.loadModels();
-    if(!loaded){ toast('फेस मोडेल लोड हुन सकेन, पासवर्ड प्रयोग गर्नुहोस्','warn'); this.showPassword(); return; }
-    this.faceLoop();
-  },
-  faceLoop(){
-    $('#lock-face-status').textContent = 'अनुहार खोजिँदैछ...';
-    this.faceMatchTimer = setInterval(async ()=>{
-      const v = $('#lock-face-video');
-      if(!v || !v.srcObject) return;
-      const desc = await Face.getDescriptor(v);
-      if(!desc){ return; }
-      // match against all users with role headmaster/teacher (staff can unlock too)
-      const staff = State.users.filter(u => u.faceDescriptor && (u.role==='headmaster' || u.role==='teacher'));
-      let best=null, bestDist=Infinity;
-      for(const u of staff){
-        const d = Face.distance(desc, u.faceDescriptor);
-        if(d < bestDist){ bestDist=d; best=u; }
-      }
-      if(best && bestDist <= 0.5){
-        $('#lock-face-status').textContent = 'चिनियो: ' + best.name;
-        this.stopFaceLoop();
-        Cam.stop();
-        Auth.loginAs(best);
-      }
-    }, 900);
-  },
-  stopFaceLoop(){ if(this.faceMatchTimer){ clearInterval(this.faceMatchTimer); this.faceMatchTimer=null; } },
-  tryPasswordLogin(){
-    const u = $('#lock-username').value.trim();
-    const p = $('#lock-password').value;
-    const cfg = State.config;
-    if(u===cfg.headmasterUsername && p===cfg.headmasterPass){
-      const hmUser = State.users.find(x=>x.role==='headmaster') || {role:'headmaster', name:cfg.headmasterName};
-      Auth.loginAs(hmUser);
-      return;
-    }
-    const staff = State.users.find(x => x.role==='teacher' && x.username===u && x.password===p);
-    if(staff){ Auth.loginAs(staff); return; }
-    $('#lock-msg').textContent = 'प्रयोगकर्ता नाम वा पासवर्ड मिलेन।';
-  }
-};
-
-const Auth = {
-  loginAs(user){
-    State.currentUser = user;
-    Cam.stop();
-    Lock.stopFaceLoop();
-    toast(`स्वागत छ, ${user.name}!`,'success',2000);
-    App.showMain();
-  },
-  logout(){
-    State.currentUser = null;
-    Cam.stop();
-    App.boot();
-  }
-};
-</script>
-<script>
-/* ---------------------------- App bootstrap & Router ---------------------------- */
-const NAV_ITEMS = [
-  {key:'dashboard', label:'ड्यासबोर्ड', icon:'🏠'},
-  {key:'attendance', label:'हाजिर', icon:'📷'},
-  {key:'people', label:'व्यक्ति', icon:'👥'},
-  {key:'reports', label:'रिपोर्ट', icon:'📊'},
-  {key:'settings', label:'सेटिङ', icon:'⚙️'},
-];
-
-const App = {
-  async boot(){
-    await loadState();
-    Cam.stop(); Lock.stopFaceLoop();
-    $('#view-setup').classList.add('hidden');
-    $('#view-lock').classList.add('hidden');
-    $('#view-main').classList.add('hidden');
-
-    if(!State.config || !State.config.setupDone){
-      $('#view-setup').classList.remove('hidden');
-      Setup.init();
-      return;
-    }
-    if(!State.currentUser){
-      $('#view-lock').classList.remove('hidden');
-      Lock.render();
-      return;
-    }
-    this.showMain();
-  },
-  showMain(){
-    $('#view-setup').classList.add('hidden');
-    $('#view-lock').classList.add('hidden');
-    $('#view-main').classList.remove('hidden');
-    const cfg = State.config;
-    for(const id of ['#tb-schoolname','#tb-schoolname2']) $(id).textContent = cfg.schoolName;
-    for(const id of ['#tb-usertag','#tb-usertag2']) $(id).textContent = `${ROLE_LABEL[State.currentUser.role]||''} • ${State.currentUser.name}`;
-    for(const id of ['#tb-logo','#tb-logo2']){ const el = $(id); el.innerHTML = cfg.logo ? `<img src="${cfg.logo}">` : (cfg.schoolName? cfg.schoolName[0]:'वि'); }
-    this.renderNav();
-    Router.go('dashboard');
-  },
-  renderNav(){
-    const nav = $('#bottom-nav');
-    nav.innerHTML = NAV_ITEMS.map(it => `
-      <button class="nav-item ${State.route===it.key?'active':''}" onclick="Router.go('${it.key}')">
-        <span class="nav-ic">${it.icon}</span><span>${it.label}</span>
-      </button>`).join('');
-  }
-};
-
-const Router = {
-  go(route){
-    State.route = route;
-    App.renderNav();
-    Cam.stop();
-    const main = $('#main-content');
-    main.innerHTML = '';
-    if(route==='dashboard') Views.dashboard(main);
-    else if(route==='attendance') Views.attendance(main);
-    else if(route==='people') Views.people(main);
-    else if(route==='reports') Views.reports(main);
-    else if(route==='settings') Views.settings(main);
-    window.scrollTo(0,0);
-  }
-};
-
-const Views = {};
-
-/* Boot on load */
-window.addEventListener('DOMContentLoaded', async () => {
+/* ---------------- face-api init ---------------- */
+async function initFaceApi(){
+  if(faceApiReady) return true;
   try{
-    await dbOpen();
-    await App.boot();
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    faceApiReady = true;
+    return true;
   }catch(err){
-    console.error(err);
-    document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif;">एप सुरु गर्न सकिएन। ब्राउजर IndexedDB समर्थन गर्दैन वा प्राइभेट मोडमा छ।</div>';
+    console.error('face-api load failed', err);
+    return false;
   }
-});
-</script>
-<script>
-/* =========================================================================
-   Attendance engine
-   Rules (as specified by school):
-   - morningStart..morningEnd   -> on-time -> morning='P'  (full)
-   - morningEnd..lunchEnd       -> late    -> morning='Half'
-   - lunchEnd..eveningStart     -> CLOSED (no marking allowed)
-   - eveningStart..eveningEnd   -> evening='P' (marks evening presence)
-   - after eveningEnd           -> CLOSED
-   Final daily letter combines both:
-     morning P + evening P   => 'PP' (double present)
-     morning Half + evening P=> 'PP' (counts as full day via both sessions)
-     morning P only          => 'P'
-     morning Half only       => 'H' (half day)
-     evening P only (no AM)  => 'P' (single present)
-     nothing marked, working day => 'A' (absent)
-     Saturday / declared holiday => 'HOL'
-   ========================================================================= */
-const Attendance = {
-  isHoliday(dateStr){
-    const d = new Date(dateStr+'T00:00:00');
-    if(State.config.saturdayHoliday && d.getDay()===6) return true;
-    return State.holidays.some(h=>h.date===dateStr);
-  },
-  holidayLabel(dateStr){
-    const d = new Date(dateStr+'T00:00:00');
-    const custom = State.holidays.find(h=>h.date===dateStr);
-    if(custom) return custom.label;
-    if(State.config.saturdayHoliday && d.getDay()===6) return 'शनिबार';
+}
+async function startCam(videoEl){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}, audio:false});
+    videoEl.srcObject = stream;
+    return stream;
+  }catch(err){
+    toast('क्यामेरा खोल्न सकिएन। अनुमति जाँच गर्नुहोस्।','err');
     return null;
-  },
-  currentSlot(now=new Date()){
-    const t = State.config.times;
-    const mins = nowMinutes(now);
-    const mS=timeStrToMinutes(t.morningStart), mE=timeStrToMinutes(t.morningEnd),
-          lE=timeStrToMinutes(t.lunchEnd), eS=timeStrToMinutes(t.eveningStart), eE=timeStrToMinutes(t.eveningEnd);
-    if(mins>=mS && mins<mE) return {slot:'morning_ontime', label:'बिहानी हाजिर (पूर्ण)'};
-    if(mins>=mE && mins<lE) return {slot:'morning_late', label:'ढिलो हाजिर (आधा)'};
-    if(mins>=lE && mins<eS) return {slot:'closed_midday', label:'हाजिर बन्द (दिउँसो)'};
-    if(mins>=eS && mins<eE) return {slot:'evening', label:'साँझको हाजिर'};
-    return {slot:'closed', label:'हाजिर समय बाहिर'};
-  },
-  finalLetter(rec){
-    if(!rec) return null;
-    if(rec.holiday) return 'HOL';
-    const m = rec.morning, e = rec.evening;
-    if(m==='P' && e==='P') return 'PP';
-    if(m==='Half' && e==='P') return 'PP';
-    if(m==='P') return 'P';
-    if(m==='Half') return 'H';
-    if(!m && e==='P') return 'P';
-    return 'A';
-  },
-  async markByUser(user, now=new Date()){
-    const date = todayStr(now);
-    if(this.isHoliday(date)){
-      return {ok:false, msg:`आज ${this.holidayLabel(date)} - बिदाको दिन हो, हाजिर आवश्यक छैन।`};
-    }
-    const slotInfo = this.currentSlot(now);
-    let rec = await DB.attendanceByUserDate(user.id, date);
-    if(!rec) rec = {userId:user.id, date, morning:null, evening:null, markedAt:{}};
-
-    if(slotInfo.slot==='morning_ontime'){
-      if(rec.morning==='P') return {ok:false, msg:'तपाईंको बिहानको हाजिर पहिले नै लागिसक्यो।'};
-      rec.morning='P'; rec.markedAt.morning = now.toISOString();
-    } else if(slotInfo.slot==='morning_late'){
-      if(rec.morning) return {ok:false, msg:'तपाईंको बिहानको हाजिर पहिले नै लागिसक्यो।'};
-      rec.morning='Half'; rec.markedAt.morning = now.toISOString();
-    } else if(slotInfo.slot==='closed_midday'){
-      return {ok:false, msg:'अहिले हाजिर लगाउन मिल्दैन। दिउँसोको समय हो, साँझको हाजिर समयमा फेरि प्रयास गर्नुहोस्।'};
-    } else if(slotInfo.slot==='evening'){
-      if(rec.evening==='P') return {ok:false, msg:'तपाईंको साँझको हाजिर पहिले नै लागिसक्यो।'};
-      rec.evening='P'; rec.markedAt.evening = now.toISOString();
-    } else {
-      return {ok:false, msg:'हाजिर लगाउने समय समाप्त भयो। सेटिङमा गई समय हेर्नुहोस्।'};
-    }
-    rec.final = this.finalLetter(rec);
-    if(rec.id) await DB.putAttendance(rec); else { const id = await DB.addAttendance(rec); rec.id=id; }
-    return {ok:true, msg:`${user.name} — हाजिर सफल भयो! (${slotInfo.label})`, rec, slotInfo};
   }
-};
-</script>
-<script>
-/* ---------------------------- Dashboard view ---------------------------- */
-Views.dashboard = async function(main){
-  const date = todayStr();
-  const cfg = State.config;
-  const todayRecs = await DB.attendanceByDate(date);
-  const totalPeople = State.users.filter(u=>u.status!=='inactive').length;
-  const students = State.users.filter(u=>u.role==='student');
-  const teachers = State.users.filter(u=>u.role==='teacher'||u.role==='headmaster');
-  const presentToday = todayRecs.filter(r=>r.final && r.final!=='A' && r.final!=='HOL').length;
-  const absentEligible = totalPeople - presentToday;
-  const slot = Attendance.currentSlot();
-  const holiday = Attendance.isHoliday(date);
-
-  main.innerHTML = `
-    <div class="card" style="background:linear-gradient(120deg,var(--himal-deep),var(--himal) 70%);color:#fff;">
-      <div class="section-eyebrow" style="color:var(--gold-soft);">आजको मिति</div>
-      <div style="font-family:var(--font-display);font-size:20px;font-weight:700;">${date} &nbsp;•&nbsp; ${WEEKDAYS_NE[new Date(date+'T00:00:00').getDay()]}बार</div>
-      <div class="big-clock" style="color:#fff; text-align:left; margin-top:6px;" id="dash-clock">${fmtClock()}</div>
-      <div style="margin-top:10px;">
-        ${holiday
-          ? `<span class="badge" style="background:rgba(255,255,255,.2); color:#fff;">🎌 आज ${Attendance.holidayLabel(date)} - बिदा</span>`
-          : `<span class="badge" style="background:rgba(255,255,255,.2); color:#fff;">⏱ ${slot.label}</span>`}
-      </div>
-    </div>
-
-    <div class="grid grid-4">
-      <div class="stat-box"><div class="num">${toNepDigits(totalPeople)}</div><div class="lbl">जम्मा दर्ता</div></div>
-      <div class="stat-box"><div class="num">${toNepDigits(students.length)}</div><div class="lbl">विद्यार्थी</div></div>
-      <div class="stat-box"><div class="num">${toNepDigits(teachers.length)}</div><div class="lbl">शिक्षक/प्र.अ.</div></div>
-      <div class="stat-box"><div class="num" style="color:var(--pine);">${toNepDigits(presentToday)}</div><div class="lbl">आज उपस्थित</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">छिटो कार्य</div>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="Router.go('attendance')">📷 हाजिर लगाउनुहोस्</button>
-        <button class="btn btn-himal" onclick="Router.go('people')">➕ नयाँ दर्ता</button>
-        <button class="btn btn-gold" onclick="Router.go('reports')">📊 रिपोर्ट हेर्नुहोस्</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">आजको हाजिर विवरण</div>
-      <div id="dash-today-list"></div>
-    </div>
-  `;
-
-  const listEl = $('#dash-today-list', main);
-  if(totalPeople===0){
-    listEl.innerHTML = `<div class="empty-state"><div class="ic">👤</div>अझै कोही दर्ता भएको छैन।<br><button class="btn btn-himal btn-sm" style="margin-top:10px;" onclick="Router.go('people')">दर्ता गर्नुहोस्</button></div>`;
-  } else if(holiday){
-    listEl.innerHTML = `<div class="empty-state"><div class="ic">🎌</div>आज बिदा भएकोले हाजिर लिइएको छैन।</div>`;
-  } else {
-    const rows = State.users.filter(u=>u.status!=='inactive').map(u=>{
-      const r = todayRecs.find(x=>x.userId===u.id);
-      const letter = r ? Attendance.finalLetter(r) : null;
-      const badge = !letter ? `<span class="badge" style="background:var(--stone);color:var(--ink-soft);">बाँकी</span>`
-        : letter==='PP' ? `<span class="badge badge-pine">PP उपस्थित</span>`
-        : letter==='P' ? `<span class="badge badge-pine">P उपस्थित</span>`
-        : letter==='H' ? `<span class="badge badge-amber">आधा दिन</span>`
-        : `<span class="badge badge-rose">अनुपस्थित</span>`;
-      return `<div class="list-row">
-        <div class="avatar">${u.photo?`<img src="${u.photo}">`:(u.name?u.name[0]:'?')}</div>
-        <div class="list-main"><div class="lname">${u.name}</div><div class="lsub">${ROLE_LABEL[u.role]}${u.class?' • '+u.class+(u.section?' '+u.section:''):''}</div></div>
-        ${badge}
-      </div>`;
-    }).join('');
-    listEl.innerHTML = rows;
+}
+function stopCam(videoEl){
+  if(videoEl && videoEl.srcObject){
+    videoEl.srcObject.getTracks().forEach(t=>t.stop());
+    videoEl.srcObject = null;
   }
+}
+async function detectDescriptor(videoEl){
+  const ok = await initFaceApi();
+  if(!ok) return null;
+  const result = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+  return result ? result.descriptor : null;
+}
+function euclideanDist(a,b){
+  let sum=0;
+  for(let i=0;i<a.length;i++){ sum += (a[i]-b[i])**2; }
+  return Math.sqrt(sum);
+}
 
-  if(this._clockTimer) clearInterval(this._clockTimer);
-  this._clockTimer = setInterval(()=>{ const el = $('#dash-clock'); if(el) el.textContent = fmtClock(); else clearInterval(this._clockTimer); }, 1000);
-};
-</script>
-<script>
-/* ---------------------------- Attendance marking view (Face primary + QR) ---------------------------- */
-Views.attendance = function(main){
-  const cfg = State.config;
-  const modeDefault = cfg.faceAttendanceEnabled ? 'face' : (cfg.qrAttendanceEnabled ? 'qr' : 'face');
-  main.innerHTML = `
-    <div class="card">
-      <div class="card-title">हाजिर लगाउनुहोस्</div>
-      <div class="card-sub">${Attendance.currentSlot().label} • ${fmtClock()}</div>
-      <div class="tabs">
-        <button class="tab-btn ${modeDefault==='face'?'active':''}" id="tab-face" onclick="AttendanceUI.switchMode('face')">🙂 फेस डिटेक्सन</button>
-        <button class="tab-btn ${modeDefault==='qr'?'active':''}" id="tab-qr" onclick="AttendanceUI.switchMode('qr')">▦ QR स्क्यान</button>
-      </div>
-      <div id="att-mode-body"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">भर्खरै लागेको हाजिर</div>
-      <div id="att-recent"></div>
-    </div>
-  `;
-  AttendanceUI.init(modeDefault);
-};
+/* ================= AUTH SCREEN LOGIC ================= */
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('loginForm').classList.toggle('active', tab==='login');
+  document.getElementById('registerForm').classList.toggle('active', tab==='register');
+}
 
-const AttendanceUI = {
-  mode:'face', faceTimer:null, qrScanner:null, recent:[], busy:false,
-
-  async init(mode){
-    this.recent = [];
-    await this.switchMode(mode);
-    this.renderRecent();
-  },
-
-  async switchMode(mode){
-    this.stopAll();
-    this.mode = mode;
-    $('#tab-face').classList.toggle('active', mode==='face');
-    $('#tab-qr').classList.toggle('active', mode==='qr');
-    const body = $('#att-mode-body');
-    if(mode==='face'){
-      body.innerHTML = `
-        <div class="cam-wrap" style="max-width:360px;margin:0 auto;">
-          <video id="att-face-video" autoplay muted playsinline></video>
-          <div class="cam-overlay-frame" style="border-radius:50%; inset:8%;"></div>
-          <div class="cam-status"><span id="att-face-status">क्यामेरा सुरु हुँदैछ...</span></div>
-        </div>
-        <div class="cam-controls" style="margin-top:10px;">
-          <button class="btn btn-outline btn-sm" onclick="AttendanceUI.flipCam()">🔄 क्यामेरा बदल्नुहोस् (अगाडि/पछाडि)</button>
-        </div>`;
-      const ok = await Cam.start($('#att-face-video'),'user');
-      if(!ok) return;
-      const loaded = await Face.loadModels();
-      if(!loaded){ $('#att-face-status').textContent = 'फेस मोडेल लोड भएन'; toast('फेस डिटेक्सन मोडेल लोड हुन सकेन, QR प्रयोग गर्नुहोस्','warn'); return; }
-      $('#att-face-status').textContent = 'अनुहार खोजिँदैछ...';
-      this.faceTimer = setInterval(()=>this.faceTick(), 800);
-    } else {
-      body.innerHTML = `<div id="att-qr-reader" style="max-width:360px;margin:0 auto;"></div>
-        <div class="cam-controls" style="margin-top:10px;">
-          <button class="btn btn-outline btn-sm" onclick="AttendanceUI.flipQr()">🔄 क्यामेरा बदल्नुहोस् (अगाडि/पछाडि)</button>
-        </div>
-        <p class="hint" style="text-align:center;">विद्यार्थी/शिक्षकको परिचय-पत्रको QR कोड क्यामेरा अगाडि देखाउनुहोस्।</p>`;
-      this.qrFacing = 'environment';
-      this.qrScanner = new Html5Qrcode('att-qr-reader');
-      try{
-        await this.qrScanner.start({facingMode:this.qrFacing}, {fps:10, qrbox:220}, (text)=>this.onQrHit(text), ()=>{});
-      }catch(e){ toast('QR क्यामेरा सुरु हुन सकेन','error'); }
-    }
-  },
-
-  async flipCam(){ await Cam.flip($('#att-face-video')); },
-  async flipQr(){
-    if(!this.qrScanner) return;
-    try{ await this.qrScanner.stop(); await this.qrScanner.clear(); }catch(e){}
-    this.qrFacing = this.qrFacing==='environment' ? 'user' : 'environment';
-    this.qrScanner = new Html5Qrcode('att-qr-reader');
-    try{ await this.qrScanner.start({facingMode:this.qrFacing}, {fps:10, qrbox:220}, (text)=>this.onQrHit(text), ()=>{}); }catch(e){}
-  },
-
-  async faceTick(){
-    if(this.busy) return;
-    const v = $('#att-face-video'); if(!v || !v.srcObject) return;
-    const desc = await Face.getDescriptor(v);
-    if(!desc){ $('#att-face-status').textContent = 'अनुहार खोजिँदैछ...'; return; }
-    const known = State.users.filter(u=>u.faceDescriptor && u.status!=='inactive');
-    let best=null, bestDist=Infinity;
-    for(const u of known){ const d = Face.distance(desc,u.faceDescriptor); if(d<bestDist){bestDist=d;best=u;} }
-    if(best && bestDist<=0.5){
-      this.busy = true;
-      $('#att-face-status').textContent = 'चिनियो: ' + best.name;
-      const res = await Attendance.markByUser(best);
-      this.pushRecent(best, res);
-      toast(res.msg, res.ok?'success':'warn');
-      setTimeout(()=>{ this.busy=false; if($('#att-face-status')) $('#att-face-status').textContent='अनुहार खोजिँदैछ...'; }, 2500);
-    } else {
-      $('#att-face-status').textContent = 'चिनिएन — दर्ता जाँच्नुहोस्';
-    }
-  },
-
-  async onQrHit(text){
-    if(this.busy) return;
-    const user = await DB.userByQr(text.trim());
-    if(!user){ toast('अमान्य QR कोड — यो प्रयोगकर्ता फेला परेन','error'); return; }
-    this.busy = true;
-    const res = await Attendance.markByUser(user);
-    this.pushRecent(user, res);
-    toast(res.msg, res.ok?'success':'warn');
-    setTimeout(()=>{ this.busy=false; }, 1800);
-  },
-
-  pushRecent(user,res){
-    this.recent.unshift({user,res,time:fmtClock()});
-    this.recent = this.recent.slice(0,10);
-    this.renderRecent();
-  },
-  renderRecent(){
-    const el = $('#att-recent'); if(!el) return;
-    if(this.recent.length===0){ el.innerHTML = `<div class="empty-state" style="padding:20px;">अझै हाजिर लागेको छैन</div>`; return; }
-    el.innerHTML = this.recent.map(r=>`
-      <div class="list-row">
-        <div class="avatar">${r.user.photo?`<img src="${r.user.photo}">`:(r.user.name?r.user.name[0]:'?')}</div>
-        <div class="list-main"><div class="lname">${r.user.name}</div><div class="lsub">${r.time} • ${ROLE_LABEL[r.user.role]}</div></div>
-        ${r.res.ok ? `<span class="badge badge-pine">सफल</span>` : `<span class="badge badge-rose">असफल</span>`}
-      </div>`).join('');
-  },
-  stopAll(){
-    if(this.faceTimer){ clearInterval(this.faceTimer); this.faceTimer=null; }
-    Cam.stop();
-    if(this.qrScanner){ try{ this.qrScanner.stop().then(()=>this.qrScanner.clear()); }catch(e){} this.qrScanner=null; }
+let regStream = null, regDescriptor = null;
+async function startRegCam(){
+  document.getElementById('regFaceStatus').textContent = 'क्यामेरा खुल्दैछ...';
+  regStream = await startCam(document.getElementById('regVideo'));
+  if(regStream){
+    document.getElementById('regFaceStatus').textContent = 'अनुहार फ्रेममा राखी क्याप्चर थिच्नुहोस्';
+    await initFaceApi();
   }
-};
-</script>
-<script>
-/* ---------------------------- People (registration + ID cards) view ---------------------------- */
-Views.people = function(main){
-  main.innerHTML = `
-    <div class="card">
-      <div class="card-title">व्यक्ति व्यवस्थापन</div>
-      <div class="card-sub">शिक्षक, विद्यार्थी र प्रधानाध्यापक दर्ता गर्नुहोस्</div>
-      <div class="tabs" id="people-role-tabs">
-        <button class="tab-btn active" data-role="all" onclick="PeopleUI.filterRole('all')">सबै</button>
-        <button class="tab-btn" data-role="student" onclick="PeopleUI.filterRole('student')">विद्यार्थी</button>
-        <button class="tab-btn" data-role="teacher" onclick="PeopleUI.filterRole('teacher')">शिक्षक</button>
-        <button class="tab-btn" data-role="headmaster" onclick="PeopleUI.filterRole('headmaster')">प्र.अ.</button>
-      </div>
-      <div class="searchbar">
-        <input type="text" id="people-search" placeholder="नाम खोज्नुहोस्..." oninput="PeopleUI.render()">
-        <button class="btn btn-primary" onclick="PeopleUI.openForm()">➕ नयाँ</button>
-      </div>
-      <div id="people-list"></div>
-    </div>
-  `;
-  PeopleUI.currentRole='all';
-  PeopleUI.render();
-};
-
-const PeopleUI = {
-  currentRole:'all', photoData:'',
-  filterRole(r){
-    this.currentRole=r;
-    $$('#people-role-tabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.role===r));
-    this.render();
-  },
-  render(){
-    const listEl = $('#people-list'); if(!listEl) return;
-    const q = ($('#people-search')?.value||'').trim().toLowerCase();
-    let people = State.users.filter(u=>u.status!=='inactive');
-    if(this.currentRole!=='all') people = people.filter(u=>u.role===this.currentRole);
-    if(q) people = people.filter(u=>u.name.toLowerCase().includes(q));
-    if(people.length===0){ listEl.innerHTML = `<div class="empty-state"><div class="ic">👤</div>कोही फेला परेन</div>`; return; }
-    listEl.innerHTML = people.map(u=>`
-      <div class="list-row">
-        <div class="avatar">${u.photo?`<img src="${u.photo}">`:(u.name?u.name[0]:'?')}</div>
-        <div class="list-main"><div class="lname">${u.name}</div><div class="lsub">${ROLE_LABEL[u.role]}${u.class?' • '+u.class+(u.section?' '+u.section:''):''} ${u.faceDescriptor?'• 🙂 फेस दर्ता':'• ⚠️ फेस छैन'}</div></div>
-        <div class="list-actions">
-          <button class="icon-sm" title="ID कार्ड" onclick="PeopleUI.showIdCard(${u.id})">🪪</button>
-          <button class="icon-sm" title="सम्पादन" onclick="PeopleUI.openForm(${u.id})">✏️</button>
-          <button class="icon-sm danger" title="हटाउनुहोस्" onclick="PeopleUI.remove(${u.id})">🗑️</button>
-        </div>
-      </div>`).join('');
-  },
-
-  classOptions(selected){
-    return State.config.classes.map(c=>`<option value="${c.name}" ${c.name===selected?'selected':''}>${c.name}</option>`).join('');
-  },
-  sectionOptions(className, selected){
-    const c = State.config.classes.find(x=>x.name===className);
-    const secs = c ? c.sections : [];
-    return secs.map(s=>`<option value="${s}" ${s===selected?'selected':''}>${s}</option>`).join('');
-  },
-
-  async openForm(userId){
-    const editing = !!userId;
-    const u = editing ? await DB.getUser(userId) : {role:'student', class:State.config.classes[0]?.name||'', section:'', name:'', phone:''};
-    this.photoData = u.photo || '';
-    this.faceDescriptor = u.faceDescriptor || null;
-    this.editingId = editing ? userId : null;
-
-    openModal(`
-      <div class="modal-head"><h3>${editing?'सम्पादन गर्नुहोस्':'नयाँ दर्ता'}</h3><button class="close-x" onclick="closeModal()">✕</button></div>
-      <div class="field">
-        <label>भूमिका *</label>
-        <select id="pf-role" onchange="PeopleUI.onRoleChange()">
-          <option value="student" ${u.role==='student'?'selected':''}>विद्यार्थी</option>
-          <option value="teacher" ${u.role==='teacher'?'selected':''}>शिक्षक</option>
-          <option value="headmaster" ${u.role==='headmaster'?'selected':''}>प्रधानाध्यापक</option>
-        </select>
-      </div>
-      <div class="field"><label>पूरा नाम *</label><input type="text" id="pf-name" value="${u.name||''}"></div>
-      <div id="pf-class-wrap" class="field-row">
-        <div class="field"><label>कक्षा</label><select id="pf-class" onchange="PeopleUI.onClassChange()">${this.classOptions(u.class)}</select></div>
-        <div class="field"><label>सेक्सन</label><select id="pf-section">${this.sectionOptions(u.class,u.section)}</select></div>
-      </div>
-      <div class="field"><label>फोन नम्बर</label><input type="text" id="pf-phone" value="${u.phone||''}"></div>
-      <div class="field-row ${u.role==='student'?'hidden':''}" id="pf-login-wrap">
-        <div class="field"><label>प्रयोगकर्ता नाम (लगइन)</label><input type="text" id="pf-username" value="${u.username||''}"></div>
-        <div class="field"><label>पासवर्ड</label><input type="password" id="pf-password" value="${u.password||''}"></div>
-      </div>
-      <div class="field">
-        <label>फोटो (अनुहार पहिचानको लागि) *</label>
-        <div id="pf-photo-zone"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="closeModal()">रद्द</button>
-        <button class="btn btn-primary" style="flex:1" onclick="PeopleUI.save()">${editing?'अपडेट गर्नुहोस्':'दर्ता गर्नुहोस्'} ✓</button>
-      </div>
-    `);
-    this.onRoleChange();
-    this.renderPhotoZone();
-  },
-  onRoleChange(){
-    const role = $('#pf-role').value;
-    $('#pf-class-wrap').classList.toggle('hidden', role!=='student');
-    $('#pf-login-wrap').classList.toggle('hidden', role==='student');
-  },
-  onClassChange(){
-    $('#pf-section').innerHTML = this.sectionOptions($('#pf-class').value, '');
-  },
-  renderPhotoZone(){
-    const zone = $('#pf-photo-zone'); if(!zone) return;
-    if(this.photoData){
-      zone.innerHTML = `
-        <div class="cam-wrap" style="max-width:220px;margin:0 auto;">
-          <img class="cam-preview" src="${this.photoData}">
-        </div>
-        <div class="hint" style="text-align:center;">${this.faceDescriptor? '✅ अनुहार पहिचान भयो' : '⚠️ अनुहार फेला परेन — फेरि खिच्नुहोस् (छायाँ/उज्यालो मिलाउनुहोस्)'}</div>
-        <button class="btn btn-outline btn-sm btn-block" style="margin-top:8px;" onclick="PeopleUI.photoData='';PeopleUI.faceDescriptor=null;PeopleUI.renderPhotoZone()">फेरि खिच्नुहोस्</button>`;
-    } else {
-      zone.innerHTML = `
-        <div class="cam-wrap" style="max-width:220px;margin:0 auto;">
-          <video id="pf-video" autoplay muted playsinline></video>
-          <div class="cam-overlay-frame"></div>
-        </div>
-        <div class="cam-controls" style="margin-top:8px;">
-          <button class="btn btn-outline btn-sm" onclick="Cam.flip($('#pf-video'))">🔄 अगाडि/पछाडि क्यामेरा</button>
-          <button class="btn btn-primary btn-sm" onclick="PeopleUI.snap()">📸 फोटो खिच्नुहोस्</button>
-        </div>
-        <div class="hint" style="text-align:center; margin-top:4px;">वा <label style="color:var(--himal); font-weight:700; cursor:pointer;">फाइलबाट अपलोड <input type="file" accept="image/*" style="display:none" onchange="PeopleUI.uploadPhoto(event)"></label></div>`;
-      Cam.start($('#pf-video'),'user');
-    }
-  },
-  async snap(){
-    const v = $('#pf-video'); if(!v) return;
-    const data = Cam.snap(v);
-    Cam.stop();
-    await this.processPhoto(data);
-  },
-  async uploadPhoto(e){
-    const f = e.target.files[0]; if(!f) return;
-    const data = await fileToDataURL(f);
-    await this.processPhoto(data);
-  },
-  async processPhoto(data){
-    this.photoData = data;
-    this.renderPhotoZone();
-    toast('अनुहार पहिचान गर्दैछ...','info',1200);
-    try{
-      await Face.loadModels();
-      const img = new Image(); img.src = data;
-      await new Promise(r=>{ img.onload=r; });
-      this.faceDescriptor = await Face.getDescriptor(img);
-    }catch(e){ this.faceDescriptor = null; }
-    this.renderPhotoZone();
-  },
-  async save(){
-    const role = $('#pf-role').value;
-    const name = $('#pf-name').value.trim();
-    if(!name){ toast('नाम आवश्यक छ','error'); return; }
-    if(!this.photoData){ toast('फोटो आवश्यक छ','error'); return; }
-    const cls = role==='student' ? $('#pf-class').value : '';
-    const sec = role==='student' ? $('#pf-section').value : '';
-    const username = role!=='student' ? $('#pf-username').value.trim() : '';
-    const password = role!=='student' ? $('#pf-password').value : '';
-
-    const payload = {
-      role, name, class:cls, section:sec, phone:$('#pf-phone').value.trim(),
-      photo:this.photoData, faceDescriptor:this.faceDescriptor,
-      username, password, status:'active'
-    };
-    if(this.editingId){
-      const existing = await DB.getUser(this.editingId);
-      Object.assign(existing, payload);
-      await DB.putUser(existing);
-      toast('अपडेट भयो','success');
-    } else {
-      payload.qrId = uid();
-      payload.createdAt = new Date().toISOString();
-      const id = await DB.addUser(payload);
-      payload.id = id;
-      toast('दर्ता सफल भयो! ID कार्ड हेर्न सक्नुहुन्छ।','success');
-    }
-    await loadState();
-    closeModal();
-    PeopleUI.render();
-  },
-  async remove(id){
-    openModal(`
-      <div class="modal-head"><h3>हटाउने पुष्टि</h3><button class="close-x" onclick="closeModal()">✕</button></div>
-      <p>के तपाईं यो व्यक्तिलाई हटाउन निश्चित हुनुहुन्छ? हाजिर विवरण सुरक्षित रहनेछ।</p>
-      <div class="btn-row"><button class="btn btn-outline" onclick="closeModal()">रद्द</button>
-      <button class="btn btn-danger" style="flex:1" onclick="PeopleUI.confirmRemove(${id})">हटाउनुहोस्</button></div>
-    `);
-  },
-  async confirmRemove(id){
-    const u = await DB.getUser(id);
-    u.status='inactive';
-    await DB.putUser(u);
-    await loadState();
-    closeModal();
-    toast('हटाइयो','success');
-    PeopleUI.render();
-  },
-  async showIdCard(id){
-    const u = await DB.getUser(id);
-    const cfg = State.config;
-    openModal(`
-      <div class="modal-head"><h3>परिचय-पत्र</h3><button class="close-x" onclick="closeModal()">✕</button></div>
-      <div class="idcard" id="idcard-print">
-        <div class="idcard-head">
-          <div class="sname">${cfg.schoolName}</div>
-          <div class="saddr">${cfg.address||''}</div>
-          <div class="idcard-ridge"><svg viewBox="0 0 340 26" preserveAspectRatio="none"><polygon points="0,26 0,16 30,6 60,14 100,3 140,13 170,5 200,15 230,7 260,16 290,6 320,14 340,9 340,26" fill="#FFFDF8"/></svg></div>
-        </div>
-        <div class="idcard-body">
-          <div class="idcard-photo">${u.photo?`<img src="${u.photo}">`:''}</div>
-          <div class="idcard-name">${u.name}</div>
-          <div class="idcard-role">${ROLE_LABEL[u.role]}</div>
-          <div class="idcard-meta">${u.class?`कक्षा: ${u.class} ${u.section}<br>`:''}${u.phone?`फोन: ${u.phone}`:''}</div>
-          <div class="idcard-qr" id="idcard-qr-el"></div>
-          <div class="idcard-id">${u.qrId}</div>
-        </div>
-      </div>
-      <div class="btn-row" style="margin-top:14px;">
-        <button class="btn btn-outline" style="flex:1" onclick="closeModal()">बन्द गर्नुहोस्</button>
-        <button class="btn btn-primary" style="flex:1" onclick="PeopleUI.printCard()">🖨️ प्रिन्ट / डाउनलोड</button>
-      </div>
-    `);
-    QR.renderInto('idcard-qr-el', u.qrId);
-  },
-  printCard(){
-    const card = $('#idcard-print');
-    const w = window.open('', '_blank');
-    w.document.write(`<html><head><title>ID Card</title><style>
-      body{font-family:sans-serif; display:flex; justify-content:center; padding:40px; background:#eee;}
-      </style></head><body>${card.outerHTML}</body></html>`);
-    w.document.close();
-    setTimeout(()=>w.print(), 400);
+}
+async function captureRegFace(){
+  const video = document.getElementById('regVideo');
+  if(!video.srcObject){ toast('पहिले क्यामेरा खोल्नुहोस्','err'); return; }
+  document.getElementById('regFaceStatus').textContent = 'अनुहार पहिचान हुँदैछ...';
+  const desc = await detectDescriptor(video);
+  if(desc){
+    regDescriptor = Array.from(desc);
+    const st = document.getElementById('regFaceStatus');
+    st.textContent = '✔ अनुहार सफलतापूर्वक क्याप्चर भयो';
+    st.className = 'face-status ok';
+  }else{
+    const st = document.getElementById('regFaceStatus');
+    st.textContent = '✘ अनुहार भेटिएन, फेरि प्रयास गर्नुहोस्';
+    st.className = 'face-status bad';
   }
-};
-</script>
-<script>
-/* ---------------------------- Reports view ---------------------------- */
-Views.reports = function(main){
+}
+
+async function doRegister(){
+  const fullname = document.getElementById('regFullname').value.trim();
+  const username = document.getElementById('regUsername').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+  const msg = document.getElementById('regMsg');
+  msg.textContent = '';
+  if(!fullname || !username || !password){ msg.textContent = 'कृपया सबै आवश्यक जानकारी भर्नुहोस्।'; return; }
+  if(password.length < 4){ msg.textContent = 'पासवर्ड कम्तिमा ४ अक्षरको हुनुपर्छ।'; return; }
+  const existing = await dbGetByUsername(username);
+  if(existing){ msg.textContent = 'यो प्रयोगकर्ता नाम पहिले नै प्रयोगमा छ।'; return; }
+  const passwordHash = await sha256(password);
+  const user = {
+    fullname, username, passwordHash,
+    faceDescriptor: regDescriptor,
+    faceLockEnabled: !!regDescriptor,
+    createdAt: Date.now()
+  };
+  const id = await dbAdd('users', user);
+  await dbPut('settings', {
+    userId:id, startTime:'10:00', lateThreshold:15,
+    purposes:['कार्यालय हाजिर','मिटिङ','फिल्ड कार्य','तालिम','अन्य']
+  });
+  stopCam(document.getElementById('regVideo'));
+  toast('खाता सफलतापूर्वक बन्यो! अब लगइन गर्नुहोस्','ok');
+  switchAuthTab('login');
+  document.getElementById('loginUsername').value = username;
+  regDescriptor = null;
+}
+
+async function doLogin(){
+  const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+  msg.textContent = '';
+  if(!username || !password){ msg.textContent = 'प्रयोगकर्ता नाम र पासवर्ड भर्नुहोस्।'; return; }
+  const user = await dbGetByUsername(username);
+  if(!user){ msg.textContent = 'खाता फेला परेन।'; return; }
+  const hash = await sha256(password);
+  if(hash !== user.passwordHash){ msg.textContent = 'पासवर्ड मिलेन।'; return; }
+
+  if(user.faceLockEnabled && user.faceDescriptor){
+    pendingLoginUser = user;
+    document.getElementById('authScreen').classList.remove('active');
+    document.getElementById('faceLockScreen').classList.add('active');
+    document.getElementById('lockFaceStatus').textContent = 'क्यामेरा खुल्दैछ...';
+    lockStream = await startCam(document.getElementById('lockVideo'));
+    document.getElementById('lockFaceStatus').textContent = 'अनुहार फ्रेममा राखी प्रमाणित थिच्नुहोस्';
+  }else{
+    await completeLogin(user);
+  }
+}
+
+let pendingLoginUser = null, lockStream = null;
+async function verifyFaceLock(){
+  const video = document.getElementById('lockVideo');
+  document.getElementById('lockFaceStatus').textContent = 'जाँच हुँदैछ...';
+  const desc = await detectDescriptor(video);
+  if(!desc){
+    document.getElementById('lockFaceStatus').textContent = '✘ अनुहार भेटिएन, फेरि प्रयास गर्नुहोस्';
+    document.getElementById('lockFaceStatus').className = 'face-status bad';
+    return;
+  }
+  const dist = euclideanDist(Array.from(desc), pendingLoginUser.faceDescriptor);
+  if(dist < FACE_MATCH_THRESHOLD){
+    document.getElementById('lockFaceStatus').textContent = '✔ प्रमाणित भयो!';
+    document.getElementById('lockFaceStatus').className = 'face-status ok';
+    stopCam(video);
+    setTimeout(()=>completeLogin(pendingLoginUser), 400);
+  }else{
+    document.getElementById('lockFaceStatus').textContent = '✘ अनुहार मिलेन, फेरि प्रयास गर्नुहोस्';
+    document.getElementById('lockFaceStatus').className = 'face-status bad';
+  }
+}
+function cancelFaceLock(){
+  stopCam(document.getElementById('lockVideo'));
+  document.getElementById('faceLockScreen').classList.remove('active');
+  document.getElementById('authScreen').classList.add('active');
+  pendingLoginUser = null;
+}
+
+async function completeLogin(user){
+  currentUser = user;
+  sessionStorage.setItem('hajir_uid', user.id);
+  currentSettings = await dbGet('settings', user.id);
+  document.getElementById('authScreen').classList.remove('active');
+  document.getElementById('faceLockScreen').classList.remove('active');
+  document.getElementById('mainShell').classList.add('active');
+  document.getElementById('userNameLabel').textContent = user.fullname;
+  document.getElementById('userAvatar').textContent = user.fullname.charAt(0).toUpperCase();
+  document.getElementById('dashName').textContent = user.fullname.split(' ')[0];
+  initHeaderDate();
+  populatePurposeUI();
+  await refreshDashboard();
+  showView('dashboardView');
+}
+
+function doLogout(){
+  currentUser = null;
+  sessionStorage.removeItem('hajir_uid');
+  [document.getElementById('markVideo'), document.getElementById('setVideo'), document.getElementById('regVideo')].forEach(stopCam);
+  document.getElementById('mainShell').classList.remove('active');
+  document.getElementById('authScreen').classList.add('active');
+  document.getElementById('loginPassword').value = '';
+}
+
+/* ================= NAV / VIEWS ================= */
+function showView(viewId){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active', b.dataset.view===viewId));
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('active', b.dataset.view===viewId));
+  if(viewId==='recordsView') renderRecords();
+  if(viewId==='reportsView'){
+    const now = new Date();
+    document.getElementById('reportMonth').value = now.getFullYear()+'-'+pad2(now.getMonth()+1);
+    renderReport();
+  }
+  if(viewId==='settingsView') populateSettingsUI();
+  if(viewId==='markView'){
+    const now = new Date();
+    document.getElementById('markTime').value = pad2(now.getHours())+':'+pad2(now.getMinutes());
+  }
+}
+function initHeaderDate(){
   const now = new Date();
-  main.innerHTML = `
-    <div class="card">
-      <div class="card-title">हाजिर रिपोर्ट</div>
-      <div class="card-sub">दैनिक, मासिक र वार्षिक हाजिर हेर्नुहोस् र एक्सेलमा डाउनलोड गर्नुहोस्</div>
-      <div class="tabs">
-        <button class="tab-btn active" id="rt-daily" onclick="ReportsUI.switchTab('daily')">दैनिक</button>
-        <button class="tab-btn" id="rt-monthly" onclick="ReportsUI.switchTab('monthly')">मासिक</button>
-        <button class="tab-btn" id="rt-yearly" onclick="ReportsUI.switchTab('yearly')">वार्षिक</button>
-      </div>
-      <div class="grid grid-3" id="rt-filters"></div>
-      <div class="btn-row" style="margin-bottom:12px;">
-        <button class="btn btn-gold btn-sm" onclick="ReportsUI.exportExcel()">⬇️ एक्सेल डाउनलोड</button>
-      </div>
-      <div id="rt-body"></div>
-    </div>
+  document.getElementById('brandDate').textContent = NP_WEEKDAYS_SHORT[now.getDay()]+', '+toNp(now.getDate())+' '+NP_MONTHS[now.getMonth()];
+  document.getElementById('todayWeekday').textContent = NP_WEEKDAYS[now.getDay()];
+  document.getElementById('todayDate').textContent = toNp(now.getDate())+' '+NP_MONTHS[now.getMonth()]+' '+toNp(now.getFullYear());
+}
+
+/* ================= PURPOSE UI ================= */
+function populatePurposeUI(){
+  const grid = document.getElementById('purposeGrid');
+  grid.innerHTML = '';
+  (currentSettings.purposes||[]).forEach(p=>{
+    const b = document.createElement('button');
+    b.type='button'; b.className='purpose-opt'+(selectedPurpose===p?' sel':'');
+    b.textContent = p;
+    b.onclick = ()=>{ selectedPurpose = p; document.querySelectorAll('.purpose-opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); };
+    grid.appendChild(b);
+  });
+  if(!selectedPurpose && currentSettings.purposes && currentSettings.purposes.length){
+    selectedPurpose = currentSettings.purposes[0];
+    if(grid.firstChild) grid.firstChild.classList.add('sel');
+  }
+  // edit modal select
+  const sel = document.getElementById('editPurpose');
+  sel.innerHTML = (currentSettings.purposes||[]).map(p=>`<option value="${p}">${p}</option>`).join('');
+}
+
+/* ================= ATTENDANCE STATUS CALC ================= */
+function computeStatus(timeStr){
+  const [h,m] = timeStr.split(':').map(Number);
+  const [sh,sm] = (currentSettings.startTime||'10:00').split(':').map(Number);
+  const late = currentSettings.lateThreshold || 15;
+  const minutes = h*60+m;
+  const startMinutes = sh*60+sm;
+  return (minutes > startMinutes + late) ? 'late' : 'present';
+}
+
+/* ================= MARK ATTENDANCE ================= */
+let markStream = null;
+async function startMarkCam(){
+  document.getElementById('markFaceStatus').textContent = 'क्यामेरा खुल्दैछ...';
+  markStream = await startCam(document.getElementById('markVideo'));
+  if(markStream){
+    document.getElementById('markFaceStatus').textContent = 'तयार। अब "अनुहार स्क्यान" थिच्नुहोस्';
+    await initFaceApi();
+  }
+}
+async function scanAndMark(){
+  const video = document.getElementById('markVideo');
+  if(!video.srcObject){ toast('पहिले क्यामेरा सुरु गर्नुहोस्','err'); return; }
+  if(!selectedPurpose){ toast('कृपया कामको प्रकार छान्नुहोस्','err'); return; }
+  document.getElementById('markFaceStatus').textContent = 'अनुहार जाँच हुँदैछ...';
+  const desc = await detectDescriptor(video);
+  if(!desc){
+    document.getElementById('markFaceStatus').textContent = '✘ अनुहार भेटिएन। राम्रो उज्यालोमा प्रयास गर्नुहोस्।';
+    document.getElementById('markFaceStatus').className='face-status bad';
+    return;
+  }
+  if(currentUser.faceDescriptor){
+    const dist = euclideanDist(Array.from(desc), currentUser.faceDescriptor);
+    if(dist >= FACE_MATCH_THRESHOLD){
+      document.getElementById('markFaceStatus').textContent = '✘ अनुहार मिलेन। तपाईं '+currentUser.fullname+' हुनुहुन्न भने म्यानुअल हाजिर प्रयोग गर्नुहोस्।';
+      document.getElementById('markFaceStatus').className='face-status bad';
+      return;
+    }
+  }
+  document.getElementById('markFaceStatus').textContent = '✔ अनुहार पहिचान भयो!';
+  document.getElementById('markFaceStatus').className='face-status ok';
+  await saveAttendance('face');
+}
+async function manualMark(){
+  if(!selectedPurpose){ toast('कृपया कामको प्रकार छान्नुहोस्','err'); return; }
+  await saveAttendance('manual');
+}
+async function saveAttendance(method){
+  const now = new Date();
+  const date = fmtDate(now);
+  const time = document.getElementById('markTime').value || (pad2(now.getHours())+':'+pad2(now.getMinutes()));
+  const note = document.getElementById('markNote').value.trim();
+  const status = computeStatus(time);
+  const existing = (await dbAllByIndex('attendance','userId', currentUser.id)).find(r=>r.date===date && r.purpose===selectedPurpose);
+  const rec = existing || {userId: currentUser.id, date, createdAt: Date.now()};
+  rec.timeIn = existing ? existing.timeIn : time;
+  rec.timeOut = existing && time !== rec.timeIn ? time : (existing ? existing.timeOut : null);
+  rec.purpose = selectedPurpose;
+  rec.status = status;
+  rec.note = note;
+  rec.method = method;
+  rec.updatedAt = Date.now();
+  if(existing){ await dbPut('attendance', rec); } else { await dbAdd('attendance', rec); }
+  document.getElementById('markNote').value = '';
+  showStamp(time);
+  toast('हाजिर सफलतापूर्वक लगियो ✔','ok');
+  ringBell();
+  await refreshDashboard();
+}
+function showStamp(time){
+  const overlay = document.getElementById('stampOverlay');
+  document.getElementById('stampTime').textContent = time;
+  overlay.style.display='flex';
+  overlay.querySelector('.stamp').style.animation='none';
+  void overlay.offsetWidth;
+  overlay.querySelector('.stamp').style.animation='stampDown .55s cubic-bezier(.2,1.4,.4,1) forwards';
+  setTimeout(()=>{ overlay.style.display='none'; }, 1400);
+}
+function ringBell(){
+  const bell = document.getElementById('bellIcon');
+  bell.style.transition='transform .1s';
+  let n=0;
+  const iv = setInterval(()=>{
+    bell.style.transform = n%2===0 ? 'rotate(18deg)' : 'rotate(-18deg)';
+    n++;
+    if(n>6){ clearInterval(iv); bell.style.transform='rotate(0deg)'; }
+  }, 90);
+}
+
+/* ================= DASHBOARD ================= */
+async function refreshDashboard(){
+  const all = await dbAllByIndex('attendance','userId', currentUser.id);
+  const now = new Date();
+  const monthStr = now.getFullYear()+'-'+pad2(now.getMonth()+1);
+  const monthRecs = all.filter(r=>r.date.startsWith(monthStr));
+  const present = monthRecs.filter(r=>r.status==='present').length;
+  const late = monthRecs.filter(r=>r.status==='late').length;
+  const todayStr = fmtDate(now);
+  const todayRecs = all.filter(r=>r.date===todayStr);
+
+  document.getElementById('todayStatusLine').textContent = todayRecs.length
+    ? `आज ${toNp(todayRecs.length)} वटा हाजिर लागिसक्यो — पछिल्लो: ${todayRecs[todayRecs.length-1].timeIn} (${statusLabel(todayRecs[todayRecs.length-1].status)})`
+    : 'आजको हाजिर अझै लागेको छैन';
+
+  const grid = document.getElementById('statGrid');
+  grid.innerHTML = `
+    <div class="stat-card"><b>${toNp(present)}</b><span>यस महिना उपस्थित</span></div>
+    <div class="stat-card gold"><b>${toNp(late)}</b><span>यस महिना ढिलो</span></div>
+    <div class="stat-card blue"><b>${toNp(monthRecs.length)}</b><span>कुल रेकर्ड</span></div>
+    <div class="stat-card red"><b>${toNp(new Set(all.map(r=>r.date)).size)}</b><span>जम्मा दिनहरू (हालसम्म)</span></div>
   `;
-  ReportsUI.year = now.getFullYear();
-  ReportsUI.month = now.getMonth()+1;
-  ReportsUI.date = todayStr();
-  ReportsUI.klass = 'all';
-  ReportsUI.switchTab('daily');
-};
 
-const ReportsUI = {
-  tab:'daily',
-  switchTab(t){
-    this.tab = t;
-    ['daily','monthly','yearly'].forEach(x=>$('#rt-'+x).classList.toggle('active', x===t));
-    this.renderFilters();
-    this.renderBody();
-  },
-  renderFilters(){
-    const classSel = `<div class="field"><label>कक्षा</label><select id="rt-class" onchange="ReportsUI.onFilterChange()">
-      <option value="all">सबै</option>${State.config.classes.map(c=>`<option value="${c.name}">${c.name}</option>`).join('')}</select></div>`;
-    const el = $('#rt-filters');
-    if(this.tab==='daily'){
-      el.innerHTML = `<div class="field"><label>मिति</label><input type="date" id="rt-date" value="${this.date}" onchange="ReportsUI.onFilterChange()"></div>${classSel}`;
-    } else if(this.tab==='monthly'){
-      el.innerHTML = `
-        <div class="field"><label>वर्ष</label><input type="number" id="rt-year" value="${this.year}" onchange="ReportsUI.onFilterChange()"></div>
-        <div class="field"><label>महिना</label><select id="rt-month" onchange="ReportsUI.onFilterChange()">
-          ${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${i+1===this.month?'selected':''}>${MONTHS_EN[i]}</option>`).join('')}
-        </select></div>
-        ${classSel}`;
-    } else {
-      el.innerHTML = `<div class="field"><label>वर्ष</label><input type="number" id="rt-year" value="${this.year}" onchange="ReportsUI.onFilterChange()"></div>${classSel}`;
-    }
-    setTimeout(()=>{ const c=$('#rt-class'); if(c) c.value=this.klass; },0);
-  },
-  onFilterChange(){
-    if($('#rt-date')) this.date = $('#rt-date').value;
-    if($('#rt-year')) this.year = +$('#rt-year').value;
-    if($('#rt-month')) this.month = +$('#rt-month').value;
-    if($('#rt-class')) this.klass = $('#rt-class').value;
-    this.renderBody();
-  },
-  peopleFiltered(){
-    let p = State.users.filter(u=>u.status!=='inactive');
-    if(this.klass!=='all') p = p.filter(u=>u.class===this.klass);
-    return p.sort((a,b)=> (a.class||'').localeCompare(b.class||'') || a.name.localeCompare(b.name));
-  },
-  letterBadgeClass(letter){
-    if(letter==='PP') return 'cell-pp'; if(letter==='P') return 'cell-p';
-    if(letter==='H') return 'cell-h'; if(letter==='HOL') return 'cell-hol';
-    return 'cell-a';
-  },
-  async renderBody(){
-    const body = $('#rt-body'); if(!body) return;
-    const people = this.peopleFiltered();
-    if(people.length===0){ body.innerHTML = `<div class="empty-state">कोही फेला परेन</div>`; return; }
-
-    if(this.tab==='daily'){
-      const recs = await DB.attendanceByDate(this.date);
-      const holiday = Attendance.isHoliday(this.date);
-      const rows = people.map(u=>{
-        const r = recs.find(x=>x.userId===u.id);
-        const letter = holiday ? 'HOL' : (r ? Attendance.finalLetter(r) : 'A');
-        return `<tr><td class="name-cell">${u.name}<div class="hint">${ROLE_LABEL[u.role]}${u.class?' • '+u.class+' '+u.section:''}</div></td>
-          <td class="${this.letterBadgeClass(letter)}">${letter}</td>
-          <td>${r&&r.markedAt&&r.markedAt.morning ? new Date(r.markedAt.morning).toLocaleTimeString('ne-NP',{hour:'2-digit',minute:'2-digit'}) : '—'}</td>
-          <td>${r&&r.markedAt&&r.markedAt.evening ? new Date(r.markedAt.evening).toLocaleTimeString('ne-NP',{hour:'2-digit',minute:'2-digit'}) : '—'}</td>
-          </tr>`;
-      }).join('');
-      body.innerHTML = `<div class="table-wrap"><table><thead><tr><th class="name-cell">नाम</th><th>स्थिति</th><th>बिहान</th><th>साँझ</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-    }
-
-    else if(this.tab==='monthly'){
-      const days = new Date(this.year, this.month, 0).getDate();
-      const dateList = Array.from({length:days},(_,i)=>`${this.year}-${pad2(this.month)}-${pad2(i+1)}`);
-      const allRecs = await DB.allAttendance();
-      const head = dateList.map(d=>{
-        const dow = new Date(d+'T00:00:00').getDay();
-        return `<th style="${dow===6?'color:var(--rose);':''}">${+d.slice(-2)}</th>`;
-      }).join('');
-      const rows = people.map(u=>{
-        let pCount=0, halfCount=0, absentCount=0, workingDays=0;
-        const cells = dateList.map(d=>{
-          const holiday = Attendance.isHoliday(d);
-          if(holiday) return `<td class="cell-hol">-</td>`;
-          const isFuture = new Date(d+'T00:00:00') > new Date();
-          const rec = allRecs.find(r=>r.userId===u.id && r.date===d);
-          const letter = rec ? Attendance.finalLetter(rec) : (isFuture ? '' : 'A');
-          if(letter){ workingDays++; if(letter==='PP'||letter==='P') pCount++; else if(letter==='H'){halfCount++;} else if(letter==='A') absentCount++; }
-          return `<td class="${letter?this.letterBadgeClass(letter):''}">${letter||''}</td>`;
-        }).join('');
-        const pct = workingDays>0 ? (((pCount + halfCount*0.5)/workingDays)*100).toFixed(0) : '0';
-        return `<tr><td class="name-cell">${u.name}<div class="hint">${u.class||ROLE_LABEL[u.role]} ${u.section||''}</div></td>${cells}
-          <td style="font-weight:700;">${pCount}</td><td style="font-weight:700;color:var(--amber);">${halfCount}</td><td style="font-weight:700;color:var(--rose);">${absentCount}</td><td style="font-weight:700;">${pct}%</td></tr>`;
-      }).join('');
-      body.innerHTML = `<div class="table-wrap"><table><thead><tr><th class="name-cell">नाम</th>${head}<th>P</th><th>H</th><th>A</th><th>%</th></tr></thead><tbody>${rows}</tbody></table></div>
-        <p class="hint" style="margin-top:8px;">P=पूर्ण उपस्थित, H=आधा दिन, A=अनुपस्थित, रातो='-' चिन्ह भएको बिदा/शनिबार।</p>`;
-    }
-
-    else { // yearly
-      const allRecs = await DB.allAttendance();
-      const head = MONTHS_EN.map(m=>`<th>${m.slice(0,3)}</th>`).join('');
-      const rows = people.map(u=>{
-        let yearTotalP=0, yearTotalWorking=0;
-        const cells = MONTHS_EN.map((_,mi)=>{
-          const days = new Date(this.year, mi+1, 0).getDate();
-          let p=0, half=0, working=0;
-          for(let d=1; d<=days; d++){
-            const dateStr = `${this.year}-${pad2(mi+1)}-${pad2(d)}`;
-            if(Attendance.isHoliday(dateStr)) continue;
-            if(new Date(dateStr+'T00:00:00') > new Date()) continue;
-            const rec = allRecs.find(r=>r.userId===u.id && r.date===dateStr);
-            const letter = rec ? Attendance.finalLetter(rec) : 'A';
-            working++;
-            if(letter==='PP'||letter==='P') p++; else if(letter==='H') half++;
-          }
-          yearTotalP += p + half*0.5; yearTotalWorking += working;
-          const pct = working>0 ? (((p+half*0.5)/working)*100).toFixed(0) : '-';
-          return `<td>${working>0?pct+'%':'-'}</td>`;
-        }).join('');
-        const yearlyPct = yearTotalWorking>0 ? ((yearTotalP/yearTotalWorking)*100).toFixed(0) : '0';
-        return `<tr><td class="name-cell">${u.name}<div class="hint">${u.class||ROLE_LABEL[u.role]} ${u.section||''}</div></td>${cells}<td style="font-weight:700;">${yearlyPct}%</td></tr>`;
-      }).join('');
-      body.innerHTML = `<div class="table-wrap"><table><thead><tr><th class="name-cell">नाम</th>${head}<th>वार्षिक %</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-    }
+  const recent = [...all].sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
+  const list = document.getElementById('recentList');
+  if(!recent.length){
+    list.innerHTML = `<div class="empty-state">🪔<div>अझै कुनै हाजिर रेकर्ड छैन। पहिलो हाजिर लगाउनुहोस्!</div></div>`;
+  }else{
+    list.innerHTML = recent.map(r=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #F1E9D6;">
+        <div><b style="font-size:13.5px;">${r.purpose}</b><div class="small-note">${niceDate(r.date)} · ${r.timeIn}</div></div>
+        <span class="chip chip-${r.status}">${statusLabel(r.status)}</span>
+      </div>`).join('');
   }
-};
-</script>
-<script>
-/* ---------------------------- Excel export (styled, via ExcelJS) ---------------------------- */
-ReportsUI.exportExcel = async function(){
-  toast('एक्सेल तयार गर्दैछ...','info',1500);
+}
+function statusLabel(s){ return s==='present' ? 'उपस्थित' : s==='late' ? 'ढिलो' : 'अनुपस्थित'; }
+
+/* ================= RECORDS CRUD ================= */
+async function renderRecords(){
+  let all = await dbAllByIndex('attendance','userId', currentUser.id);
+  const monthFilter = document.getElementById('filterMonth').value;
+  const statusFilter = document.getElementById('filterStatus').value;
+  const searchFilter = document.getElementById('filterSearch').value.trim().toLowerCase();
+  if(monthFilter) all = all.filter(r=>r.date.startsWith(monthFilter));
+  if(statusFilter) all = all.filter(r=>r.status===statusFilter);
+  if(searchFilter) all = all.filter(r=>(r.purpose||'').toLowerCase().includes(searchFilter) || (r.note||'').toLowerCase().includes(searchFilter));
+  all.sort((a,b)=> b.date.localeCompare(a.date) || (b.timeIn||'').localeCompare(a.timeIn||''));
+
+  const tbody = document.getElementById('recTableBody');
+  const cards = document.getElementById('recCards');
+  if(!all.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">🗂 कुनै रेकर्ड फेला परेन</div></td></tr>`;
+    cards.innerHTML = `<div class="empty-state">🗂 कुनै रेकर्ड फेला परेन</div>`;
+    return;
+  }
+  tbody.innerHTML = all.map(r=>`
+    <tr>
+      <td>${niceDate(r.date)}</td>
+      <td>${r.timeIn}${r.timeOut && r.timeOut!==r.timeIn ? ' - '+r.timeOut : ''}</td>
+      <td>${r.purpose}</td>
+      <td><span class="chip chip-${r.status}">${statusLabel(r.status)}</span></td>
+      <td>${r.note||'—'}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal(${r.id})">✎</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRecord(${r.id})">🗑</button>
+      </div></td>
+    </tr>`).join('');
+  cards.innerHTML = all.map(r=>`
+    <div class="rec-card">
+      <div class="top"><b>${niceDate(r.date)}</b><span class="chip chip-${r.status}">${statusLabel(r.status)}</span></div>
+      <div class="small-note">🕐 ${r.timeIn}${r.timeOut && r.timeOut!==r.timeIn ? ' - '+r.timeOut : ''} &nbsp; · &nbsp; ${r.purpose}</div>
+      ${r.note ? `<div class="small-note" style="margin-top:4px;">📝 ${r.note}</div>` : ''}
+      <div class="row-actions" style="margin-top:10px;">
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal(${r.id})">✎ सम्पादन</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRecord(${r.id})">🗑 मेटाउनुहोस्</button>
+      </div>
+    </div>`).join('');
+}
+async function openEditModal(id){
+  editingRecId = id;
+  const now = new Date();
+  if(id){
+    const rec = await dbGet('attendance', id);
+    document.getElementById('editModalTitle').textContent = 'रेकर्ड सम्पादन';
+    document.getElementById('editDate').value = rec.date;
+    document.getElementById('editTime').value = rec.timeIn;
+    document.getElementById('editPurpose').value = rec.purpose;
+    document.getElementById('editStatus').value = rec.status;
+    document.getElementById('editNote').value = rec.note||'';
+  }else{
+    document.getElementById('editModalTitle').textContent = 'नयाँ रेकर्ड थप्नुहोस्';
+    document.getElementById('editDate').value = fmtDate(now);
+    document.getElementById('editTime').value = pad2(now.getHours())+':'+pad2(now.getMinutes());
+    document.getElementById('editPurpose').value = (currentSettings.purposes||[])[0]||'';
+    document.getElementById('editStatus').value = 'present';
+    document.getElementById('editNote').value = '';
+  }
+  document.getElementById('editModalBg').classList.add('active');
+}
+function closeEditModal(){ document.getElementById('editModalBg').classList.remove('active'); editingRecId=null; }
+async function saveEditModal(){
+  const date = document.getElementById('editDate').value;
+  const time = document.getElementById('editTime').value;
+  const purpose = document.getElementById('editPurpose').value;
+  const status = document.getElementById('editStatus').value;
+  const note = document.getElementById('editNote').value.trim();
+  if(!date || !time || !purpose){ toast('कृपया सबै जानकारी भर्नुहोस्','err'); return; }
+  if(editingRecId){
+    const rec = await dbGet('attendance', editingRecId);
+    rec.date=date; rec.timeIn=time; rec.purpose=purpose; rec.status=status; rec.note=note; rec.updatedAt=Date.now();
+    await dbPut('attendance', rec);
+    toast('रेकर्ड अद्यावधिक भयो ✔','ok');
+  }else{
+    await dbAdd('attendance', {userId:currentUser.id, date, timeIn:time, timeOut:null, purpose, status, note, method:'manual', createdAt:Date.now(), updatedAt:Date.now()});
+    toast('नयाँ रेकर्ड थपियो ✔','ok');
+  }
+  closeEditModal();
+  renderRecords();
+  refreshDashboard();
+}
+async function deleteRecord(id){
+  if(!confirm('के तपाईं यो रेकर्ड मेटाउन निश्चित हुनुहुन्छ?')) return;
+  await dbDelete('attendance', id);
+  toast('रेकर्ड मेटाइयो','ok');
+  renderRecords();
+  refreshDashboard();
+}
+
+/* ================= REPORTS ================= */
+async function renderReport(){
+  const monthVal = document.getElementById('reportMonth').value;
+  if(!monthVal) return;
+  const [y,m] = monthVal.split('-').map(Number);
+  const all = (await dbAllByIndex('attendance','userId', currentUser.id)).filter(r=>r.date.startsWith(monthVal));
+  const daysInMonth = new Date(y,m,0).getDate();
+  const present = all.filter(r=>r.status==='present').length;
+  const late = all.filter(r=>r.status==='late').length;
+  const workingDaysSoFar = countWorkingDays(y,m,daysInMonth);
+  const uniqueDaysPresent = new Set(all.filter(r=>r.status!=='absent').map(r=>r.date)).size;
+  const absent = Math.max(workingDaysSoFar - uniqueDaysPresent, 0);
+  const pct = workingDaysSoFar ? Math.round((uniqueDaysPresent/workingDaysSoFar)*100) : 0;
+
+  document.getElementById('reportStatGrid').innerHTML = `
+    <div class="stat-card"><b>${toNp(uniqueDaysPresent)}</b><span>उपस्थित दिन</span></div>
+    <div class="stat-card gold"><b>${toNp(late)}</b><span>ढिलो पटक</span></div>
+    <div class="stat-card red"><b>${toNp(absent)}</b><span>अनुपस्थित दिन (अनुमानित)</span></div>
+    <div class="stat-card blue"><b>${toNp(pct)}%</b><span>उपस्थिति दर</span></div>
+  `;
+
+  // calendar
+  const firstDow = new Date(y,m-1,1).getDay();
+  const cal = document.getElementById('reportCalendar');
+  let html = NP_WEEKDAYS_SHORT.map(w=>`<div class="cal-head">${w}</div>`).join('');
+  for(let i=0;i<firstDow;i++) html += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = y+'-'+pad2(m)+'-'+pad2(d);
+    const dow = new Date(y,m-1,d).getDay();
+    const dayRecs = all.filter(r=>r.date===dateStr);
+    let cls = 'cal-cell';
+    if(dow===6) cls += ' off';
+    if(dayRecs.some(r=>r.status==='late')) cls += ' late';
+    else if(dayRecs.some(r=>r.status==='present')) cls += ' present';
+    html += `<div class="${cls}">${toNp(d)}</div>`;
+  }
+  cal.innerHTML = html;
+
+  // bar chart: hours worked per day (timeIn to timeOut) else mark 0
+  const bars = document.getElementById('reportBars');
+  let barsHtml = '';
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = y+'-'+pad2(m)+'-'+pad2(d);
+    const rec = all.find(r=>r.date===dateStr);
+    let hours = 0, cls='bar';
+    if(rec){
+      cls = rec.status==='late' ? 'bar late' : 'bar';
+      if(rec.timeOut && rec.timeOut !== rec.timeIn){
+        hours = timeDiffHours(rec.timeIn, rec.timeOut);
+      }else{ hours = 1; }
+    }else{ cls='bar absent'; hours = 0.15; }
+    const heightPct = Math.min(hours/9*100, 100);
+    barsHtml += `<div class="${cls}" style="height:${heightPct}%" title="${toNp(d)}: ${hours.toFixed(1)} घण्टा"></div>`;
+  }
+  bars.innerHTML = barsHtml;
+}
+function countWorkingDays(y,m,daysInMonth){
+  const now = new Date();
+  const isCurrentMonth = (now.getFullYear()===y && now.getMonth()+1===m);
+  const limit = isCurrentMonth ? now.getDate() : daysInMonth;
+  let count=0;
+  for(let d=1; d<=limit; d++){
+    if(new Date(y,m-1,d).getDay() !== 6) count++;
+  }
+  return count;
+}
+function timeDiffHours(t1,t2){
+  const [h1,m1]=t1.split(':').map(Number), [h2,m2]=t2.split(':').map(Number);
+  let diff = (h2*60+m2)-(h1*60+m1);
+  if(diff<0) diff += 24*60;
+  return diff/60;
+}
+
+/* ================= EXCEL EXPORT (colorful) ================= */
+async function exportExcel(){
+  const monthVal = document.getElementById('reportMonth').value;
+  if(!monthVal){ toast('महिना छान्नुहोस्','err'); return; }
+  const [y,m] = monthVal.split('-').map(Number);
+  const all = (await dbAllByIndex('attendance','userId', currentUser.id)).filter(r=>r.date.startsWith(monthVal))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
   const wb = new ExcelJS.Workbook();
-  wb.creator = State.config.schoolName;
-  const cfg = State.config;
-  const people = this.peopleFiltered();
-  const COLORS = { p:'FFDDEBDD', pp:'FFBFE0BF', half:'FFF3E4C4', a:'FFF4DEDE', hol:'FFF6C8C8', head:'FFE7DFCE', title:'FF83192A' };
+  const ws = wb.addWorksheet('हाजिर रिपोर्ट');
+  ws.mergeCells('A1:G1');
+  const title = ws.getCell('A1');
+  title.value = `मेरो हाजिर — ${currentUser.fullname} — ${NP_MONTHS[m-1]} ${y}`;
+  title.font = {bold:true, size:16, color:{argb:'FFFFFFFF'}};
+  title.alignment = {horizontal:'center', vertical:'middle'};
+  ws.getRow(1).height = 30;
+  ws.getCell('A1').fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFA31621'}};
 
-  function styleTitleRow(ws, rowNum, span){
-    ws.mergeCells(rowNum,1,rowNum,span);
-    const c = ws.getCell(rowNum,1);
-    c.value = cfg.schoolName + (cfg.address? ' - '+cfg.address:'');
-    c.font = {bold:true, size:14, color:{argb:'FFFFFFFF'}};
-    c.alignment = {horizontal:'center', vertical:'middle'};
-    c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:COLORS.title}};
-    ws.getRow(rowNum).height = 26;
-  }
-  function styleHeaderRow(ws, rowNum, lastCol){
-    for(let i=1;i<=lastCol;i++){
-      const c = ws.getCell(rowNum,i);
-      c.font = {bold:true, size:10};
-      c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:COLORS.head}};
-      c.alignment = {horizontal:'center', vertical:'middle'};
-      c.border = {bottom:{style:'thin'}};
-    }
-  }
-  function letterFill(letter){
-    if(letter==='PP') return COLORS.pp;
-    if(letter==='P') return COLORS.p;
-    if(letter==='H') return COLORS.half;
-    if(letter==='HOL') return COLORS.hol;
-    if(letter==='A') return COLORS.a;
-    return null;
-  }
+  const headers = ['मिति','वार','आउने समय','जाने समय','काम','स्थिति','टिप्पणी'];
+  const headerRow = ws.addRow(headers);
+  headerRow.eachCell(cell=>{
+    cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFC9A227'}};
+    cell.font = {bold:true, color:{argb:'FF2A211C'}};
+    cell.alignment = {horizontal:'center'};
+    cell.border = {bottom:{style:'thin'}};
+  });
 
-  if(this.tab==='daily'){
-    const ws = wb.addWorksheet('दैनिक हाजिर');
-    styleTitleRow(ws, 1, 5);
-    ws.mergeCells(2,1,2,5); ws.getCell(2,1).value = `मिति: ${this.date}`; ws.getCell(2,1).alignment={horizontal:'center'};
-    ws.addRow([]);
-    const headRow = 4;
-    ws.getRow(headRow).values = ['नाम','भूमिका','कक्षा/सेक्सन','स्थिति','समय (बिहान/साँझ)'];
-    styleHeaderRow(ws, headRow, 5);
-    const recs = await DB.attendanceByDate(this.date);
-    const holiday = Attendance.isHoliday(this.date);
-    people.forEach((u,i)=>{
-      const r = recs.find(x=>x.userId===u.id);
-      const letter = holiday ? 'HOL' : (r?Attendance.finalLetter(r):'A');
-      const timeStr = r ? [r.markedAt?.morning?new Date(r.markedAt.morning).toLocaleTimeString():'', r.markedAt?.evening?new Date(r.markedAt.evening).toLocaleTimeString():''].filter(Boolean).join(' / ') : '';
-      const row = ws.addRow([u.name, ROLE_LABEL[u.role], `${u.class||''} ${u.section||''}`, letter, timeStr]);
-      const fill = letterFill(letter);
-      if(fill) row.getCell(4).fill = {type:'pattern',pattern:'solid',fgColor:{argb:fill}};
-      row.getCell(4).font = {bold:true};
-      row.eachCell(c=>c.alignment={horizontal:'center'});
-    });
-    ws.columns = [{width:22},{width:14},{width:16},{width:10},{width:22}];
-  }
+  const statusColors = {present:'FFE5F3E7', late:'FFFBEBD9', absent:'FFF8E3E3'};
+  const statusFont = {present:'FF3E7C4A', late:'FFD9822B', absent:'FFA31621'};
 
-  else if(this.tab==='monthly'){
-    const ws = wb.addWorksheet(`${this.year}-${pad2(this.month)}`);
-    const days = new Date(this.year, this.month, 0).getDate();
-    const lastCol = 2 + days + 4;
-    styleTitleRow(ws, 1, lastCol);
-    ws.mergeCells(2,1,2,lastCol); ws.getCell(2,1).value = `मासिक हाजिर - ${MONTHS_EN[this.month-1]} ${this.year} ${this.klass!=='all'?'| कक्षा: '+this.klass:''}`;
-    ws.getCell(2,1).alignment={horizontal:'center'};
-    const headRow=4;
-    const headVals = ['क्र.सं.','नाम']; for(let d=1;d<=days;d++) headVals.push(d);
-    headVals.push('P','H','A','%');
-    ws.getRow(headRow).values = headVals;
-    styleHeaderRow(ws, headRow, lastCol);
-    // shade saturday header cells red
-    for(let d=1; d<=days; d++){
-      const dow = new Date(`${this.year}-${pad2(this.month)}-${pad2(d)}T00:00:00`).getDay();
-      if(dow===6) ws.getCell(headRow, 2+d).fill = {type:'pattern',pattern:'solid',fgColor:{argb:COLORS.hol}};
-    }
-    const allRecs = await DB.allAttendance();
-    people.forEach((u,i)=>{
-      let pCount=0, halfCount=0, absentCount=0, working=0;
-      const rowVals = [i+1, u.name];
-      for(let d=1; d<=days; d++){
-        const dateStr = `${this.year}-${pad2(this.month)}-${pad2(d)}`;
-        const holiday = Attendance.isHoliday(dateStr);
-        const isFuture = new Date(dateStr+'T00:00:00') > new Date();
-        let letter = '';
-        if(holiday) letter='HOL';
-        else if(!isFuture){ const rec = allRecs.find(r=>r.userId===u.id && r.date===dateStr); letter = rec?Attendance.finalLetter(rec):'A'; }
-        if(letter && letter!=='HOL'){ working++; if(letter==='PP'||letter==='P') pCount++; else if(letter==='H') halfCount++; else if(letter==='A') absentCount++; }
-        rowVals.push(letter==='HOL' ? '-' : letter);
+  all.forEach(r=>{
+    const row = ws.addRow([niceDate(r.date), NP_WEEKDAYS[weekdayOf(r.date)], r.timeIn, r.timeOut||'—', r.purpose, statusLabel(r.status), r.note||'']);
+    row.eachCell((cell,colNum)=>{
+      cell.alignment = {horizontal: colNum<=2?'left':'center'};
+      if(colNum===6){
+        cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb: statusColors[r.status]}};
+        cell.font = {bold:true, color:{argb: statusFont[r.status]}};
       }
-      const pct = working>0 ? Math.round(((pCount+halfCount*0.5)/working)*100) : 0;
-      rowVals.push(pCount, halfCount, absentCount, pct+'%');
-      const row = ws.addRow(rowVals);
-      for(let d=1; d<=days; d++){
-        const cell = row.getCell(2+d);
-        const val = cell.value;
-        const fill = letterFill(val==='-'?'HOL':val);
-        if(fill) cell.fill = {type:'pattern',pattern:'solid',fgColor:{argb:fill}};
-        cell.alignment={horizontal:'center'};
-        cell.font={bold:true, size:9};
-      }
-      row.getCell(1).alignment={horizontal:'center'};
+      cell.border = {bottom:{style:'hair', color:{argb:'FFEEE3CB'}}};
     });
-    ws.getColumn(1).width=6; ws.getColumn(2).width=20;
-    for(let d=1; d<=days; d++) ws.getColumn(2+d).width=4;
-    ws.getColumn(3+days).width=6; ws.getColumn(4+days).width=6; ws.getColumn(5+days).width=6; ws.getColumn(6+days).width=7;
-  }
+  });
 
-  else { // yearly
-    const ws = wb.addWorksheet(`वार्षिक ${this.year}`);
-    const lastCol = 2 + 12 + 1;
-    styleTitleRow(ws, 1, lastCol);
-    ws.mergeCells(2,1,2,lastCol); ws.getCell(2,1).value = `वार्षिक हाजिर रिपोर्ट - ${this.year} ${this.klass!=='all'?'| कक्षा: '+this.klass:''}`;
-    ws.getCell(2,1).alignment={horizontal:'center'};
-    const headRow=4;
-    ws.getRow(headRow).values = ['क्र.सं.','नाम', ...MONTHS_EN, 'वार्षिक %'];
-    styleHeaderRow(ws, headRow, lastCol);
-    const allRecs = await DB.allAttendance();
-    people.forEach((u,i)=>{
-      let yTotalP=0, yTotalWorking=0;
-      const rowVals=[i+1,u.name];
-      for(let mi=0; mi<12; mi++){
-        const days = new Date(this.year, mi+1, 0).getDate();
-        let p=0, half=0, working=0;
-        for(let d=1; d<=days; d++){
-          const dateStr = `${this.year}-${pad2(mi+1)}-${pad2(d)}`;
-          if(Attendance.isHoliday(dateStr)) continue;
-          if(new Date(dateStr+'T00:00:00') > new Date()) continue;
-          const rec = allRecs.find(r=>r.userId===u.id && r.date===dateStr);
-          const letter = rec?Attendance.finalLetter(rec):'A';
-          working++; if(letter==='PP'||letter==='P') p++; else if(letter==='H') half++;
-        }
-        yTotalP += p+half*0.5; yTotalWorking += working;
-        rowVals.push(working>0 ? Math.round(((p+half*0.5)/working)*100)+'%' : '-');
-      }
-      rowVals.push(yTotalWorking>0 ? Math.round((yTotalP/yTotalWorking)*100)+'%':'0%');
-      const row = ws.addRow(rowVals);
-      row.eachCell(c=>c.alignment={horizontal:'center'});
-    });
-    ws.getColumn(1).width=6; ws.getColumn(2).width=20;
-    for(let i=0;i<12;i++) ws.getColumn(3+i).width=8;
-    ws.getColumn(15).width=10;
-  }
+  ws.columns = [{width:20},{width:12},{width:12},{width:12},{width:22},{width:14},{width:28}];
+
+  // summary sheet
+  const present = all.filter(r=>r.status==='present').length;
+  const late = all.filter(r=>r.status==='late').length;
+  const ws2 = wb.addWorksheet('सारांश');
+  ws2.mergeCells('A1:B1');
+  ws2.getCell('A1').value = 'महिनाको सारांश';
+  ws2.getCell('A1').font = {bold:true, size:14, color:{argb:'FFFFFFFF'}};
+  ws2.getCell('A1').fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FF0B3D91'}};
+  const sumRows = [['उपस्थित दिन', present], ['ढिलो पटक', late], ['कुल रेकर्ड', all.length]];
+  sumRows.forEach(r=>{
+    const row = ws2.addRow(r);
+    row.getCell(1).font = {bold:true};
+    row.getCell(2).alignment = {horizontal:'center'};
+  });
+  ws2.columns = [{width:22},{width:14}];
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], {type:'application/octet-stream'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const fname = this.tab==='daily' ? `hajir_${this.date}.xlsx` : this.tab==='monthly' ? `hajir_${this.year}_${pad2(this.month)}.xlsx` : `hajir_varshik_${this.year}.xlsx`;
-  a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+  a.href = url; a.download = `Hajir_Report_${y}_${pad2(m)}.xlsx`;
+  document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
-  toast('एक्सेल डाउनलोड भयो','success');
-};
-</script>
-<script>
-/* ---------------------------- Settings view ---------------------------- */
-Views.settings = function(main){
-  const cfg = State.config;
-  main.innerHTML = `
-    <div class="card">
-      <div class="section-eyebrow">विद्यालय विवरण</div>
-      <div class="field"><label>विद्यालयको नाम</label><input type="text" id="st-schoolname" value="${cfg.schoolName}"></div>
-      <div class="field"><label>ठेगाना</label><input type="text" id="st-address" value="${cfg.address||''}"></div>
-      <div class="field"><label>फोन</label><input type="text" id="st-phone" value="${cfg.phone||''}"></div>
-      <button class="btn btn-himal btn-sm" onclick="SettingsUI.saveSchool()">विवरण सुरक्षित गर्नुहोस्</button>
-    </div>
+  toast('रंगीन एक्सेल डाउनलोड भयो 🎉','ok');
+}
 
-    <div class="card">
-      <div class="section-eyebrow">हाजिर समय (सेटिङद्वारा नियन्त्रण)</div>
-      <p class="hint" style="margin-bottom:10px;">बिहान समयमा पूर्ण उपस्थिति (P), समय सकेपछि दिउँसोको खाजा समयसम्म आधा दिन (H), त्यसपछि बन्द। साँझको समयमा हाजिर लगाए डबल P (PP) हुन्छ।</p>
-      <div class="field-row">
-        <div class="field"><label>बिहान हाजिर सुरु</label><input type="time" id="st-morningStart" value="${cfg.times.morningStart}"></div>
-        <div class="field"><label>बिहान पूर्ण हाजिर अन्त्य</label><input type="time" id="st-morningEnd" value="${cfg.times.morningEnd}"></div>
-      </div>
-      <div class="field"><label>दिउँसो खाजा समय (आधा दिन कटअफ)</label><input type="time" id="st-lunchEnd" value="${cfg.times.lunchEnd}"></div>
-      <div class="field-row">
-        <div class="field"><label>साँझ हाजिर सुरु</label><input type="time" id="st-eveningStart" value="${cfg.times.eveningStart}"></div>
-        <div class="field"><label>साँझ हाजिर अन्त्य</label><input type="time" id="st-eveningEnd" value="${cfg.times.eveningEnd}"></div>
-      </div>
-      <button class="btn btn-himal btn-sm" onclick="SettingsUI.saveTimes()">समय सुरक्षित गर्नुहोस्</button>
-    </div>
-
-    <div class="card">
-      <div class="section-eyebrow">नियन्त्रणहरू</div>
-      <div class="toggle-row">
-        <div><div class="toggle-label">फेस लक (लगइन)</div><div class="toggle-desc">लक स्क्रिनमा फेस पहिचान सक्षम/असक्षम गर्नुहोस्</div></div>
-        <label class="switch"><input type="checkbox" id="st-faceLock" ${cfg.faceLockEnabled?'checked':''} onchange="SettingsUI.saveToggles()"><span class="slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <div><div class="toggle-label">फेस डिटेक्सन हाजिर</div><div class="toggle-desc">हाजिर लगाउने प्रमुख विधि</div></div>
-        <label class="switch"><input type="checkbox" id="st-faceAtt" ${cfg.faceAttendanceEnabled?'checked':''} onchange="SettingsUI.saveToggles()"><span class="slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <div><div class="toggle-label">QR कोड हाजिर</div><div class="toggle-desc">वैकल्पिक हाजिर विधि</div></div>
-        <label class="switch"><input type="checkbox" id="st-qrAtt" ${cfg.qrAttendanceEnabled?'checked':''} onchange="SettingsUI.saveToggles()"><span class="slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <div><div class="toggle-label">शनिबार स्वतः बिदा</div><div class="toggle-desc">हरेक शनिबार रातो चिन्ह सहित बिदा गणना हुन्छ</div></div>
-        <label class="switch"><input type="checkbox" id="st-satHoliday" ${cfg.saturdayHoliday?'checked':''} onchange="SettingsUI.saveToggles()"><span class="slider"></span></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-eyebrow">कक्षा र सेक्सन व्यवस्थापन</div>
-      <div id="st-classes-list"></div>
-      <div class="field-row" style="margin-top:10px;">
-        <div class="field"><input type="text" id="st-new-class" placeholder="नयाँ कक्षाको नाम"></div>
-        <button class="btn btn-himal btn-sm" onclick="SettingsUI.addClass()">➕ कक्षा थप्नुहोस्</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-eyebrow">विशेष बिदा (Holidays)</div>
-      <div id="st-holiday-list"></div>
-      <div class="field-row" style="margin-top:10px;">
-        <div class="field"><input type="date" id="st-new-holiday-date"></div>
-        <div class="field"><input type="text" id="st-new-holiday-label" placeholder="बिदाको कारण"></div>
-        <button class="btn btn-himal btn-sm" onclick="SettingsUI.addHoliday()">➕ थप्नुहोस्</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-eyebrow">ब्याकअप तथा डाटा</div>
-      <p class="hint" style="margin-bottom:10px;">सम्पूर्ण डाटा (विद्यालय, व्यक्ति, हाजिर) यस डिभाइसको IndexedDB मा सुरक्षित छ। नियमित ब्याकअप डाउनलोड गर्न सुझाव दिइन्छ।</p>
-      <div class="btn-row">
-        <button class="btn btn-gold btn-sm" onclick="SettingsUI.backup()">⬇️ ब्याकअप डाउनलोड</button>
-        <label class="btn btn-outline btn-sm">⬆️ ब्याकअप पुनर्स्थापना<input type="file" accept=".json" style="display:none" onchange="SettingsUI.restore(event)"></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-eyebrow">खाता</div>
-      <button class="btn btn-danger btn-sm" onclick="Auth.logout()">⏻ लगआउट गर्नुहोस्</button>
-    </div>
-  `;
-  SettingsUI.renderClasses();
-  SettingsUI.renderHolidays();
-};
-
-const SettingsUI = {
-  async saveSchool(){
-    const cfg = State.config;
-    cfg.schoolName = $('#st-schoolname').value.trim();
-    cfg.address = $('#st-address').value.trim();
-    cfg.phone = $('#st-phone').value.trim();
-    await DB.putSetting(cfg);
-    await loadState();
-    toast('विवरण सुरक्षित भयो','success');
-    App.showMain();
-  },
-  async saveTimes(){
-    const cfg = State.config;
-    cfg.times = {
-      morningStart:$('#st-morningStart').value, morningEnd:$('#st-morningEnd').value,
-      lunchEnd:$('#st-lunchEnd').value, eveningStart:$('#st-eveningStart').value, eveningEnd:$('#st-eveningEnd').value,
-    };
-    await DB.putSetting(cfg);
-    await loadState();
-    toast('समय सुरक्षित भयो','success');
-  },
-  async saveToggles(){
-    const cfg = State.config;
-    cfg.faceLockEnabled = $('#st-faceLock').checked;
-    cfg.faceAttendanceEnabled = $('#st-faceAtt').checked;
-    cfg.qrAttendanceEnabled = $('#st-qrAtt').checked;
-    cfg.saturdayHoliday = $('#st-satHoliday').checked;
-    await DB.putSetting(cfg);
-    await loadState();
-    toast('सुरक्षित भयो','success',1500);
-  },
-  renderClasses(){
-    const el = $('#st-classes-list'); if(!el) return;
-    el.innerHTML = State.config.classes.map((c,ci)=>`
-      <div class="list-row">
-        <div class="list-main">
-          <div class="lname">${c.name}</div>
-          <div class="lsub" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
-            ${c.sections.map((s,si)=>`<span class="chip">${s} <button onclick="SettingsUI.removeSection(${ci},${si})">✕</button></span>`).join('')}
-            <button class="link-btn" onclick="SettingsUI.addSection(${ci})">+ सेक्सन</button>
-          </div>
-        </div>
-        <button class="icon-sm danger" onclick="SettingsUI.removeClass(${ci})">🗑️</button>
-      </div>`).join('') || `<div class="empty-state">कक्षा थपिएको छैन</div>`;
-  },
-  async addClass(){
-    const name = $('#st-new-class').value.trim();
-    if(!name) return;
-    State.config.classes.push({name, sections:['क']});
-    await DB.putSetting(State.config);
-    $('#st-new-class').value='';
-    this.renderClasses();
-    toast('कक्षा थपियो','success',1500);
-  },
-  async removeClass(ci){
-    State.config.classes.splice(ci,1);
-    await DB.putSetting(State.config);
-    this.renderClasses();
-  },
-  async addSection(ci){
-    const s = prompt('नयाँ सेक्सनको नाम (जस्तै: क, ख, ग)');
-    if(!s) return;
-    State.config.classes[ci].sections.push(s.trim());
-    await DB.putSetting(State.config);
-    this.renderClasses();
-  },
-  async removeSection(ci,si){
-    State.config.classes[ci].sections.splice(si,1);
-    await DB.putSetting(State.config);
-    this.renderClasses();
-  },
-  renderHolidays(){
-    const el = $('#st-holiday-list'); if(!el) return;
-    const hols = State.holidays.slice().sort((a,b)=>a.date.localeCompare(b.date));
-    el.innerHTML = hols.map(h=>`
-      <div class="list-row"><div class="list-main"><div class="lname">${h.date}</div><div class="lsub">${h.label}</div></div>
-      <button class="icon-sm danger" onclick="SettingsUI.removeHoliday('${h.date}')">🗑️</button></div>`).join('') || `<div class="empty-state">कुनै विशेष बिदा थपिएको छैन</div>`;
-  },
-  async addHoliday(){
-    const d = $('#st-new-holiday-date').value;
-    const label = $('#st-new-holiday-label').value.trim() || 'बिदा';
-    if(!d) return;
-    await DB.setHoliday(d,label);
-    await loadState();
-    this.renderHolidays();
-    toast('बिदा थपियो','success',1500);
-  },
-  async removeHoliday(d){
-    await DB.removeHoliday(d);
-    await loadState();
-    this.renderHolidays();
-  },
-  async backup(){
-    const data = {
-      config: State.config,
-      users: await DB.allUsers(),
-      attendance: await DB.allAttendance(),
-      holidays: await DB.allHolidays(),
-      exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href=url; a.download = `hajir_backup_${todayStr()}.json`; document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    toast('ब्याकअप डाउनलोड भयो','success');
-  },
-  async restore(e){
-    const f = e.target.files[0]; if(!f) return;
-    if(!confirm('ब्याकअप पुनर्स्थापना गर्दा हालको सबै डाटा (यदि नाम/mismatch भए) अधिलेखन हुन सक्छ। अगाडि बढ्ने हो?')) return;
-    try{
-      const text = await f.text();
-      const data = JSON.parse(text);
-      if(data.config) await DB.putSetting(data.config);
-      if(data.users) for(const u of data.users) await DB.putUser(u);
-      if(data.attendance) for(const a of data.attendance) await DB.putAttendance(a);
-      if(data.holidays) for(const h of data.holidays) await DB.setHoliday(h.date,h.label);
-      toast('पुनर्स्थापना सफल भयो','success');
-      await loadState();
-      App.boot();
-    }catch(err){ toast('फाइल पढ्न सकिएन','error'); }
+/* ================= SETTINGS ================= */
+function populateSettingsUI(){
+  document.getElementById('setStartTime').value = currentSettings.startTime || '10:00';
+  document.getElementById('setLateThreshold').value = currentSettings.lateThreshold ?? 15;
+  renderPurposeTags();
+  document.getElementById('faceLockSwitch').classList.toggle('on', !!currentUser.faceLockEnabled);
+}
+function renderPurposeTags(){
+  const el = document.getElementById('purposeTagList');
+  el.innerHTML = (currentSettings.purposes||[]).map((p,i)=>`
+    <span class="tag">${p}<button onclick="removePurpose(${i})">×</button></span>`).join('');
+}
+async function saveWorkSettings(){
+  currentSettings.startTime = document.getElementById('setStartTime').value || '10:00';
+  currentSettings.lateThreshold = parseInt(document.getElementById('setLateThreshold').value) || 0;
+  await dbPut('settings', currentSettings);
+  toast('सेटिङ सेभ भयो ✔','ok');
+}
+async function addPurpose(){
+  const input = document.getElementById('newPurposeInput');
+  const val = input.value.trim();
+  if(!val) return;
+  currentSettings.purposes = currentSettings.purposes || [];
+  if(currentSettings.purposes.includes(val)){ toast('पहिले नै थपिएको छ','err'); return; }
+  currentSettings.purposes.push(val);
+  await dbPut('settings', currentSettings);
+  input.value='';
+  renderPurposeTags();
+  populatePurposeUI();
+  toast('थपियो ✔','ok');
+}
+async function removePurpose(i){
+  currentSettings.purposes.splice(i,1);
+  await dbPut('settings', currentSettings);
+  renderPurposeTags();
+  populatePurposeUI();
+}
+async function toggleFaceLock(){
+  if(!currentUser.faceDescriptor){
+    toast('पहिले तलबाट अनुहार क्याप्चर गर्नुहोस्','err');
+    return;
   }
-};
+  currentUser.faceLockEnabled = !currentUser.faceLockEnabled;
+  await dbPut('users', currentUser);
+  document.getElementById('faceLockSwitch').classList.toggle('on', currentUser.faceLockEnabled);
+  toast(currentUser.faceLockEnabled ? 'फेस लक सक्रिय भयो' : 'फेस लक निष्क्रिय भयो','ok');
+}
+let setStream = null;
+async function startSetCam(){
+  document.getElementById('setFaceStatus').textContent = 'क्यामेरा खुल्दैछ...';
+  setStream = await startCam(document.getElementById('setVideo'));
+  if(setStream){ document.getElementById('setFaceStatus').textContent = 'तयार'; await initFaceApi(); }
+}
+async function recaptureFace(){
+  const video = document.getElementById('setVideo');
+  if(!video.srcObject){ toast('पहिले क्यामेरा खोल्नुहोस्','err'); return; }
+  document.getElementById('setFaceStatus').textContent = 'पहिचान हुँदैछ...';
+  const desc = await detectDescriptor(video);
+  if(desc){
+    currentUser.faceDescriptor = Array.from(desc);
+    currentUser.faceLockEnabled = true;
+    await dbPut('users', currentUser);
+    document.getElementById('setFaceStatus').textContent = '✔ अनुहार अद्यावधिक भयो';
+    document.getElementById('setFaceStatus').className = 'face-status ok';
+    document.getElementById('faceLockSwitch').classList.add('on');
+    toast('अनुहार क्याप्चर सफल ✔','ok');
+  }else{
+    document.getElementById('setFaceStatus').textContent = '✘ भेटिएन, फेरि प्रयास गर्नुहोस्';
+    document.getElementById('setFaceStatus').className = 'face-status bad';
+  }
+}
+
+/* ================= INIT ================= */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  await openDB();
+  const now = new Date();
+  document.getElementById('reportMonth').value = now.getFullYear()+'-'+pad2(now.getMonth()+1);
+  document.getElementById('filterMonth').value = '';
+  initFaceApi(); // preload in background, non-blocking
+});
 </script>
 </body>
 </html>
