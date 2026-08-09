@@ -84,8 +84,9 @@ input,select,textarea{font-family:inherit;}
 
 /* ---------- AUTH SCREEN ---------- */
 #authScreen{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 16px;
+  min-height:100vh;align-items:center;justify-content:center;padding:30px 16px;
 }
+#authScreen.active{display:flex;}
 .auth-wrap{width:100%;max-width:960px;display:grid;grid-template-columns:1.05fr 1fr;gap:0;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-2);}
 .auth-hero{
   background:
@@ -299,7 +300,7 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
             <button class="btn btn-outline btn-sm" onclick="startRegCam()">📷 क्यामेरा खोल्नुहोस्</button>
             <button class="btn btn-gold btn-sm" onclick="captureRegFace()">✔ अनुहार क्याप्चर गर्नुहोस्</button>
           </div>
-          <p class="small-note" style="margin-top:8px;">अनुहार क्याप्चर गर्नाले "फेस लक" र "फेस हाजिर" प्रयोग गर्न मिल्छ। नचाहेमा यो चरण छोड्न सकिन्छ।</p>
+          <p class="small-note" style="margin-top:8px;">अनुहार क्याप्चर गर्नाले "फेस हाजिर" प्रयोग गर्न मिल्छ। "फेस लक" सेटिङबाट पछि छुट्टै सक्रिय गर्न सकिन्छ। नचाहेमा यो चरण छोड्न सकिन्छ।</p>
         </div>
         <button class="btn btn-primary btn-block" onclick="doRegister()">🪔 खाता बनाउनुहोस्</button>
         <p id="regMsg" class="small-note" style="margin-top:10px;color:var(--danger);"></p>
@@ -661,6 +662,7 @@ function switchAuthTab(tab){
   document.querySelectorAll('.auth-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   document.getElementById('loginForm').classList.toggle('active', tab==='login');
   document.getElementById('registerForm').classList.toggle('active', tab==='register');
+  if(tab!=='register') stopCam(document.getElementById('regVideo'));
 }
 
 let regStream = null, regDescriptor = null;
@@ -703,7 +705,7 @@ async function doRegister(){
   const user = {
     fullname, username, passwordHash,
     faceDescriptor: regDescriptor,
-    faceLockEnabled: !!regDescriptor,
+    faceLockEnabled: false,
     createdAt: Date.now()
   };
   const id = await dbAdd('users', user);
@@ -788,7 +790,7 @@ async function completeLogin(user){
 function doLogout(){
   currentUser = null;
   sessionStorage.removeItem('hajir_uid');
-  [document.getElementById('markVideo'), document.getElementById('setVideo'), document.getElementById('regVideo')].forEach(stopCam);
+  [document.getElementById('markVideo'), document.getElementById('setVideo'), document.getElementById('regVideo'), document.getElementById('lockVideo')].forEach(stopCam);
   document.getElementById('mainShell').classList.remove('active');
   document.getElementById('authScreen').classList.add('active');
   document.getElementById('loginPassword').value = '';
@@ -799,6 +801,8 @@ function showView(viewId){
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active', b.dataset.view===viewId));
   document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('active', b.dataset.view===viewId));
+  if(viewId!=='markView') stopCam(document.getElementById('markVideo'));
+  if(viewId!=='settingsView') stopCam(document.getElementById('setVideo'));
   if(viewId==='recordsView') renderRecords();
   if(viewId==='reportsView'){
     const now = new Date();
@@ -1277,6 +1281,31 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('reportMonth').value = now.getFullYear()+'-'+pad2(now.getMonth()+1);
   document.getElementById('filterMonth').value = '';
   initFaceApi(); // preload in background, non-blocking
+
+  // restore session on refresh (same-tab only; no re-verification needed, session already authenticated)
+  const savedUid = sessionStorage.getItem('hajir_uid');
+  if(savedUid){
+    try{
+      const user = await dbGet('users', parseInt(savedUid, 10));
+      if(user){
+        currentUser = user;
+        currentSettings = await dbGet('settings', user.id);
+        document.getElementById('authScreen').classList.remove('active');
+        document.getElementById('mainShell').classList.add('active');
+        document.getElementById('userNameLabel').textContent = user.fullname;
+        document.getElementById('userAvatar').textContent = user.fullname.charAt(0).toUpperCase();
+        document.getElementById('dashName').textContent = user.fullname.split(' ')[0];
+        initHeaderDate();
+        populatePurposeUI();
+        await refreshDashboard();
+        showView('dashboardView');
+      }else{
+        sessionStorage.removeItem('hajir_uid');
+      }
+    }catch(err){
+      sessionStorage.removeItem('hajir_uid');
+    }
+  }
 });
 </script>
 </body>
