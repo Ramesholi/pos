@@ -54,6 +54,7 @@ input,select,textarea{font-family:inherit;}
   transition:transform .15s ease, box-shadow .15s ease, background .2s ease;
 }
 .btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none;transform:none;}
 .btn-primary{background:linear-gradient(135deg,var(--sindoor),var(--sindoor-dark));color:#fff;box-shadow:0 6px 16px rgba(163,22,33,.30);}
 .btn-primary:hover{box-shadow:0 8px 20px rgba(163,22,33,.4);}
 .btn-gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#3a2c05;box-shadow:0 6px 16px rgba(201,162,39,.30);}
@@ -84,9 +85,13 @@ input,select,textarea{font-family:inherit;}
 
 /* ---------- AUTH SCREEN ---------- */
 #authScreen{
-  min-height:100vh;align-items:center;justify-content:center;padding:30px 16px;
+  min-height:100vh;align-items:center;justify-content:center;padding:30px 16px;flex-direction:column;gap:20px;
 }
 #authScreen.active{display:flex;}
+.auth-page-title{text-align:center;}
+.auth-page-title .pt-icon{width:46px;height:46px;margin-bottom:8px;}
+.auth-page-title h1{font-size:30px;margin:0 0 6px;color:var(--sindoor-dark);}
+.auth-page-title p{font-size:13.5px;color:var(--ink-soft);margin:0;font-weight:600;}
 .auth-wrap{width:100%;max-width:960px;display:grid;grid-template-columns:1.05fr 1fr;gap:0;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-2);}
 .auth-hero{
   background:
@@ -140,7 +145,7 @@ input,select,textarea{font-family:inherit;}
 }
 .nav-tab.active{background:#fff;color:var(--sindoor);}
 
-main{padding:26px 0 100px;}
+main{padding:26px 0 60px;}
 .view{display:none;}
 .view.active{display:block;animation:fadein .35s ease;}
 @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
@@ -211,7 +216,9 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 .cal-cell{aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--ivory-2);color:var(--ink-soft);}
 .cal-cell.present{background:#E5F3E7;color:var(--success);}
 .cal-cell.late{background:#FBEBD9;color:var(--warning);}
+.cal-cell.absent{background:#F8E3E3;color:var(--danger);}
 .cal-cell.off{background:#F1E4E4;color:#b98;opacity:.6;}
+.cal-cell.future{background:var(--ivory-2);color:#c9bda3;opacity:.6;}
 .cal-cell.empty{background:transparent;}
 .bar-chart{display:flex;align-items:flex-end;gap:4px;height:130px;margin-top:16px;}
 .bar{flex:1;background:linear-gradient(180deg,var(--gold-light),var(--gold));border-radius:4px 4px 0 0;min-height:3px;position:relative;}
@@ -229,7 +236,7 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 .switch.on::after{left:23px;}
 
 /* bottom nav mobile */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #EEE3CB;padding:8px 4px;z-index:80;box-shadow:0 -6px 18px rgba(0,0,0,.06);}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #EEE3CB;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:80;box-shadow:0 -6px 18px rgba(0,0,0,.06);}
 .bottom-nav .bn-inner{display:flex;justify-content:space-around;}
 .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--ink-soft);font-size:10.5px;font-weight:700;padding:4px 6px;}
 .bn-item.active{color:var(--sindoor);}
@@ -237,7 +244,7 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 @media(max-width:720px){
   .bottom-nav{display:block;}
   .nav-tabs{display:none;}
-  main{padding-bottom:90px;}
+  main{padding-bottom:calc(88px + env(safe-area-inset-bottom));}
 }
 @media(max-width:860px){
   .auth-wrap{grid-template-columns:1fr;}
@@ -262,6 +269,11 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 
 <!-- ================= AUTH SCREEN ================= -->
 <section id="authScreen" class="screen active">
+  <div class="auth-page-title">
+    <svg class="pt-icon" viewBox="0 0 64 64" fill="none"><path d="M32 4l6 10H26l6-10z" fill="#C9A227"/><rect x="30" y="14" width="4" height="8" fill="#C9A227"/><path d="M10 26h44l-4 8H14l-4-8z" fill="#A31621"/><path d="M14 34h36l-3 7H17l-3-7z" fill="#A31621" opacity=".85"/><rect x="20" y="41" width="24" height="19" rx="2" fill="#A31621" opacity=".9"/><rect x="29" y="48" width="6" height="12" fill="#FBF6EC"/></svg>
+    <h1>व्यक्तिगत हाजिरी खाता</h1>
+    <p>सुरक्षित रूपमा लगइन गर्नुहोस् वा नयाँ खाता खोल्नुहोस्</p>
+  </div>
   <div class="auth-wrap">
     <div class="auth-hero">
       <svg class="pagoda-mark" viewBox="0 0 64 64" fill="none"><path d="M32 4l6 10H26l6-10z" fill="#E8C766"/><rect x="30" y="14" width="4" height="8" fill="#E8C766"/><path d="M10 26h44l-4 8H14l-4-8z" fill="#fff"/><path d="M14 34h36l-3 7H17l-3-7z" fill="#fff" opacity=".85"/><rect x="20" y="41" width="24" height="19" rx="2" fill="#fff" opacity=".9"/><rect x="29" y="48" width="6" height="12" fill="#A31621"/></svg>
@@ -314,14 +326,14 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
   <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
     <div class="card" style="max-width:380px;width:100%;text-align:center;">
       <h2>🔒 अनुहार प्रमाणीकरण</h2>
-      <p class="small-note">कृपया क्यामेरामा आफ्नो अनुहार देखाउनुहोस्।</p>
+      <p class="small-note">क्यामेरा अगाडि अनुहार देखाउनुहोस् — पहिचान भएमा आफै लगइन हुन्छ।</p>
       <div class="cam-frame round" style="margin-top:14px;">
         <video id="lockVideo" autoplay muted playsinline></video>
         <canvas id="lockCanvas"></canvas>
       </div>
       <div class="face-status" id="lockFaceStatus">क्यामेरा सुरु हुँदैछ...</div>
       <div style="display:flex;gap:8px;margin-top:14px;">
-        <button class="btn btn-primary btn-block" onclick="verifyFaceLock()">✔ प्रमाणित गर्नुहोस्</button>
+        <button class="btn btn-outline btn-block" onclick="verifyFaceLock()">🔁 फेरि जाँच गर्नुहोस्</button>
       </div>
       <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="cancelFaceLock()">पासवर्डबाट फर्कनुहोस्</button>
     </div>
@@ -376,29 +388,32 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 
     <!-- MARK ATTENDANCE -->
     <section class="view" id="markView">
-      <div class="section-title"><div><h2>हाजिर लगाउनुहोस्</h2><div class="sub">अनुहार पहिचान गरेर वा म्यानुअल रूपमा हाजिर लगाउनुहोस्</div></div></div>
+      <div class="section-title"><div><h2>हाजिर लगाउनुहोस्</h2><div class="sub">पहिले कारण छान्नुहोस्, त्यसपछि मात्र हाजिर लाग्छ</div></div></div>
       <div class="mark-wrap">
+        <div class="card">
+          <div class="field">
+            <label>① कुन कामको लागि हाजिर? <span style="color:var(--sindoor);">*अनिवार्य</span></label>
+            <div class="purpose-grid" id="purposeGrid"></div>
+            <p class="small-note" id="purposeWarning" style="display:none;color:var(--danger);font-weight:700;margin-top:8px;">⚠ पहिले माथिबाट कामको कारण/उद्देश्य छान्नुहोस् — कारण नछानी हाजिर लाग्दैन।</p>
+          </div>
+          <div class="field"><label>समय (आवश्यक भए बदल्नुहोस्)</label><input type="time" id="markTime"></div>
+          <div class="field"><label>टिप्पणी (वैकल्पिक)</label><textarea id="markNote" rows="2" placeholder="जस्तै: अफिस म्यानुअल कारणले ढिलो"></textarea></div>
+          <button class="btn btn-primary btn-block" id="manualMarkBtn" onclick="manualMark()" disabled>✍ म्यानुअल हाजिर लगाउनुहोस् (क्यामेरा बिना)</button>
+          <p class="small-note" style="margin-top:10px;">टिप: सेटिङमा गई कामको प्रकार थप्न/हटाउन सकिन्छ र हाजिर समय/ढिलो सीमा मिलाउन सकिन्छ।</p>
+        </div>
         <div class="card" style="text-align:center;">
+          <label style="display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:10px;">② अनुहार पहिचान गरी हाजिर</label>
           <div class="cam-frame round" id="markCamFrame">
             <video id="markVideo" autoplay muted playsinline></video>
             <canvas id="markCanvas"></canvas>
           </div>
           <div class="face-status" id="markFaceStatus">क्यामेरा सुरु गर्नुहोस्</div>
           <button class="btn btn-outline btn-block" style="margin-top:12px;" onclick="startMarkCam()">📷 क्यामेरा सुरु गर्नुहोस्</button>
-          <button class="btn btn-gold btn-block" style="margin-top:8px;" onclick="scanAndMark()">✔ अनुहार स्क्यान गरी हाजिर लगाउनुहोस्</button>
-        </div>
-        <div class="card">
-          <div class="field">
-            <label>कुन कामको लागि हाजिर?</label>
-            <div class="purpose-grid" id="purposeGrid"></div>
-          </div>
-          <div class="field"><label>समय (आवश्यक भए बदल्नुहोस्)</label><input type="time" id="markTime"></div>
-          <div class="field"><label>टिप्पणी (वैकल्पिक)</label><textarea id="markNote" rows="2" placeholder="जस्तै: अफिस म्यानुअल कारणले ढिलो"></textarea></div>
-          <button class="btn btn-primary btn-block" onclick="manualMark()">✍ म्यानुअल हाजिर लगाउनुहोस् (क्यामेरा बिना)</button>
-          <p class="small-note" style="margin-top:10px;">टिप: सेटिङमा गई कामको प्रकार थप्न/हटाउन सकिन्छ र हाजिर समय/ढिलो सीमा मिलाउन सकिन्छ।</p>
+          <button class="btn btn-gold btn-block" id="scanMarkBtn" style="margin-top:8px;" onclick="scanAndMark()" disabled>✔ अनुहार स्क्यान गरी हाजिर लगाउनुहोस्</button>
         </div>
       </div>
     </section>
+
 
     <!-- RECORDS -->
     <section class="view" id="recordsView">
@@ -431,7 +446,7 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
         <h3 style="font-size:16px;margin-top:0;">महिनावारी क्यालेन्डर</h3>
         <div class="calendar-grid" id="reportCalendar"></div>
         <div style="display:flex;gap:14px;margin-top:12px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;">
-          <span>🟩 उपस्थित</span><span>🟧 ढिलो</span><span>⬜ अनुपस्थित/बिदा</span>
+          <span>🟩 हाजिर लागेको (उपस्थित)</span><span>🟧 ढिलो (आधा हाजिर)</span><span>🟥 हाजिर नलागेको (अनुपस्थित)</span><span>⬜ बिदा/शनिबार/आउने मिति</span>
         </div>
       </div>
       <div class="card" style="margin-top:16px;">
@@ -445,9 +460,14 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
       <div class="section-title"><div><h2>सेटिङ</h2><div class="sub">प्रोफाइल, फेस लक, कामको प्रकार मिलाउनुहोस्</div></div></div>
       <div class="card" style="margin-bottom:16px;">
         <h3 style="margin-top:0;font-size:16px;">कामको समय</h3>
-        <div class="field"><label>हाजिर सुरु समय (यसपछि आउनेलाई "ढिलो" मानिन्छ)</label><input type="time" id="setStartTime"></div>
+        <div class="field"><label>हाजिर सुरु समय (यसपछि आउनेलाई "ढिलो/आधा हाजिर" मानिन्छ)</label><input type="time" id="setStartTime"></div>
         <div class="field"><label>ढिलो हुने सीमा (मिनेट)</label><input type="number" id="setLateThreshold" min="0"></div>
+        <p class="small-note" style="margin-top:-8px;">यो सीमा नाघेपछि हाजिर "ढिलो (आधा हाजिर)" मानिन्छ — तर यो मान्यता <b>दिउँसो १:०० बजेसम्म</b> मात्र हुन्छ। १:०० बजे पछि हाजिर लाग्दैन (टोगल अफ भएमा मात्र)।</p>
         <button class="btn btn-primary btn-sm" onclick="saveWorkSettings()">सेभ गर्नुहोस्</button>
+        <div class="toggle-row" style="margin-top:14px;border-top:1px solid #F1E9D6;padding-top:14px;">
+          <div><b>जहिलेसुकै हाजिर (Anytime Mode)</b><div class="small-note">🟢 अन: दिनभरि जुनसुकै समयमा लगाए पनि त्यो दिनको हाजिर गनिन्छ, समयको बन्देज हुँदैन।<br>🔴 अफ: सेट गरेको समय अनुसार "उपस्थित/ढिलो(आधा)" गणना हुन्छ, र १:०० बजे पछि हाजिर लाग्दैन।</div></div>
+          <div class="switch" id="anytimeModeSwitch" onclick="toggleAnytimeMode()"></div>
+        </div>
       </div>
       <div class="card" style="margin-bottom:16px;">
         <h3 style="margin-top:0;font-size:16px;">कामको प्रकार / उद्देश्यहरू</h3>
@@ -710,7 +730,7 @@ async function doRegister(){
   };
   const id = await dbAdd('users', user);
   await dbPut('settings', {
-    userId:id, startTime:'10:00', lateThreshold:15,
+    userId:id, startTime:'10:00', lateThreshold:15, anytimeMode:false,
     purposes:['कार्यालय हाजिर','मिटिङ','फिल्ड कार्य','तालिम','अन्य']
   });
   stopCam(document.getElementById('regVideo'));
@@ -737,34 +757,55 @@ async function doLogin(){
     document.getElementById('faceLockScreen').classList.add('active');
     document.getElementById('lockFaceStatus').textContent = 'क्यामेरा खुल्दैछ...';
     lockStream = await startCam(document.getElementById('lockVideo'));
-    document.getElementById('lockFaceStatus').textContent = 'अनुहार फ्रेममा राखी प्रमाणित थिच्नुहोस्';
+    document.getElementById('lockFaceStatus').textContent = 'स्वतः पहिचान हुँदैछ... अनुहार फ्रेममा राख्नुहोस्';
+    await initFaceApi();
+    startFaceLockAutoDetect();
   }else{
     await completeLogin(user);
   }
 }
 
-let pendingLoginUser = null, lockStream = null;
+let pendingLoginUser = null, lockStream = null, faceLockAutoTimer = null, faceLockBusy = false;
+function startFaceLockAutoDetect(){
+  stopFaceLockAutoDetect();
+  faceLockAutoTimer = setInterval(async ()=>{
+    if(faceLockBusy || !pendingLoginUser) return;
+    faceLockBusy = true;
+    await attemptFaceLockVerify(true);
+    faceLockBusy = false;
+  }, 1200);
+}
+function stopFaceLockAutoDetect(){
+  if(faceLockAutoTimer){ clearInterval(faceLockAutoTimer); faceLockAutoTimer = null; }
+}
 async function verifyFaceLock(){
+  await attemptFaceLockVerify(false);
+}
+async function attemptFaceLockVerify(silent){
   const video = document.getElementById('lockVideo');
-  document.getElementById('lockFaceStatus').textContent = 'जाँच हुँदैछ...';
+  if(!video.srcObject || !pendingLoginUser) return;
+  if(!silent) document.getElementById('lockFaceStatus').textContent = 'जाँच हुँदैछ...';
   const desc = await detectDescriptor(video);
   if(!desc){
-    document.getElementById('lockFaceStatus').textContent = '✘ अनुहार भेटिएन, फेरि प्रयास गर्नुहोस्';
-    document.getElementById('lockFaceStatus').className = 'face-status bad';
+    document.getElementById('lockFaceStatus').textContent = 'अनुहार खोजिँदैछ... राम्रो उज्यालोमा फ्रेममा राख्नुहोस्';
+    document.getElementById('lockFaceStatus').className = 'face-status';
     return;
   }
   const dist = euclideanDist(Array.from(desc), pendingLoginUser.faceDescriptor);
   if(dist < FACE_MATCH_THRESHOLD){
+    stopFaceLockAutoDetect();
     document.getElementById('lockFaceStatus').textContent = '✔ प्रमाणित भयो!';
     document.getElementById('lockFaceStatus').className = 'face-status ok';
     stopCam(video);
-    setTimeout(()=>completeLogin(pendingLoginUser), 400);
+    const user = pendingLoginUser;
+    setTimeout(()=>completeLogin(user), 400);
   }else{
-    document.getElementById('lockFaceStatus').textContent = '✘ अनुहार मिलेन, फेरि प्रयास गर्नुहोस्';
+    document.getElementById('lockFaceStatus').textContent = '✘ अनुहार मिलेन, फेरि प्रयास गर्दैछ...';
     document.getElementById('lockFaceStatus').className = 'face-status bad';
   }
 }
 function cancelFaceLock(){
+  stopFaceLockAutoDetect();
   stopCam(document.getElementById('lockVideo'));
   document.getElementById('faceLockScreen').classList.remove('active');
   document.getElementById('authScreen').classList.add('active');
@@ -790,6 +831,7 @@ async function completeLogin(user){
 function doLogout(){
   currentUser = null;
   sessionStorage.removeItem('hajir_uid');
+  stopFaceLockAutoDetect();
   [document.getElementById('markVideo'), document.getElementById('setVideo'), document.getElementById('regVideo'), document.getElementById('lockVideo')].forEach(stopCam);
   document.getElementById('mainShell').classList.remove('active');
   document.getElementById('authScreen').classList.add('active');
@@ -813,6 +855,10 @@ function showView(viewId){
   if(viewId==='markView'){
     const now = new Date();
     document.getElementById('markTime').value = pad2(now.getHours())+':'+pad2(now.getMinutes());
+    selectedPurpose = null;
+    document.getElementById('purposeWarning').style.display = 'none';
+    populatePurposeUI();
+    updateMarkButtonsState();
   }
 }
 function initHeaderDate(){
@@ -830,26 +876,57 @@ function populatePurposeUI(){
     const b = document.createElement('button');
     b.type='button'; b.className='purpose-opt'+(selectedPurpose===p?' sel':'');
     b.textContent = p;
-    b.onclick = ()=>{ selectedPurpose = p; document.querySelectorAll('.purpose-opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); };
+    b.onclick = ()=>{
+      selectedPurpose = p;
+      document.querySelectorAll('.purpose-opt').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      document.getElementById('purposeWarning').style.display = 'none';
+      updateMarkButtonsState();
+    };
     grid.appendChild(b);
   });
-  if(!selectedPurpose && currentSettings.purposes && currentSettings.purposes.length){
-    selectedPurpose = currentSettings.purposes[0];
-    if(grid.firstChild) grid.firstChild.classList.add('sel');
-  }
   // edit modal select
   const sel = document.getElementById('editPurpose');
   sel.innerHTML = (currentSettings.purposes||[]).map(p=>`<option value="${p}">${p}</option>`).join('');
+  updateMarkButtonsState();
+}
+function updateMarkButtonsState(){
+  const manualBtn = document.getElementById('manualMarkBtn');
+  const scanBtn = document.getElementById('scanMarkBtn');
+  if(manualBtn) manualBtn.disabled = !selectedPurpose;
+  if(scanBtn) scanBtn.disabled = !selectedPurpose;
+}
+function requirePurposeMsg(){
+  document.getElementById('purposeWarning').style.display = 'block';
+  document.getElementById('purposeWarning').scrollIntoView({behavior:'smooth', block:'center'});
+  toast('पहिले कामको कारण/उद्देश्य छान्नुहोस्','err');
 }
 
 /* ================= ATTENDANCE STATUS CALC ================= */
-function computeStatus(timeStr){
+const ATTENDANCE_CUTOFF_MINUTES = 13*60; // 1:00 PM hard cutoff — after this, no attendance if anytimeMode is off
+function getMarkTimeValue(){
+  const v = document.getElementById('markTime').value;
+  if(v) return v;
+  const now = new Date();
+  return pad2(now.getHours())+':'+pad2(now.getMinutes());
+}
+function evaluateAttendanceTime(timeStr){
+  if(currentSettings.anytimeMode) return {allowed:true, status:'present'};
   const [h,m] = timeStr.split(':').map(Number);
-  const [sh,sm] = (currentSettings.startTime||'10:00').split(':').map(Number);
-  const late = currentSettings.lateThreshold || 15;
   const minutes = h*60+m;
+  const [sh,sm] = (currentSettings.startTime||'10:00').split(':').map(Number);
   const startMinutes = sh*60+sm;
-  return (minutes > startMinutes + late) ? 'late' : 'present';
+  const late = currentSettings.lateThreshold || 15;
+  if(minutes > ATTENDANCE_CUTOFF_MINUTES){
+    return {allowed:false, status:null, reason:'cutoff'};
+  }
+  if(minutes > startMinutes + late){
+    return {allowed:true, status:'late'}; // "late" = counted as half-day attendance
+  }
+  return {allowed:true, status:'present'};
+}
+function blockedTimeMsg(){
+  toast('⛔ हाजिर लगाउने समय सकियो — दिउँसो १:०० बजे पछि हाजिर लाग्दैन। "जहिलेसुकै हाजिर" मोड सेटिङबाट सक्रिय गरे जुनसुकै बेला लाग्छ।','err');
 }
 
 /* ================= MARK ATTENDANCE ================= */
@@ -863,9 +940,11 @@ async function startMarkCam(){
   }
 }
 async function scanAndMark(){
+  if(!selectedPurpose){ requirePurposeMsg(); return; }
+  const preCheck = evaluateAttendanceTime(getMarkTimeValue());
+  if(!preCheck.allowed){ blockedTimeMsg(); return; }
   const video = document.getElementById('markVideo');
   if(!video.srcObject){ toast('पहिले क्यामेरा सुरु गर्नुहोस्','err'); return; }
-  if(!selectedPurpose){ toast('कृपया कामको प्रकार छान्नुहोस्','err'); return; }
   document.getElementById('markFaceStatus').textContent = 'अनुहार जाँच हुँदैछ...';
   const desc = await detectDescriptor(video);
   if(!desc){
@@ -886,15 +965,19 @@ async function scanAndMark(){
   await saveAttendance('face');
 }
 async function manualMark(){
-  if(!selectedPurpose){ toast('कृपया कामको प्रकार छान्नुहोस्','err'); return; }
+  if(!selectedPurpose){ requirePurposeMsg(); return; }
+  const preCheck = evaluateAttendanceTime(getMarkTimeValue());
+  if(!preCheck.allowed){ blockedTimeMsg(); return; }
   await saveAttendance('manual');
 }
 async function saveAttendance(method){
   const now = new Date();
   const date = fmtDate(now);
-  const time = document.getElementById('markTime').value || (pad2(now.getHours())+':'+pad2(now.getMinutes()));
+  const time = getMarkTimeValue();
   const note = document.getElementById('markNote').value.trim();
-  const status = computeStatus(time);
+  const evalRes = evaluateAttendanceTime(time);
+  if(!evalRes.allowed){ blockedTimeMsg(); return; }
+  const status = evalRes.status;
   const existing = (await dbAllByIndex('attendance','userId', currentUser.id)).find(r=>r.date===date && r.purpose===selectedPurpose);
   const rec = existing || {userId: currentUser.id, date, createdAt: Date.now()};
   rec.timeIn = existing ? existing.timeIn : time;
@@ -966,7 +1049,7 @@ async function refreshDashboard(){
       </div>`).join('');
   }
 }
-function statusLabel(s){ return s==='present' ? 'उपस्थित' : s==='late' ? 'ढिलो' : 'अनुपस्थित'; }
+function statusLabel(s){ return s==='present' ? 'उपस्थित' : s==='late' ? 'ढिलो (आधा हाजिर)' : 'अनुपस्थित'; }
 
 /* ================= RECORDS CRUD ================= */
 async function renderRecords(){
@@ -1060,23 +1143,41 @@ async function deleteRecord(id){
 }
 
 /* ================= REPORTS ================= */
+function classifyDay(dateStr, dow, dayRecs, todayStr){
+  if(dow===6) return 'off';
+  if(dayRecs.some(r=>r.status==='late')) return 'late';
+  if(dayRecs.some(r=>r.status==='present')) return 'present';
+  if(dayRecs.some(r=>r.status==='absent')) return 'absent';
+  if(dateStr > todayStr) return 'future';
+  return 'absent';
+}
 async function renderReport(){
   const monthVal = document.getElementById('reportMonth').value;
   if(!monthVal) return;
   const [y,m] = monthVal.split('-').map(Number);
   const all = (await dbAllByIndex('attendance','userId', currentUser.id)).filter(r=>r.date.startsWith(monthVal));
   const daysInMonth = new Date(y,m,0).getDate();
-  const present = all.filter(r=>r.status==='present').length;
-  const late = all.filter(r=>r.status==='late').length;
-  const workingDaysSoFar = countWorkingDays(y,m,daysInMonth);
-  const uniqueDaysPresent = new Set(all.filter(r=>r.status!=='absent').map(r=>r.date)).size;
-  const absent = Math.max(workingDaysSoFar - uniqueDaysPresent, 0);
-  const pct = workingDaysSoFar ? Math.round((uniqueDaysPresent/workingDaysSoFar)*100) : 0;
+  const todayStr = fmtDate(new Date());
+  const lateRecordCount = all.filter(r=>r.status==='late').length;
+
+  // build per-day status once, reuse for stats + calendar + bars
+  const dayStatuses = [];
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = y+'-'+pad2(m)+'-'+pad2(d);
+    const dow = new Date(y,m-1,d).getDay();
+    const dayRecs = all.filter(r=>r.date===dateStr);
+    dayStatuses.push({d, dateStr, dow, dayRecs, status: classifyDay(dateStr, dow, dayRecs, todayStr)});
+  }
+
+  const presentDays = dayStatuses.filter(x=>x.status==='present'||x.status==='late').length;
+  const absentDays = dayStatuses.filter(x=>x.status==='absent').length;
+  const workingDaysSoFar = dayStatuses.filter(x=>x.status==='present'||x.status==='late'||x.status==='absent').length;
+  const pct = workingDaysSoFar ? Math.round((presentDays/workingDaysSoFar)*100) : 0;
 
   document.getElementById('reportStatGrid').innerHTML = `
-    <div class="stat-card"><b>${toNp(uniqueDaysPresent)}</b><span>उपस्थित दिन</span></div>
-    <div class="stat-card gold"><b>${toNp(late)}</b><span>ढिलो पटक</span></div>
-    <div class="stat-card red"><b>${toNp(absent)}</b><span>अनुपस्थित दिन (अनुमानित)</span></div>
+    <div class="stat-card"><b>${toNp(presentDays)}</b><span>उपस्थित दिन (हाजिर लागेको)</span></div>
+    <div class="stat-card gold"><b>${toNp(lateRecordCount)}</b><span>ढिलो (आधा हाजिर) पटक</span></div>
+    <div class="stat-card red"><b>${toNp(absentDays)}</b><span>अनुपस्थित दिन (हाजिर नलागेको)</span></div>
     <div class="stat-card blue"><b>${toNp(pct)}%</b><span>उपस्थिति दर</span></div>
   `;
 
@@ -1085,45 +1186,29 @@ async function renderReport(){
   const cal = document.getElementById('reportCalendar');
   let html = NP_WEEKDAYS_SHORT.map(w=>`<div class="cal-head">${w}</div>`).join('');
   for(let i=0;i<firstDow;i++) html += `<div class="cal-cell empty"></div>`;
-  for(let d=1; d<=daysInMonth; d++){
-    const dateStr = y+'-'+pad2(m)+'-'+pad2(d);
-    const dow = new Date(y,m-1,d).getDay();
-    const dayRecs = all.filter(r=>r.date===dateStr);
-    let cls = 'cal-cell';
-    if(dow===6) cls += ' off';
-    if(dayRecs.some(r=>r.status==='late')) cls += ' late';
-    else if(dayRecs.some(r=>r.status==='present')) cls += ' present';
-    html += `<div class="${cls}">${toNp(d)}</div>`;
-  }
+  dayStatuses.forEach(x=>{
+    html += `<div class="cal-cell ${x.status}">${toNp(x.d)}</div>`;
+  });
   cal.innerHTML = html;
 
   // bar chart: hours worked per day (timeIn to timeOut) else mark 0
   const bars = document.getElementById('reportBars');
   let barsHtml = '';
-  for(let d=1; d<=daysInMonth; d++){
-    const dateStr = y+'-'+pad2(m)+'-'+pad2(d);
-    const rec = all.find(r=>r.date===dateStr);
+  dayStatuses.forEach(x=>{
+    const rec = x.dayRecs[0];
     let hours = 0, cls='bar';
-    if(rec){
-      cls = rec.status==='late' ? 'bar late' : 'bar';
-      if(rec.timeOut && rec.timeOut !== rec.timeIn){
-        hours = timeDiffHours(rec.timeIn, rec.timeOut);
-      }else{ hours = 1; }
-    }else{ cls='bar absent'; hours = 0.15; }
+    if(x.status==='present' || x.status==='late'){
+      cls = x.status==='late' ? 'bar late' : 'bar';
+      hours = (rec && rec.timeOut && rec.timeOut !== rec.timeIn) ? timeDiffHours(rec.timeIn, rec.timeOut) : 1;
+    }else if(x.status==='absent'){
+      cls='bar absent'; hours = 0.15;
+    }else{
+      cls='bar'; hours = 0.03; // off/future — near-invisible placeholder
+    }
     const heightPct = Math.min(hours/9*100, 100);
-    barsHtml += `<div class="${cls}" style="height:${heightPct}%" title="${toNp(d)}: ${hours.toFixed(1)} घण्टा"></div>`;
-  }
+    barsHtml += `<div class="${cls}" style="height:${heightPct}%" title="${toNp(x.d)}: ${hours.toFixed(1)} घण्टा"></div>`;
+  });
   bars.innerHTML = barsHtml;
-}
-function countWorkingDays(y,m,daysInMonth){
-  const now = new Date();
-  const isCurrentMonth = (now.getFullYear()===y && now.getMonth()+1===m);
-  const limit = isCurrentMonth ? now.getDate() : daysInMonth;
-  let count=0;
-  for(let d=1; d<=limit; d++){
-    if(new Date(y,m-1,d).getDay() !== 6) count++;
-  }
-  return count;
 }
 function timeDiffHours(t1,t2){
   const [h1,m1]=t1.split(':').map(Number), [h2,m2]=t2.split(':').map(Number);
@@ -1184,7 +1269,7 @@ async function exportExcel(){
   ws2.getCell('A1').value = 'महिनाको सारांश';
   ws2.getCell('A1').font = {bold:true, size:14, color:{argb:'FFFFFFFF'}};
   ws2.getCell('A1').fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FF0B3D91'}};
-  const sumRows = [['उपस्थित दिन', present], ['ढिलो पटक', late], ['कुल रेकर्ड', all.length]];
+  const sumRows = [['उपस्थित दिन', present], ['ढिलो (आधा हाजिर) पटक', late], ['कुल रेकर्ड', all.length]];
   sumRows.forEach(r=>{
     const row = ws2.addRow(r);
     row.getCell(1).font = {bold:true};
@@ -1206,8 +1291,15 @@ async function exportExcel(){
 function populateSettingsUI(){
   document.getElementById('setStartTime').value = currentSettings.startTime || '10:00';
   document.getElementById('setLateThreshold').value = currentSettings.lateThreshold ?? 15;
+  document.getElementById('anytimeModeSwitch').classList.toggle('on', !!currentSettings.anytimeMode);
   renderPurposeTags();
   document.getElementById('faceLockSwitch').classList.toggle('on', !!currentUser.faceLockEnabled);
+}
+async function toggleAnytimeMode(){
+  currentSettings.anytimeMode = !currentSettings.anytimeMode;
+  await dbPut('settings', currentSettings);
+  document.getElementById('anytimeModeSwitch').classList.toggle('on', currentSettings.anytimeMode);
+  toast(currentSettings.anytimeMode ? 'जहिलेसुकै हाजिर मोड सक्रिय भयो' : 'समय अनुसार हाजिर मोड सक्रिय भयो','ok');
 }
 function renderPurposeTags(){
   const el = document.getElementById('purposeTagList');
