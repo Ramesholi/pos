@@ -121,10 +121,12 @@ input,select,textarea{font-family:inherit;}
 .face-status.bad{color:var(--danger);}
 .small-note{font-size:12px;color:var(--ink-soft);line-height:1.6;}
 
-/* ---------- PAGODA HEADER (signature) ---------- */
+/* ---------- PAGODA HEADER (signature) — now sticky site menu bar ---------- */
 .pagoda-header{
-  position:relative;background:linear-gradient(135deg,var(--sindoor-dark),var(--sindoor));
+  position:sticky;top:0;z-index:70;
+  background:linear-gradient(135deg,var(--sindoor-dark),var(--sindoor));
   color:#fff;padding:16px 0 26px;
+  box-shadow:0 6px 18px rgba(42,33,28,.18);
 }
 .pagoda-header::after{
   content:"";position:absolute;left:0;right:0;bottom:-1px;height:16px;
@@ -167,11 +169,27 @@ main{padding:26px 0 60px;}
 .today-card .date-big .wd{color:var(--sindoor);}
 
 /* mark attendance */
-.mark-wrap{display:grid;grid-template-columns:340px 1fr;gap:22px;}
-@media(max-width:800px){.mark-wrap{grid-template-columns:1fr;}}
 .purpose-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
 .purpose-opt{padding:9px 14px;border-radius:10px;border:1.5px solid #E3D6BE;background:#fff;font-size:13.5px;font-weight:600;color:var(--ink-soft);}
 .purpose-opt.sel{border-color:var(--sindoor);background:#FBEAE9;color:var(--sindoor);}
+
+/* method tabs — separates Face vs Manual attendance clearly */
+.method-tabs{display:flex;gap:10px;margin:20px 0 16px;flex-wrap:wrap;}
+.method-tab{
+  flex:1;min-width:200px;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 16px;border-radius:14px;border:2px solid #E3D6BE;background:#fff;
+  font-size:14.5px;font-weight:700;color:var(--ink-soft);box-shadow:var(--shadow-1);
+  transition:border .15s ease, color .15s ease, background .15s ease;
+}
+.method-tab .mt-badge{font-size:11px;font-weight:700;background:var(--ivory-2);color:var(--ink-soft);padding:2px 8px;border-radius:999px;}
+.method-tab.active{border-color:var(--sindoor);background:linear-gradient(135deg,#FBEAE9,#fff);color:var(--sindoor);}
+.method-tab.active .mt-badge{background:var(--sindoor);color:#fff;}
+.mark-method-section{display:none;}
+.mark-method-section.active{display:block;animation:fadein .3s ease;}
+.method-section-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.method-section-head .msh-icon{width:38px;height:38px;border-radius:10px;background:var(--ivory-2);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.method-section-head h3{margin:0;font-size:17px;}
+.method-section-head p{margin:2px 0 0;font-size:12.5px;color:var(--ink-soft);font-weight:600;}
 
 /* stamp overlay */
 #stampOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:999;background:rgba(42,33,28,.35);backdrop-filter:blur(2px);}
@@ -235,7 +253,7 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
 .switch.on::after{left:23px;}
 
-/* bottom nav mobile */
+/* bottom nav mobile — persistent site menu bar on small screens */
 .bottom-nav{
   display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #EEE3CB;
   z-index:80;box-shadow:0 -6px 18px rgba(0,0,0,.06);
@@ -397,21 +415,32 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
 
     <!-- MARK ATTENDANCE -->
     <section class="view" id="markView">
-      <div class="section-title"><div><h2>हाजिर लगाउनुहोस्</h2><div class="sub">पहिले कारण छान्नुहोस्, त्यसपछि मात्र हाजिर लाग्छ</div></div></div>
-      <div class="mark-wrap">
-        <div class="card">
-          <div class="field">
-            <label>① कुन कामको लागि हाजिर? <span style="color:var(--sindoor);">*अनिवार्य</span></label>
-            <div class="purpose-grid" id="purposeGrid"></div>
-            <p class="small-note" id="purposeWarning" style="display:none;color:var(--danger);font-weight:700;margin-top:8px;">⚠ पहिले माथिबाट कामको कारण/उद्देश्य छान्नुहोस् — कारण नछानी हाजिर लाग्दैन।</p>
-          </div>
-          <div class="field"><label>समय (आवश्यक भए बदल्नुहोस्)</label><input type="time" id="markTime"></div>
-          <div class="field"><label>टिप्पणी (वैकल्पिक)</label><textarea id="markNote" rows="2" placeholder="जस्तै: अफिस म्यानुअल कारणले ढिलो"></textarea></div>
-          <button class="btn btn-primary btn-block" id="manualMarkBtn" onclick="manualMark()" disabled>✍ म्यानुअल हाजिर लगाउनुहोस् (क्यामेरा बिना)</button>
-          <p class="small-note" style="margin-top:10px;">टिप: सेटिङमा गई कामको प्रकार थप्न/हटाउन सकिन्छ र हाजिर समय/ढिलो सीमा मिलाउन सकिन्छ।</p>
+      <div class="section-title"><div><h2>हाजिर लगाउनुहोस्</h2><div class="sub">पहिले कारण छान्नुहोस्, त्यसपछि तलबाट फेस वा म्यानुअल तरिका छानेर हाजिर लगाउनुहोस्</div></div></div>
+
+      <!-- Shared / common fields required for both methods -->
+      <div class="card">
+        <div class="field">
+          <label>① कुन कामको लागि हाजिर? <span style="color:var(--sindoor);">*अनिवार्य</span></label>
+          <div class="purpose-grid" id="purposeGrid"></div>
+          <p class="small-note" id="purposeWarning" style="display:none;color:var(--danger);font-weight:700;margin-top:8px;">⚠ पहिले माथिबाट कामको कारण/उद्देश्य छान्नुहोस् — कारण नछानी हाजिर लाग्दैन।</p>
         </div>
+        <div class="field"><label>समय (आवश्यक भए बदल्नुहोस्)</label><input type="time" id="markTime"></div>
+        <div class="field" style="margin-bottom:0;"><label>टिप्पणी (वैकल्पिक)</label><textarea id="markNote" rows="2" placeholder="जस्तै: अफिस म्यानुअल कारणले ढिलो"></textarea></div>
+      </div>
+
+      <!-- Method selector: Face vs Manual, kept as two clearly separate sections -->
+      <div class="method-tabs" id="methodTabs">
+        <button class="method-tab active" data-method="face" onclick="switchMarkMethod('face')">📸 फेसद्वारा हाजिर <span class="mt-badge">स्वचालित</span></button>
+        <button class="method-tab" data-method="manual" onclick="switchMarkMethod('manual')">✍ म्यानुअल हाजिर <span class="mt-badge">क्यामेरा बिना</span></button>
+      </div>
+
+      <!-- ② FACE ATTENDANCE SECTION -->
+      <div class="mark-method-section active" id="faceMethodSection">
         <div class="card" style="text-align:center;">
-          <label style="display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:10px;">② अनुहार पहिचान गरी हाजिर</label>
+          <div class="method-section-head" style="justify-content:center;text-align:left;">
+            <div class="msh-icon">📸</div>
+            <div><h3>② फेसद्वारा हाजिर</h3><p>क्यामेरा अगाडि अनुहार राखेर स्वचालित रूपमा हाजिर लगाउनुहोस्</p></div>
+          </div>
           <div class="cam-frame round" id="markCamFrame">
             <video id="markVideo" autoplay muted playsinline></video>
             <canvas id="markCanvas"></canvas>
@@ -421,6 +450,20 @@ table.rec-table td{padding:12px 14px;font-size:13.5px;border-top:1px solid #F1E9
           <button class="btn btn-gold btn-block" id="scanMarkBtn" style="margin-top:8px;" onclick="scanAndMark()" disabled>✔ अनुहार स्क्यान गरी हाजिर लगाउनुहोस्</button>
         </div>
       </div>
+
+      <!-- ② MANUAL ATTENDANCE SECTION -->
+      <div class="mark-method-section" id="manualMethodSection">
+        <div class="card">
+          <div class="method-section-head">
+            <div class="msh-icon">✍</div>
+            <div><h3>② म्यानुअल हाजिर</h3><p>क्यामेरा प्रयोग नगरी, माथिको जानकारीका आधारमा सिधै हाजिर लगाउनुहोस्</p></div>
+          </div>
+          <p class="small-note">माथि छानिएको काम, समय र टिप्पणी प्रयोग गरी हाजिर दर्ता हुनेछ। यो विकल्प क्यामेरा उपलब्ध नभएको बेला वा फेस पहिचान गर्न नमिल्दा प्रयोग गर्नुहोस्।</p>
+          <button class="btn btn-primary btn-block" id="manualMarkBtn" onclick="manualMark()" disabled style="margin-top:6px;">✍ म्यानुअल हाजिर लगाउनुहोस् (क्यामेरा बिना)</button>
+        </div>
+      </div>
+
+      <p class="small-note" style="margin-top:14px;">टिप: सेटिङमा गई कामको प्रकार थप्न/हटाउन सकिन्छ र हाजिर समय/ढिलो सीमा मिलाउन सकिन्छ।</p>
     </section>
 
 
@@ -639,6 +682,7 @@ let currentSettings = null;
 let selectedPurpose = null;
 let editingRecId = null;
 let faceApiReady = false;
+let currentMarkMethod = 'face';
 
 /* ---------------- face-api init ---------------- */
 async function initFaceApi(){
@@ -863,14 +907,30 @@ function showView(viewId){
     selectedPurpose = null;
     document.getElementById('purposeWarning').style.display = 'none';
     populatePurposeUI();
+    switchMarkMethod('face');
     updateMarkButtonsState();
   }
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 function initHeaderDate(){
   const now = new Date();
   document.getElementById('brandDate').textContent = NP_WEEKDAYS_SHORT[now.getDay()]+', '+toNp(now.getDate())+' '+NP_MONTHS[now.getMonth()];
   document.getElementById('todayWeekday').textContent = NP_WEEKDAYS[now.getDay()];
   document.getElementById('todayDate').textContent = toNp(now.getDate())+' '+NP_MONTHS[now.getMonth()]+' '+toNp(now.getFullYear());
+}
+
+/* ================= MARK METHOD SWITCH (Face vs Manual — separate sections) ================= */
+function switchMarkMethod(method){
+  currentMarkMethod = method;
+  document.querySelectorAll('.method-tab').forEach(b=>b.classList.toggle('active', b.dataset.method===method));
+  document.getElementById('faceMethodSection').classList.toggle('active', method==='face');
+  document.getElementById('manualMethodSection').classList.toggle('active', method==='manual');
+  // Stop the camera when leaving the face section to save resources/privacy
+  if(method!=='face'){
+    stopCam(document.getElementById('markVideo'));
+    document.getElementById('markFaceStatus').textContent = 'क्यामेरा सुरु गर्नुहोस्';
+    document.getElementById('markFaceStatus').className = 'face-status';
+  }
 }
 
 /* ================= PURPOSE UI ================= */
