@@ -1,1 +1,1 @@
-Attendance management system 
+POS billing management system 
