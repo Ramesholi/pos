@@ -74,7 +74,8 @@ a{color:inherit;text-decoration:none;}
   color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
 }
 .brand{display:flex;align-items:center;gap:10px;padding:20px 18px 14px;}
-.brand-badge{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow:var(--shadow);}
+.brand-badge{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow:var(--shadow);overflow:hidden;flex-shrink:0;}
+.brand-badge img{width:100%;height:100%;object-fit:cover;}
 .brand-name{font-family:'Sora';font-weight:700;font-size:16.5px;line-height:1.15;}
 .brand-sub{font-size:11px;color:#A9B4CC;margin-top:1px;}
 .nav{padding:10px 12px;display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto;}
@@ -97,7 +98,8 @@ a{color:inherit;text-decoration:none;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font-size:17px;}
 .icon-btn:hover{background:var(--surface-alt);}
-.menu-btn{display:none;}
+.topbar-logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:none;align-items:center;justify-content:center;font-size:18px;font-weight:800;overflow:hidden;flex-shrink:0;}
+.topbar-logo img{width:100%;height:100%;object-fit:cover;}
 .content{padding:20px 22px 90px;flex:1;}
 
 /* ---------- generic ---------- */
@@ -120,8 +122,8 @@ a{color:inherit;text-decoration:none;}
 .input:focus,.select:focus{border-color:var(--accent);background:#fff;}
 .label{font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;}
 .field{margin-bottom:14px;}
-.row{display:flex;gap:12px;}
-.row>*{flex:1;}
+.row{display:flex;gap:12px;flex-wrap:wrap;}
+.row>*{flex:1;min-width:140px;}
 .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
 .chip-success{background:var(--success-bg);color:var(--success);}
 .chip-danger{background:var(--danger-bg);color:var(--danger);}
@@ -166,7 +168,8 @@ tr:last-child td{border-bottom:none;}
 
 /* ---------- Lock Screen ---------- */
 #lockScreen{position:fixed;inset:0;background:linear-gradient(160deg,var(--primary) 0%,#0A1226 100%);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:20px;}
-.lock-badge{width:74px;height:74px;border-radius:22px;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:18px;box-shadow:0 10px 30px rgba(214,52,71,.4);}
+.lock-badge{width:74px;height:74px;border-radius:22px;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:18px;box-shadow:0 10px 30px rgba(214,52,71,.4);overflow:hidden;}
+.lock-badge img{width:100%;height:100%;object-fit:cover;}
 .lock-title{font-family:'Sora';font-weight:700;font-size:20px;margin-bottom:2px;}
 .lock-sub{color:#9AA6C4;font-size:13px;margin-bottom:26px;}
 .pin-dots{display:flex;gap:14px;margin-bottom:26px;}
@@ -224,6 +227,8 @@ tr:last-child td{border-bottom:none;}
 /* ---------- receipt ---------- */
 .receipt{width:300px;background:#fff;color:#111;font-family:'Inter',monospace;padding:18px 16px;margin:0 auto;font-size:12.5px;}
 .receipt .r-head{text-align:center;margin-bottom:8px;}
+.receipt .r-logo{width:46px;height:46px;border-radius:10px;margin:0 auto 6px;overflow:hidden;}
+.receipt .r-logo img{width:100%;height:100%;object-fit:cover;}
 .receipt .r-shop{font-family:'Sora';font-weight:800;font-size:16px;}
 .receipt hr{border:none;border-top:1px dashed #999;margin:8px 0;}
 .receipt table{font-size:11.5px;}
@@ -248,7 +253,7 @@ tr:last-child td{border-bottom:none;}
 .dash-2col-even{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:860px){
   .sidebar{display:none;}
-  .menu-btn{display:flex;}
+  .topbar-logo{display:flex;}
   .bottom-nav{display:block;}
   .content{padding:14px 14px 84px;}
   .topbar{padding:12px 14px;}
@@ -265,6 +270,12 @@ tr:last-child td{border-bottom:none;}
 .link-btn{background:none;border:none;color:var(--info);cursor:pointer;font-weight:700;font-size:12.5px;padding:0;}
 .udhaaro-badge{display:inline-flex;align-items:center;gap:5px;background:var(--danger-bg);color:var(--danger);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
 .avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.logo-upload-box{display:flex;align-items:center;gap:14px;}
+.logo-preview{width:64px;height:64px;border-radius:14px;background:var(--surface-alt);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);overflow:hidden;flex-shrink:0;}
+.logo-preview img{width:100%;height:100%;object-fit:cover;}
+.report-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
+.report-toolbar .field{margin-bottom:0;min-width:150px;flex:1;}
+.report-toolbar .btn{flex-shrink:0;}
 @media print{
   body *{visibility:hidden;}
   #printArea, #printArea *{visibility:visible;}
@@ -278,7 +289,7 @@ tr:last-child td{border-bottom:none;}
 
 <!-- ================= LOCK SCREEN ================= -->
 <div id="lockScreen">
-  <div class="lock-badge"><i class="ri-store-2-fill"></i></div>
+  <div class="lock-badge" id="lockBadge"><i class="ri-store-2-fill"></i></div>
   <div class="lock-title" id="lockTitle">पिन प्रविष्ट गर्नुहोस्</div>
   <div class="lock-sub" id="lockSub">आफ्नो पसल खोल्न ४ अंकको पिन हाल्नुहोस्</div>
   <div class="pin-dots" id="pinDots">
@@ -296,7 +307,7 @@ tr:last-child td{border-bottom:none;}
 <div id="app" class="hidden">
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-badge"><i class="ri-store-2-fill"></i></div>
+      <div class="brand-badge" id="sbBrandBadge"><i class="ri-store-2-fill"></i></div>
       <div>
         <div class="brand-name" id="sbShopName">पसल POS</div>
         <div class="brand-sub">बिक्री व्यवस्थापन</div>
@@ -312,7 +323,7 @@ tr:last-child td{border-bottom:none;}
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="icon-btn menu-btn" onclick="toggleMobileMenu()"><i class="ri-menu-line"></i></button>
+        <div class="topbar-logo" id="topbarLogo"><i class="ri-store-2-fill"></i></div>
         <div>
           <h1 id="pageTitle">ड्यासबोर्ड</h1>
           <div class="topbar-sub" id="pageSub">आजको बिक्री सारांश</div>
@@ -411,7 +422,7 @@ const State = {
   customers:[],
   sales:[],
   transactions:[],
-  settings:{ shopName:'मेरो पसल', shopAddr:'काठमाडौं, नेपाल', shopPhone:'', shopPan:'', pin:null, currency:'रु' },
+  settings:{ shopName:'मेरो पसल', shopAddr:'काठमाडौं, नेपाल', shopPhone:'', shopPan:'', shopLogo:'', vatPercent:13, pin:null, currency:'रु' },
   cart:[], // {productId,name,price,qty,barcode}
   selectedCustomerId:null,
   paymentType:'cash',
@@ -440,6 +451,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   await loadAll();
   buildNav();
   setupPinPad();
+  applyBranding();
   if(!State.settings.pin){
     State.pinMode='setup';
     document.getElementById('lockTitle').textContent='नयाँ पिन बनाउनुहोस्';
@@ -460,6 +472,16 @@ async function loadAll(){
   settingsRows.forEach(r=>{ State.settings[r.key]=r.value; });
 }
 async function saveSetting(key,value){ State.settings[key]=value; await dbPut('settings',{key,value}); }
+
+/* ---------------- Branding (logo shown across app) ---------------- */
+function applyBranding(){
+  const logo=State.settings.shopLogo;
+  const badgeHTML = logo ? `<img src="${logo}">` : '<i class="ri-store-2-fill"></i>';
+  const badges=['sbBrandBadge','topbarLogo','lockBadge'];
+  badges.forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=badgeHTML; });
+  const nameEl=document.getElementById('sbShopName');
+  if(nameEl) nameEl.textContent = State.settings.shopName || 'पसल POS';
+}
 
 /* ---------------- PIN / Lock ---------------- */
 function setupPinPad(){
@@ -566,7 +588,6 @@ function buildNav(){
   const bn=document.getElementById('bottomNavList');
   bn.innerHTML=NAV_ITEMS.map(n=>`<div class="bn-item" data-id="${n.id}" onclick="navigate('${n.id}')"><i class="${n.icon}"></i><span>${n.label}</span></div>`).join('');
 }
-function toggleMobileMenu(){ navigate('pos'); }
 async function navigate(view){
   State.view=view;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active', el.dataset.id===view));
@@ -574,7 +595,7 @@ async function navigate(view){
   const titles={dashboard:['ड्यासबोर्ड','आजको बिक्री सारांश'],pos:['बिलिङ','सामान स्क्यान वा खोजी गरी बिल बनाउनुहोस्'],products:['सामान व्यवस्थापन','आफ्नो स्टक व्यवस्थापन गर्नुहोस्'],customers:['ग्राहक व्यवस्थापन','ग्राहक र उधारो हेर्नुहोस्'],reports:['रिपोर्ट','बिक्री विश्लेषण'],settings:['सेटिङ','पसल र प्रणाली सेटिङ']};
   document.getElementById('pageTitle').textContent=titles[view][0];
   document.getElementById('pageSub').textContent=titles[view][1];
-  document.getElementById('sbShopName').textContent = State.settings.shopName || 'पसल POS';
+  applyBranding();
   const c=document.getElementById('content');
   c.innerHTML='<div class="empty">लोड हुँदै...</div>';
   if(view==='dashboard') renderDashboard();
@@ -1053,18 +1074,22 @@ function calcTotals(){
   const subtotal=State.cart.reduce((a,c)=>a+c.price*c.qty,0);
   const pctOff=subtotal*(State.discountPct/100);
   const discount=pctOff+(State.discountFlat||0);
-  const total=Math.max(0, subtotal-discount);
+  const taxable=Math.max(0, subtotal-discount);
+  const vatPercent=Number(State.settings.vatPercent)||0;
+  const vat=taxable*(vatPercent/100);
+  const total=taxable+vat;
   const cost=State.cart.reduce((a,c)=>{ const p=State.products.find(x=>x.id===c.productId); return a+(p?p.costPrice:0)*c.qty; },0);
-  const profit=total-cost;
-  return {subtotal,discount,total,profit};
+  const profit=total-vat-cost;
+  return {subtotal,discount,vat,vatPercent,total,profit};
 }
 function renderCartSummary(){
   const el=document.getElementById('summaryBlock');
   if(!el) return;
-  const {subtotal,discount,total}=calcTotals();
+  const {subtotal,discount,vat,vatPercent,total}=calcTotals();
   el.innerHTML=`
     <div class="sum-row"><span>उप-जम्मा</span><span>${NPR(subtotal)}</span></div>
     <div class="sum-row"><span>छुट</span><span>− ${NPR(discount)}</span></div>
+    ${vatPercent>0?`<div class="sum-row"><span>VAT (${vatPercent}%)</span><span>+ ${NPR(vat)}</span></div>`:''}
     <div class="sum-row total"><span>कुल रकम</span><span>${NPR(total)}</span></div>
   `;
 }
@@ -1078,12 +1103,12 @@ function onSelectCustomer(id){ State.selectedCustomerId=id||null; }
 async function completeSale(){
   if(!State.cart.length){ toast('कार्टमा सामान छैन','err'); return; }
   if(State.paymentType==='credit' && !State.selectedCustomerId){ toast('उधारो बिलका लागि ग्राहक छनोट गर्नुपर्छ','err'); return; }
-  const {subtotal,discount,total,profit}=calcTotals();
+  const {subtotal,discount,vat,vatPercent,total,profit}=calcTotals();
   const billNo = 'B' + (State.sales.length+1).toString().padStart(5,'0');
   const sale={
     id:uid(), billNo, date:new Date().toISOString(),
     items: State.cart.map(c=>({productId:c.productId,name:c.name,price:c.price,qty:c.qty,unit:c.unit})),
-    subtotal, discount, total, profit,
+    subtotal, discount, vat, vatPercent, total, profit,
     paymentType:State.paymentType,
     customerId: State.selectedCustomerId || null
   };
@@ -1118,10 +1143,12 @@ async function completeSale(){
    ============================================================ */
 function buildReceiptHTML(sale){
   const cu = sale.customerId ? State.customers.find(c=>c.id===sale.customerId) : null;
+  const logo=State.settings.shopLogo;
   return `
   <div class="receipt" id="receiptEl">
     <div class="dhaka-strip" style="margin-bottom:8px;"></div>
     <div class="r-head">
+      ${logo?`<div class="r-logo"><img src="${logo}"></div>`:''}
       <div class="r-shop">${esc(State.settings.shopName||'मेरो पसल')}</div>
       <div>${esc(State.settings.shopAddr||'')}</div>
       <div>${esc(State.settings.shopPhone||'')}</div>
@@ -1141,6 +1168,7 @@ function buildReceiptHTML(sale){
     <hr>
     <div style="display:flex;justify-content:space-between;"><span>उप-जम्मा</span><span>${NPR(sale.subtotal)}</span></div>
     <div style="display:flex;justify-content:space-between;"><span>छुट</span><span>− ${NPR(sale.discount)}</span></div>
+    ${(sale.vatPercent>0)?`<div style="display:flex;justify-content:space-between;"><span>VAT (${sale.vatPercent}%)</span><span>+ ${NPR(sale.vat)}</span></div>`:''}
     <div class="r-tot" style="margin-top:4px;"><span>कुल जम्मा</span><span>${NPR(sale.total)}</span></div>
     <div style="margin-top:4px;">भुक्तानी: <b>${payLabel(sale.paymentType)}</b></div>
     <hr>
@@ -1174,9 +1202,9 @@ function showReceipt(sale, custId){
 }
 function printReceipt(){ window.print(); }
 
-async function sendWhatsApp(saleId){
+function sendWhatsApp(saleId){
   const sale = State.sales.find(s=>s.id===saleId) || State.lastReceipt;
-  let phone=document.getElementById('waPhone').value.trim().replace(/\\D/g,'');
+  let phone=document.getElementById('waPhone').value.trim().replace(/\D/g,'');
   if(!phone){ toast('कृपया मोबाइल नम्बर हाल्नुहोस्','err'); return; }
   if(phone.length===10) phone='977'+phone; // Nepal default country code
   const lines=[
@@ -1188,25 +1216,12 @@ async function sendWhatsApp(saleId){
   lines.push('—'.repeat(20));
   lines.push(`उप-जम्मा: ${NPR(sale.subtotal)}`);
   lines.push(`छुट: ${NPR(sale.discount)}`);
+  if(sale.vatPercent>0) lines.push(`VAT (${sale.vatPercent}%): ${NPR(sale.vat)}`);
   lines.push(`*कुल जम्मा: ${NPR(sale.total)}*`);
   lines.push(`भुक्तानी: ${payLabel(sale.paymentType)}`);
   lines.push('', 'धन्यवाद! 🙏');
-  const text=encodeURIComponent(lines.join('\\n'));
-
-  // try sharing receipt as image first (better on mobile), fallback to text link
-  const el=document.getElementById('receiptEl');
-  if(el && window.html2canvas && navigator.canShare){
-    try{
-      const canvas=await html2canvas(el,{scale:2,backgroundColor:'#ffffff'});
-      const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
-      const file=new File([blob], `bill-${sale.billNo}.png`, {type:'image/png'});
-      if(navigator.canShare({files:[file]})){
-        await navigator.share({files:[file], title:'बिल '+sale.billNo, text:'बिल '+sale.billNo});
-        toast('रसिद साझा गरियो, WhatsApp छनोट गर्नुहोस्','ok');
-        return;
-      }
-    }catch(e){ /* fall through to link */ }
-  }
+  const text=encodeURIComponent(lines.join('\n'));
+  // Directly open WhatsApp chat with this number, message pre-filled and ready to send
   window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
 }
 
@@ -1233,14 +1248,14 @@ async function bluetoothPrintReceipt(){
     const sale=State.lastReceipt;
     const enc=new TextEncoder();
     let text='';
-    text += (State.settings.shopName||'Pasal POS')+'\\n';
-    text += (State.settings.shopAddr||'')+'\\n';
-    text += 'Bill: '+sale.billNo+'  '+fmtDateTime(sale.date)+'\\n';
-    text += '--------------------------------\\n';
-    sale.items.forEach(it=>{ text += `${it.name} x${it.qty} = ${it.price*it.qty}\\n`; });
-    text += '--------------------------------\\n';
-    text += `TOTAL: Rs. ${sale.total}\\n`;
-    text += `Payment: ${sale.paymentType}\\n\\nDhanyabad!\\n\\n\\n`;
+    text += (State.settings.shopName||'Pasal POS')+'\n';
+    text += (State.settings.shopAddr||'')+'\n';
+    text += 'Bill: '+sale.billNo+'  '+fmtDateTime(sale.date)+'\n';
+    text += '--------------------------------\n';
+    sale.items.forEach(it=>{ text += `${it.name} x${it.qty} = ${it.price*it.qty}\n`; });
+    text += '--------------------------------\n';
+    text += `TOTAL: Rs. ${sale.total}\n`;
+    text += `Payment: ${sale.paymentType}\n\nDhanyabad!\n\n\n`;
     const bytes=enc.encode(text);
     const chunkSize=180;
     for(let i=0;i<bytes.length;i+=chunkSize){
@@ -1378,10 +1393,10 @@ function renderReports(){
   const today=todayKey();
   const monthStart=today.slice(0,7)+'-01';
   c.innerHTML=`
-    <div class="row" style="margin-bottom:16px;">
-      <div class="field" style="margin-bottom:0;"><label class="label">देखि</label><input class="input" type="date" id="repFrom" value="${monthStart}" onchange="renderReportBody()"></div>
-      <div class="field" style="margin-bottom:0;"><label class="label">सम्म</label><input class="input" type="date" id="repTo" value="${today}" onchange="renderReportBody()"></div>
-      <div style="display:flex;align-items:flex-end;"><button class="btn btn-outline" onclick="exportReportCSV()"><i class="ri-download-2-line"></i> CSV निकाल्नुहोस्</button></div>
+    <div class="report-toolbar">
+      <div class="field"><label class="label">देखि</label><input class="input" type="date" id="repFrom" value="${monthStart}" onchange="renderReportBody()"></div>
+      <div class="field"><label class="label">सम्म</label><input class="input" type="date" id="repTo" value="${today}" onchange="renderReportBody()"></div>
+      <button class="btn btn-outline" onclick="exportReportCSV()"><i class="ri-download-2-line"></i> CSV निकाल्नुहोस्</button>
     </div>
     <div id="reportBody"></div>
   `;
@@ -1424,8 +1439,8 @@ function renderReportBody(){
 function exportReportCSV(){
   const from=document.getElementById('repFrom').value, to=document.getElementById('repTo').value;
   const sales=State.sales.filter(s=>{ const d=s.date.slice(0,10); return d>=from && d<=to; });
-  let csv='Bill No,Date,Items,Payment,Total\\n';
-  sales.forEach(s=>{ csv+=`${s.billNo},${s.date},${s.items.reduce((a,i)=>a+i.qty,0)},${payLabel(s.paymentType)},${s.total}\\n`; });
+  let csv='Bill No,Date,Items,Payment,Total\n';
+  sales.forEach(s=>{ csv+=`${s.billNo},${s.date},${s.items.reduce((a,i)=>a+i.qty,0)},${payLabel(s.paymentType)},${s.total}\n`; });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`report-${from}-to-${to}.csv`; a.click();
 }
@@ -1440,10 +1455,26 @@ function renderSettings(){
     <div class="grid g2">
       <div class="card" style="padding:20px;">
         <h3 style="margin:0 0 16px;font-size:15.5px;"><i class="ri-store-2-line"></i> पसलको जानकारी</h3>
+        <div class="field">
+          <label class="label">पसलको लोगो</label>
+          <div class="logo-upload-box">
+            <div class="logo-preview" id="logoPreview">${s.shopLogo?`<img src="${s.shopLogo}">`:'<i class="ri-image-line"></i>'}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+                <i class="ri-upload-2-line"></i> लोगो अपलोड
+                <input type="file" accept="image/*" style="display:none;" onchange="uploadLogo(this.files[0])">
+              </label>
+              ${s.shopLogo?`<button class="btn btn-outline btn-sm" onclick="removeLogo()"><i class="ri-delete-bin-line"></i> हटाउनुहोस्</button>`:''}
+            </div>
+          </div>
+        </div>
         <div class="field"><label class="label">पसलको नाम</label><input class="input" id="st_name" value="${esc(s.shopName||'')}"></div>
         <div class="field"><label class="label">ठेगाना</label><input class="input" id="st_addr" value="${esc(s.shopAddr||'')}"></div>
         <div class="field"><label class="label">फोन नम्बर</label><input class="input" id="st_phone" value="${esc(s.shopPhone||'')}"></div>
-        <div class="field"><label class="label">PAN/VAT नं</label><input class="input" id="st_pan" value="${esc(s.shopPan||'')}"></div>
+        <div class="row">
+          <div class="field"><label class="label">PAN/VAT नं</label><input class="input" id="st_pan" value="${esc(s.shopPan||'')}"></div>
+          <div class="field"><label class="label">VAT प्रतिशत (%)</label><input class="input" type="number" step="0.01" id="st_vat" value="${s.vatPercent!==undefined&&s.vatPercent!==null?s.vatPercent:13}"></div>
+        </div>
         <button class="btn btn-primary" onclick="saveShopSettings()"><i class="ri-save-line"></i> सुरक्षित गर्नुहोस्</button>
       </div>
       <div class="card" style="padding:20px;">
@@ -1467,13 +1498,35 @@ function renderSettings(){
     </div>
   `;
 }
+function uploadLogo(file){
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('कृपया मान्य तस्बिर फाइल छान्नुहोस्','err'); return; }
+  const reader=new FileReader();
+  reader.onload=async (e)=>{
+    const dataUrl=e.target.result;
+    await saveSetting('shopLogo', dataUrl);
+    document.getElementById('logoPreview').innerHTML=`<img src="${dataUrl}">`;
+    applyBranding();
+    toast('लोगो अपलोड भयो','ok');
+    renderSettings();
+  };
+  reader.readAsDataURL(file);
+}
+async function removeLogo(){
+  await saveSetting('shopLogo','');
+  applyBranding();
+  toast('लोगो हटाइयो','ok');
+  renderSettings();
+}
 async function saveShopSettings(){
   await saveSetting('shopName', document.getElementById('st_name').value.trim());
   await saveSetting('shopAddr', document.getElementById('st_addr').value.trim());
   await saveSetting('shopPhone', document.getElementById('st_phone').value.trim());
   await saveSetting('shopPan', document.getElementById('st_pan').value.trim());
+  const vatVal=parseFloat(document.getElementById('st_vat').value);
+  await saveSetting('vatPercent', isNaN(vatVal)?0:vatVal);
   toast('सेटिङ सुरक्षित भयो','ok');
-  document.getElementById('sbShopName').textContent=State.settings.shopName;
+  applyBranding();
 }
 function exportBackup(){
   const data={products:State.products,customers:State.customers,sales:State.sales,transactions:State.transactions,settings:State.settings,exportedAt:new Date().toISOString()};
@@ -1495,6 +1548,7 @@ function importBackup(file){
       if(data.settings){ for(const k in data.settings) await saveSetting(k,data.settings[k]); }
       await loadAll();
       toast('ब्याकअप सफलतापूर्वक ल्याइयो','ok');
+      applyBranding();
       navigate(State.view);
     }catch(err){ toast('फाइल पढ्न सकिएन','err'); }
   };
