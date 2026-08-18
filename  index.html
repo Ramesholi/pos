@@ -2,1803 +2,1204 @@
 <html lang="ne">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>पसल POS — बिक्री व्यवस्थापन</title>
-<meta name="theme-color" content="#0F1B33">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1B1B2F">
+<title>पसल POS — स्मार्ट बिलिंग सफ्टवेयर</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
-
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        paper:   '#FAF6EE',
+        ink:     '#1B1B2F',
+        crimson: '#A31621',
+        crimsondark: '#7C1019',
+        marigold:'#E8A33D',
+        himalaya:'#2C5F7C',
+        leaf:    '#2F7D5C',
+      },
+      fontFamily: {
+        np: ['Mukta','sans-serif'],
+        num: ['Poppins','sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
 <style>
-:root{
-  --bg:#F3F5FA;
-  --surface:#FFFFFF;
-  --surface-alt:#F0F2F8;
-  --ink:#181D2A;
-  --muted:#6C7488;
-  --border:#E6E9F2;
-  --primary:#101B33;
-  --primary-2:#1B2C52;
-  --accent:#D63447;
-  --accent-ink:#FFFFFF;
-  --gold:#F1A93B;
-  --success:#1B9C6E;
-  --success-bg:#E7F8F1;
-  --danger:#E23653;
-  --danger-bg:#FDECEF;
-  --info:#2C6BE0;
-  --radius:16px;
-  --radius-sm:10px;
-  --shadow:0 6px 24px rgba(16,27,51,.08);
-  --shadow-lg:0 18px 46px rgba(16,27,51,.16);
-}
-*{box-sizing:border-box;}
-html,body{height:100%;}
-body{
-  margin:0;
-  font-family:'Inter','Noto Sans Devanagari',sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-  -webkit-tap-highlight-color:transparent;
-  overflow-x:hidden;
-}
-h1,h2,h3,h4,.disp{font-family:'Sora','Noto Sans Devanagari',sans-serif;}
-button{font-family:inherit;}
-input,select,textarea{font-family:'Inter','Noto Sans Devanagari',sans-serif;}
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-thumb{background:#D6DAE6;border-radius:8px;}
-a{color:inherit;text-decoration:none;}
-
-/* dhaka signature strip */
-.dhaka-strip{
-  height:7px;width:100%;
-  background:
-    linear-gradient(135deg, var(--gold) 25%, transparent 25%) 0 0/14px 14px,
-    linear-gradient(-135deg, var(--accent) 25%, transparent 25%) 0 0/14px 14px,
-    linear-gradient(45deg, var(--accent) 25%, transparent 25%) 0 0/14px 14px,
-    linear-gradient(-45deg, var(--gold) 25%, transparent 25%) 0 0/14px 14px;
-  background-color:#16233D;
-  flex-shrink:0;
-}
-
-/* ---------- App shell ---------- */
-#app{display:flex;min-height:100vh;}
-.sidebar{
-  width:230px;flex-shrink:0;background:linear-gradient(180deg,var(--primary),var(--primary-2));
-  color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
-}
-.brand{display:flex;align-items:center;gap:10px;padding:20px 18px 14px;}
-.brand-badge{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow:var(--shadow);overflow:hidden;flex-shrink:0;}
-.brand-badge img{width:100%;height:100%;object-fit:cover;}
-.brand-name{font-family:'Sora';font-weight:700;font-size:16.5px;line-height:1.15;}
-.brand-sub{font-size:11px;color:#A9B4CC;margin-top:1px;}
-.nav{padding:10px 12px;display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto;}
-.nav-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;color:#C7CFE3;cursor:pointer;font-size:14.5px;font-weight:500;transition:.15s;border:1px solid transparent;}
-.nav-item i{font-size:19px;}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
-.nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.08);}
-.nav-item.active i{color:var(--gold);}
-.sidebar-foot{padding:14px 16px 18px;border-top:1px solid rgba(255,255,255,.08);}
-.lock-btn{display:flex;align-items:center;gap:10px;color:#C7CFE3;font-size:13.5px;cursor:pointer;padding:8px 10px;border-radius:10px;}
-.lock-btn:hover{background:rgba(255,255,255,.06);color:#fff;}
-
-.main{flex:1;min-width:0;display:flex;flex-direction:column;}
-.topbar{
-  position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;padding:14px 22px;gap:14px;
-}
-.topbar h1{font-size:19px;margin:0;font-weight:700;}
-.topbar-sub{font-size:12.5px;color:var(--muted);margin-top:1px;}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font-size:17px;}
-.icon-btn:hover{background:var(--surface-alt);}
-.topbar-logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:none;align-items:center;justify-content:center;font-size:18px;font-weight:800;overflow:hidden;flex-shrink:0;}
-.topbar-logo img{width:100%;height:100%;object-fit:cover;}
-.content{padding:20px 22px 90px;flex:1;}
-
-/* ---------- generic ---------- */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-weight:600;font-size:13.5px;cursor:pointer;transition:.15s;white-space:nowrap;}
-.btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(16,27,51,.08);}
-.btn:active{transform:translateY(0);}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.btn-primary:hover{background:#C22A3B;}
-.btn-dark{background:var(--primary);border-color:var(--primary);color:#fff;}
-.btn-gold{background:var(--gold);border-color:var(--gold);color:#20140a;}
-.btn-success{background:var(--success);border-color:var(--success);color:#fff;}
-.btn-outline{background:transparent;}
-.btn-sm{padding:7px 11px;font-size:12.5px;border-radius:9px;}
-.btn-icon{padding:9px;border-radius:10px;}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
-.btn-block{width:100%;justify-content:center;}
-
-.input,.select{width:100%;padding:11px 13px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface-alt);font-size:14px;color:var(--ink);outline:none;transition:.15s;}
-.input:focus,.select:focus{border-color:var(--accent);background:#fff;}
-.label{font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;}
-.field{margin-bottom:14px;}
-.row{display:flex;gap:12px;flex-wrap:wrap;}
-.row>*{flex:1;min-width:140px;}
-.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
-.chip-success{background:var(--success-bg);color:var(--success);}
-.chip-danger{background:var(--danger-bg);color:var(--danger);}
-.chip-gold{background:#FDF3E1;color:#9C6B10;}
-.chip-info{background:#EAF1FE;color:var(--info);}
-.muted{color:var(--muted);}
-.divider{height:1px;background:var(--border);margin:14px 0;}
-.grid{display:grid;gap:16px;}
-.g4{grid-template-columns:repeat(4,1fr);}
-.g3{grid-template-columns:repeat(3,1fr);}
-.g2{grid-template-columns:repeat(2,1fr);}
-@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr);}.g3{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:640px){.g4,.g3,.g2{grid-template-columns:1fr 1fr;}}
-
-.empty{text-align:center;padding:50px 20px;color:var(--muted);}
-.empty i{font-size:42px;opacity:.35;display:block;margin-bottom:10px;}
-
-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;padding:10px 12px;border-bottom:1.5px solid var(--border);}
-td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-.table-wrap{overflow-x:auto;}
-
-/* toast */
-#toastHost{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
-.toast{background:var(--primary);color:#fff;padding:11px 18px;border-radius:12px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px;animation:toastIn .25s ease;}
-.toast.err{background:var(--danger);}
-.toast.ok{background:var(--success);}
-@keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-/* modal */
-.modal-bg{position:fixed;inset:0;background:rgba(12,16,28,.55);backdrop-filter:blur(2px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s ease;}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.modal{background:var(--surface);border-radius:20px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .18s ease;}
-.modal.wide{max-width:760px;}
-@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);border-radius:20px 20px 0 0;z-index:2;}
-.modal-head h3{margin:0;font-size:16.5px;}
-.modal-body{padding:20px;}
-.modal-foot{padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 20px 20px;}
-.close-x{width:32px;height:32px;border-radius:9px;border:none;background:var(--surface-alt);cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center;}
-
-/* ---------- Lock Screen ---------- */
-#lockScreen{position:fixed;inset:0;background:linear-gradient(160deg,var(--primary) 0%,#0A1226 100%);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:20px;}
-.lock-badge{width:74px;height:74px;border-radius:22px;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:18px;box-shadow:0 10px 30px rgba(214,52,71,.4);overflow:hidden;}
-.lock-badge img{width:100%;height:100%;object-fit:cover;}
-.lock-title{font-family:'Sora';font-weight:700;font-size:20px;margin-bottom:2px;}
-.lock-sub{color:#9AA6C4;font-size:13px;margin-bottom:26px;}
-.pin-dots{display:flex;gap:14px;margin-bottom:26px;}
-.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid #4C577A;transition:.15s;}
-.pin-dot.filled{background:var(--gold);border-color:var(--gold);}
-.pin-dot.shake{animation:shake .35s;}
-@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
-.pin-pad{display:grid;grid-template-columns:repeat(3,68px);gap:14px;}
-.pin-key{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:22px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.pin-key:hover{background:rgba(255,255,255,.14);}
-.pin-key:active{background:rgba(255,255,255,.22);}
-.pin-key.wide{background:transparent;border:none;font-size:19px;color:#9AA6C4;}
-
-/* ---------- Dashboard ---------- */
-.stat-card{padding:18px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;}
-.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.stat-val{font-family:'Sora';font-size:23px;font-weight:700;}
-.stat-label{color:var(--muted);font-size:12.5px;font-weight:500;}
-.stat-trend{font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:3px;}
-
-/* ---------- POS ---------- */
-.pos-wrap{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start;}
-@media(max-width:980px){.pos-wrap{grid-template-columns:1fr;}}
-.scan-bar{display:flex;gap:10px;margin-bottom:16px;}
-.scan-bar .input{font-size:15px;}
-.product-tile{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:8px;}
-.product-tile:hover{border-color:var(--accent);box-shadow:0 6px 16px rgba(214,52,71,.12);transform:translateY(-2px);}
-.product-tile.oos{opacity:.5;cursor:not-allowed;}
-.p-thumb{width:100%;aspect-ratio:1.3;border-radius:10px;background:linear-gradient(135deg,#F0F2F8,#E4E8F3);display:flex;align-items:center;justify-content:center;font-size:26px;color:#AEB6CB;overflow:hidden;}
-.p-thumb img{width:100%;height:100%;object-fit:cover;}
-.p-name{font-size:12.5px;font-weight:700;line-height:1.25;}
-.p-meta{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;}
-.p-price{color:var(--accent);font-weight:800;font-size:13.5px;}
-.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;}
-
-.cart-panel{position:sticky;top:78px;display:flex;flex-direction:column;max-height:calc(100vh - 96px);}
-.cart-head{padding:16px 16px 10px;display:flex;align-items:center;justify-content:space-between;}
-.cart-list{flex:1;overflow-y:auto;padding:0 12px;max-height:320px;}
-.cart-item{display:flex;gap:10px;align-items:center;padding:10px 6px;border-bottom:1px dashed var(--border);}
-.cart-item .ci-name{font-size:13px;font-weight:700;flex:1;min-width:0;}
-.cart-item .ci-name div.sub{font-weight:500;color:var(--muted);font-size:11px;}
-.qty-ctrl{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border-radius:9px;padding:3px;}
-.qty-ctrl button{width:24px;height:24px;border:none;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);}
-.qty-ctrl span{width:22px;text-align:center;font-weight:700;font-size:13px;}
-.ci-price{font-weight:700;font-size:13px;width:66px;text-align:right;}
-.ci-del{color:var(--danger);cursor:pointer;font-size:16px;padding:2px;}
-.cart-summary{padding:14px 16px;border-top:1px solid var(--border);}
-.sum-row{display:flex;justify-content:space-between;font-size:13.5px;padding:4px 0;color:var(--muted);}
-.sum-row.total{font-size:18px;font-weight:800;color:var(--ink);padding-top:8px;border-top:1px dashed var(--border);margin-top:6px;}
-.pay-types{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0;}
-.pay-type{border:1.5px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
-.pay-type i{display:block;font-size:17px;margin-bottom:3px;}
-.pay-type.active{border-color:var(--accent);color:var(--accent);background:#FDF1F2;}
-
-/* ---------- receipt ---------- */
-.receipt{width:300px;background:#fff;color:#111;font-family:'Inter',monospace;padding:18px 16px;margin:0 auto;font-size:12.5px;}
-.receipt .r-head{text-align:center;margin-bottom:8px;}
-.receipt .r-logo{width:46px;height:46px;border-radius:10px;margin:0 auto 6px;overflow:hidden;}
-.receipt .r-logo img{width:100%;height:100%;object-fit:cover;}
-.receipt .r-shop{font-family:'Sora';font-weight:800;font-size:16px;}
-.receipt hr{border:none;border-top:1px dashed #999;margin:8px 0;}
-.receipt table{font-size:11.5px;}
-.receipt th,.receipt td{padding:3px 2px;border:none;}
-.receipt .r-tot{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;}
-.receipt .r-foot{text-align:center;margin-top:10px;color:#555;font-size:11px;}
-
-/* scanner modal */
-#qrReader{width:100%;border-radius:12px;overflow:hidden;background:#000;}
-
-/* barcode label */
-.label-preview{border:1.5px dashed var(--border);border-radius:12px;padding:14px;text-align:center;}
-
-/* mobile bottom nav */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:40;padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.06);}
-.bottom-nav .bn-items{display:flex;justify-content:space-around;}
-.bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:10px;font-weight:600;padding:5px 8px;border-radius:10px;flex:1;}
-.bn-item i{font-size:19px;}
-.bn-item.active{color:var(--accent);}
-
-.dash-2col{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;}
-.dash-2col-even{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:860px){
-  .sidebar{display:none;}
-  .topbar-logo{display:flex;}
-  .bottom-nav{display:block;}
-  .content{padding:14px 14px 84px;}
-  .topbar{padding:12px 14px;}
-  .cart-panel{position:static;max-height:none;}
-  .dash-2col, .dash-2col-even{grid-template-columns:1fr;}
-  .g4{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:480px){
-  .g4,.g3,.g2{grid-template-columns:1fr;}
-  .pin-pad{grid-template-columns:repeat(3,58px);gap:10px;}
-  .pin-key{width:58px;height:58px;font-size:19px;}
-}
-.hidden{display:none !important;}
-.link-btn{background:none;border:none;color:var(--info);cursor:pointer;font-weight:700;font-size:12.5px;padding:0;}
-.udhaaro-badge{display:inline-flex;align-items:center;gap:5px;background:var(--danger-bg);color:var(--danger);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-.avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-.logo-upload-box{display:flex;align-items:center;gap:14px;}
-.logo-preview{width:64px;height:64px;border-radius:14px;background:var(--surface-alt);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);overflow:hidden;flex-shrink:0;}
-.logo-preview img{width:100%;height:100%;object-fit:cover;}
-.report-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
-.report-toolbar .field{margin-bottom:0;min-width:150px;flex:1;}
-.report-toolbar .btn{flex-shrink:0;}
-.floating-cart-bar{position:fixed;left:16px;right:16px;bottom:16px;z-index:50;background:var(--primary);color:#fff;border-radius:16px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg);cursor:pointer;font-size:13.5px;font-weight:700;gap:10px;}
-.floating-cart-bar .btn{pointer-events:none;}
-@media(min-width:861px){.floating-cart-bar{left:246px;right:26px;bottom:22px;}}
-@media(max-width:860px){.floating-cart-bar{bottom:74px;}}
-.tag-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:20px;font-size:12.5px;font-weight:600;}
-.tag-chip i{cursor:pointer;color:var(--muted);font-size:14px;}
-.tag-chip i:hover{color:var(--danger);}
-@media print{
-  body *{visibility:hidden;}
-  #printArea, #printArea *{visibility:visible;}
-  #printArea{position:absolute;top:0;left:0;width:100%;}
-}
+  html,body{ height:100%; overscroll-behavior:none; }
+  body{
+    font-family:'Mukta','Poppins',sans-serif;
+    background:#F0EBDF;
+    color:#1B1B2F;
+    -webkit-tap-highlight-color: transparent;
+    user-select:none;
+  }
+  input, textarea{ user-select:text; }
+  .num{ font-family:'Poppins',sans-serif; font-variant-numeric: tabular-nums; }
+  ::-webkit-scrollbar{ width:0; height:0; }
+  .prayer-strip{
+    height:5px;
+    background: linear-gradient(90deg,
+      #2C5F7C 0 20%, #FAF6EE 20% 40%, #A31621 40% 60%, #2F7D5C 60% 80%, #E8A33D 80% 100%);
+  }
+  .safe-top{ padding-top: env(safe-area-inset-top); }
+  .safe-bottom{ padding-bottom: env(safe-area-inset-bottom); }
+  .card{ background:#fff; border-radius:16px; box-shadow: 0 1px 2px rgba(27,27,47,.06), 0 1px 12px rgba(27,27,47,.05); }
+  .btn{ display:flex; align-items:center; justify-content:center; gap:6px; border-radius:14px; font-weight:600; transition:transform .12s ease, opacity .12s ease; }
+  .btn:active{ transform: scale(0.96); }
+  .btn-primary{ background:#A31621; color:#fff; }
+  .btn-primary:active{ background:#7C1019; }
+  .btn-gold{ background:#E8A33D; color:#1B1B2F; }
+  .btn-ghost{ background:#fff; color:#1B1B2F; border:1.5px solid #E7E1D3; }
+  .btn-dark{ background:#1B1B2F; color:#fff; }
+  .tag{ border-radius:999px; font-size:12px; font-weight:600; padding:5px 12px; }
+  .nav-item{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; flex:1; color:#9C9686; transition: color .15s ease; }
+  .nav-item.active{ color:#A31621; }
+  .nav-item svg{ width:22px; height:22px; }
+  .sheet{ position:fixed; inset:0; z-index:60; display:flex; align-items:flex-end; }
+  .sheet-backdrop{ position:absolute; inset:0; background:rgba(27,27,47,.55); }
+  .sheet-panel{ position:relative; width:100%; max-height:92vh; background:#F0EBDF; border-radius:24px 24px 0 0; overflow:auto; animation: slideup .22s ease; }
+  @keyframes slideup{ from{ transform:translateY(30px); opacity:.4;} to{ transform:translateY(0); opacity:1;} }
+  .modal{ position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .modal-backdrop{ position:absolute; inset:0; background:rgba(27,27,47,.6); }
+  .modal-box{ position:relative; width:100%; max-width:420px; max-height:88vh; overflow:auto; background:#fff; border-radius:20px; animation: pop .18s ease; }
+  @keyframes pop{ from{ transform:scale(.94); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .toast-wrap{ position:fixed; top:14px; left:0; right:0; z-index:90; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+  .toast{ background:#1B1B2F; color:#fff; padding:10px 18px; border-radius:999px; font-size:14px; font-weight:500; box-shadow:0 6px 20px rgba(0,0,0,.25); animation: toastin .18s ease; max-width:88%; text-align:center; }
+  @keyframes toastin{ from{ transform:translateY(-14px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+  .scanbox{ position:absolute; inset:12%; border:3px solid #E8A33D; border-radius:20px; box-shadow: 0 0 0 999px rgba(0,0,0,.35); }
+  .spinner{ width:34px; height:34px; border-radius:50%; border:4px solid rgba(255,255,255,.25); border-top-color:#E8A33D; animation: spin 0.8s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .fade-in{ animation: fadein .18s ease; }
+  @keyframes fadein{ from{opacity:0} to{opacity:1} }
+  .receipt{ font-family:'Poppins',monospace; }
+  .dashed{ border-top:1.5px dashed #C9C2AE; }
+  input[type=range]{ -webkit-appearance:none; height:6px; border-radius:4px; background:#E7E1D3; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#A31621; border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.3); cursor:pointer; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ position:absolute; top:0; left:0; width:80mm; }
+  }
 </style>
 </head>
-<body>
+<body class="fade-in">
 
-<div id="toastHost"></div>
-
-<!-- ================= LOCK SCREEN ================= -->
-<div id="lockScreen">
-  <div class="lock-badge" id="lockBadge"><i class="ri-store-2-fill"></i></div>
-  <div class="lock-title" id="lockTitle">पिन प्रविष्ट गर्नुहोस्</div>
-  <div class="lock-sub" id="lockSub">आफ्नो पसल खोल्न ४ अंकको पिन हाल्नुहोस्</div>
-  <div class="pin-dots" id="pinDots">
-    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-  </div>
-  <div class="pin-pad" id="pinPad">
-    <button class="pin-key" data-k="1">1</button><button class="pin-key" data-k="2">2</button><button class="pin-key" data-k="3">3</button>
-    <button class="pin-key" data-k="4">4</button><button class="pin-key" data-k="5">5</button><button class="pin-key" data-k="6">6</button>
-    <button class="pin-key" data-k="7">7</button><button class="pin-key" data-k="8">8</button><button class="pin-key" data-k="9">9</button>
-    <button class="pin-key wide" data-k="clear">खाली</button><button class="pin-key" data-k="0">0</button><button class="pin-key wide" data-k="back"><i class="ri-arrow-left-line"></i></button>
-  </div>
-</div>
-
-<!-- ================= APP ================= -->
-<div id="app" class="hidden">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-badge" id="sbBrandBadge"><i class="ri-store-2-fill"></i></div>
-      <div>
-        <div class="brand-name" id="sbShopName">पसल POS</div>
-        <div class="brand-sub">बिक्री व्यवस्थापन</div>
-      </div>
-    </div>
-    <div class="dhaka-strip"></div>
-    <nav class="nav" id="navList"></nav>
-    <div class="sidebar-foot">
-      <div class="lock-btn" onclick="lockApp()"><i class="ri-lock-2-line"></i> लक गर्नुहोस्</div>
-    </div>
-  </aside>
-
-  <div class="main">
-    <div class="topbar">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="topbar-logo" id="topbarLogo"><i class="ri-store-2-fill"></i></div>
-        <div>
-          <h1 id="pageTitle">ड्यासबोर्ड</h1>
-          <div class="topbar-sub" id="pageSub">आजको बिक्री सारांश</div>
-        </div>
-      </div>
-      <div class="topbar-right">
-        <div class="icon-btn" title="लक"><i class="ri-lock-2-line" onclick="lockApp()"></i></div>
-      </div>
-    </div>
-    <div class="content" id="content"></div>
-  </div>
-</div>
-
-<nav class="bottom-nav">
-  <div class="bn-items" id="bottomNavList"></div>
-</nav>
-
-<!-- offscreen receipt render target for image capture -->
-<div id="receiptCapture" style="position:fixed;left:-9999px;top:0;"></div>
+<div id="app" class="max-w-md mx-auto min-h-screen flex flex-col bg-[#F0EBDF] relative"></div>
+<div id="toastWrap" class="toast-wrap"></div>
+<div id="overlayRoot"></div>
 
 <script>
 /* ============================================================
-   पसल POS — Vanilla JS + IndexedDB Point of Sale System
+   नेपाली POS — Core App
    ============================================================ */
 
-/* ---------------- Utilities ---------------- */
-const NPR = n => 'रु ' + (Number(n)||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-function esc(s){ return (s===undefined||s===null)?'':String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmtDate(d){ const dt=new Date(d); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-function fmtDateTime(d){ const dt=new Date(d); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
-function todayKey(){ return new Date().toISOString().slice(0,10); }
-function toast(msg,type=''){
-  const host=document.getElementById('toastHost');
-  const t=document.createElement('div');
-  t.className='toast '+type;
-  const icon = type==='err'?'ri-error-warning-line':(type==='ok'?'ri-checkbox-circle-line':'ri-information-line');
-  t.innerHTML=`<i class="${icon}"></i><span>${esc(msg)}</span>`;
-  host.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(8px)'; t.style.transition='.2s'; setTimeout(()=>t.remove(),200); },2600);
-}
-function closeModal(){ const bg=document.querySelector('.modal-bg'); if(bg) bg.remove(); }
-function openModalHTML(html){
-  closeModal();
-  const bg=document.createElement('div');
-  bg.className='modal-bg';
-  bg.innerHTML=html;
-  bg.addEventListener('mousedown',e=>{ if(e.target===bg) closeModal(); });
-  document.body.appendChild(bg);
-  return bg;
-}
-
-/* ---------------- IndexedDB layer ---------------- */
-let DB=null;
+/* ---------- IndexedDB layer ---------- */
+const DB_NAME = 'nepaliPOS_db', DB_VERSION = 1;
+let db;
 function openDB(){
   return new Promise((resolve,reject)=>{
-    const req=indexedDB.open('pasal_pos_db', 1);
-    req.onupgradeneeded=(e)=>{
-      const db=e.target.result;
-      if(!db.objectStoreNames.contains('products')){
-        const s=db.createObjectStore('products',{keyPath:'id'});
-        s.createIndex('barcode','barcode',{unique:false});
-        s.createIndex('name','name',{unique:false});
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e)=>{
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('products')){
+        const s = d.createObjectStore('products', {keyPath:'id', autoIncrement:true});
+        s.createIndex('category','category');
       }
-      if(!db.objectStoreNames.contains('customers')){
-        const s=db.createObjectStore('customers',{keyPath:'id'});
-        s.createIndex('phone','phone',{unique:false});
+      if(!d.objectStoreNames.contains('categories')){
+        d.createObjectStore('categories', {keyPath:'id', autoIncrement:true});
       }
-      if(!db.objectStoreNames.contains('sales')){
-        const s=db.createObjectStore('sales',{keyPath:'id'});
-        s.createIndex('date','date',{unique:false});
-        s.createIndex('customerId','customerId',{unique:false});
+      if(!d.objectStoreNames.contains('sales')){
+        const s = d.createObjectStore('sales', {keyPath:'id', autoIncrement:true});
+        s.createIndex('date','date');
       }
-      if(!db.objectStoreNames.contains('transactions')){
-        const s=db.createObjectStore('transactions',{keyPath:'id'});
-        s.createIndex('customerId','customerId',{unique:false});
-      }
-      if(!db.objectStoreNames.contains('settings')){
-        db.createObjectStore('settings',{keyPath:'key'});
+      if(!d.objectStoreNames.contains('settings')){
+        d.createObjectStore('settings', {keyPath:'key'});
       }
     };
-    req.onsuccess=(e)=>{ DB=e.target.result; resolve(DB); };
-    req.onerror=(e)=>{ reject(e); };
+    req.onsuccess = (e)=>{ db = e.target.result; resolve(db); };
+    req.onerror = (e)=> reject(e.target.error);
   });
 }
-function tx(store,mode='readonly'){ return DB.transaction(store,mode).objectStore(store); }
-function dbGetAll(store){ return new Promise((res,rej)=>{ const r=tx(store).getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
-function dbGet(store,key){ return new Promise((res,rej)=>{ const r=tx(store).get(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
-function dbPut(store,val){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(val); r.onsuccess=()=>res(val); r.onerror=()=>rej(r.error); }); }
-function dbDelete(store,key){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').delete(key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function storeTx(name, mode='readonly'){ return db.transaction(name, mode).objectStore(name); }
+function dbGetAll(name){ return new Promise((res,rej)=>{ const r=storeTx(name).getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbGet(name,id){ return new Promise((res,rej)=>{ const r=storeTx(name).get(id); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbPut(name,val){ return new Promise((res,rej)=>{ const r=storeTx(name,'readwrite').put(val); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbDelete(name,id){ return new Promise((res,rej)=>{ const r=storeTx(name,'readwrite').delete(id); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function dbClear(name){ return new Promise((res,rej)=>{ const r=storeTx(name,'readwrite').clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
 
-/* ---------------- App State ---------------- */
-const State = {
-  view:'dashboard',
-  products:[],
-  customers:[],
-  sales:[],
-  transactions:[],
-  settings:{ shopName:'मेरो पसल', shopAddr:'काठमाडौं, नेपाल', shopPhone:'', shopPan:'', shopLogo:'', vatPercent:13, pin:null, currency:'रु', categories:[], units:['थान','के.जी.','ग्राम','लिटर','मिली','प्याकेट','डजन'] },
-  cart:[], // {productId,name,price,qty,barcode}
-  selectedCustomerId:null,
-  paymentType:'cash',
-  discountPct:0,
-  discountFlat:0,
-  lastReceipt:null,
-  pinBuffer:'',
-  pinMode:'unlock', // unlock | setup | confirm | change-old | change-new
-  pinTemp:null,
-  html5Qr:null,
-  scanContext:null // 'pos' | 'product-field'
+/* ---------- App State ---------- */
+const state = {
+  tab: 'billing',
+  products: [],
+  categories: [],
+  sales: [],
+  cart: [],           // {productId,name,price,qty,unit}
+  search: '',
+  activeCategory: 'सबै',
+  settings: {
+    key:'main',
+    shopName:'मेरो पसल',
+    address:'', phone:'', pan:'',
+    currency:'रु', taxRate:13,
+    invoiceCounter: 1,
+    matchThreshold: 0.72,
+  },
+  mobilenetModel: null,
+  modelStatus: 'idle', // idle | loading | ready | error
+  cameraMode: null,    // 'detect' | 'capture'
+  editingProductId: null,
+  lastSale: null,
+  reportRange: 'today',
+  cartOpen: false,
 };
 
-const NAV_ITEMS=[
-  {id:'dashboard', label:'ड्यासबोर्ड', icon:'ri-dashboard-3-line'},
-  {id:'addcart', label:'सामान थप्नुहोस्', icon:'ri-shopping-basket-2-line'},
-  {id:'billing', label:'बिलिङ', icon:'ri-shopping-cart-2-line'},
-  {id:'products', label:'सामान', icon:'ri-archive-2-line'},
-  {id:'customers', label:'ग्राहक', icon:'ri-team-line'},
-  {id:'reports', label:'रिपोर्ट', icon:'ri-bar-chart-2-line'},
-  {id:'settings', label:'सेटिङ', icon:'ri-settings-3-line'}
-];
+/* ---------- Utilities ---------- */
+function toast(msg){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),250); }, 1800);
+}
+function formatMoney(num){
+  num = Math.round((num||0)*100)/100;
+  let sign = num < 0 ? '-' : '';
+  num = Math.abs(num);
+  let [intPart, decPart] = num.toFixed(2).split('.');
+  let last3 = intPart.slice(-3);
+  let rest = intPart.slice(0,-3);
+  if(rest !== '') rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',';
+  return sign + state.settings.currency + ' ' + rest + last3 + '.' + decPart;
+}
+function fmtDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('ne-NP',{year:'numeric',month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('ne-NP',{hour:'2-digit',minute:'2-digit'});
+}
+function uid(){ return Date.now() + Math.floor(Math.random()*1000); }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function cosineSim(a,b){
+  let dot=0,na=0,nb=0;
+  for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; }
+  if(na===0||nb===0) return 0;
+  return dot/(Math.sqrt(na)*Math.sqrt(nb));
+}
+function resizeImageToDataURL(source, maxSize=320){
+  const canvas = document.createElement('canvas');
+  let w = source.videoWidth || source.width, h = source.videoHeight || source.height;
+  let scale = Math.min(1, maxSize/Math.max(w,h));
+  canvas.width = Math.round(w*scale); canvas.height = Math.round(h*scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  return { dataURL: canvas.toDataURL('image/jpeg', 0.82), canvas };
+}
 
-/* ---------------- Init ---------------- */
-window.addEventListener('DOMContentLoaded', async ()=>{
-  await openDB();
-  await loadAll();
-  buildNav();
-  setupPinPad();
-  applyBranding();
-  if(!State.settings.pin){
-    State.pinMode='setup';
-    document.getElementById('lockTitle').textContent='नयाँ पिन बनाउनुहोस्';
-    document.getElementById('lockSub').textContent='४ अंकको सुरक्षा पिन सेट गर्नुहोस्';
-  } else {
-    State.pinMode='unlock';
-  }
-});
-
+/* ---------- Persistence bootstrap ---------- */
 async function loadAll(){
-  const [products, customers, sales, transactions, settingsRows] = await Promise.all([
-    dbGetAll('products'), dbGetAll('customers'), dbGetAll('sales'), dbGetAll('transactions'), dbGetAll('settings')
-  ]);
-  State.products=products||[];
-  State.customers=customers||[];
-  State.sales=sales||[];
-  State.transactions=transactions||[];
-  settingsRows.forEach(r=>{ State.settings[r.key]=r.value; });
+  state.products = await dbGetAll('products');
+  state.categories = await dbGetAll('categories');
+  state.sales = await dbGetAll('sales');
+  const s = await dbGet('settings','main');
+  if(s) state.settings = Object.assign(state.settings, s);
+  else await dbPut('settings', state.settings);
 }
-async function saveSetting(key,value){ State.settings[key]=value; await dbPut('settings',{key,value}); }
-
-/* ---------------- Branding (logo shown across app) ---------------- */
-function applyBranding(){
-  const logo=State.settings.shopLogo;
-  const badgeHTML = logo ? `<img src="${logo}">` : '<i class="ri-store-2-fill"></i>';
-  const badges=['sbBrandBadge','topbarLogo','lockBadge'];
-  badges.forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=badgeHTML; });
-  const nameEl=document.getElementById('sbShopName');
-  if(nameEl) nameEl.textContent = State.settings.shopName || 'पसल POS';
-}
-
-/* ---------------- PIN / Lock ---------------- */
-function setupPinPad(){
-  document.querySelectorAll('.pin-key').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const k=btn.dataset.k;
-      if(k==='clear'){ State.pinBuffer=''; renderPinDots(); return; }
-      if(k==='back'){ State.pinBuffer=State.pinBuffer.slice(0,-1); renderPinDots(); return; }
-      if(State.pinBuffer.length>=4) return;
-      State.pinBuffer+=k;
-      renderPinDots();
-      if(State.pinBuffer.length===4) setTimeout(handlePinComplete,150);
-    });
-  });
-}
-function renderPinDots(){
-  const dots=document.querySelectorAll('.pin-dot');
-  dots.forEach((d,i)=>{ d.classList.toggle('filled', i<State.pinBuffer.length); });
-}
-function shakeDots(){
-  const wrap=document.getElementById('pinDots');
-  wrap.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('shake'));
-  setTimeout(()=>wrap.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('shake')),350);
-}
-async function handlePinComplete(){
-  const val=State.pinBuffer;
-  if(State.pinMode==='setup'){
-    State.pinTemp=val;
-    State.pinMode='confirm';
-    State.pinBuffer='';
-    renderPinDots();
-    document.getElementById('lockTitle').textContent='पिन पुनः पुष्टि गर्नुहोस्';
-    document.getElementById('lockSub').textContent='उही ४ अंकको पिन फेरि हाल्नुहोस्';
-    return;
-  }
-  if(State.pinMode==='confirm'){
-    if(val===State.pinTemp){
-      await saveSetting('pin', val);
-      toast('पिन सफलतापूर्वक सेट भयो','ok');
-      unlockUI();
-    } else {
-      shakeDots(); toast('पिन मिलेन, फेरि प्रयास गर्नुहोस्','err');
-      State.pinMode='setup'; State.pinBuffer=''; renderPinDots();
-      document.getElementById('lockTitle').textContent='नयाँ पिन बनाउनुहोस्';
-      document.getElementById('lockSub').textContent='४ अंकको सुरक्षा पिन सेट गर्नुहोस्';
-    }
-    return;
-  }
-  if(State.pinMode==='unlock'){
-    if(val===State.settings.pin){
-      unlockUI();
-    } else {
-      shakeDots(); toast('गलत पिन','err');
-      State.pinBuffer=''; renderPinDots();
-    }
-    return;
-  }
-  if(State.pinMode==='change-old'){
-    if(val===State.settings.pin){
-      State.pinMode='change-new'; State.pinBuffer=''; renderPinDots();
-      document.getElementById('lockTitle').textContent='नयाँ पिन हाल्नुहोस्';
-      document.getElementById('lockSub').textContent='तपाईंको नयाँ पिन प्रविष्ट गर्नुहोस्';
-    } else {
-      shakeDots(); toast('गलत पिन','err');
-      State.pinBuffer=''; renderPinDots();
-    }
-    return;
-  }
-  if(State.pinMode==='change-new'){
-    await saveSetting('pin', val);
-    toast('पिन परिवर्तन भयो','ok');
-    unlockUI();
-  }
-}
-function unlockUI(){
-  document.getElementById('lockScreen').style.display='none';
-  document.getElementById('app').classList.remove('hidden');
-  State.pinBuffer=''; renderPinDots();
-  navigate(State.view||'dashboard');
-}
-function lockApp(){
-  State.pinMode='unlock'; State.pinBuffer='';
-  document.getElementById('lockTitle').textContent='पिन प्रविष्ट गर्नुहोस्';
-  document.getElementById('lockSub').textContent='आफ्नो पसल खोल्न ४ अंकको पिन हाल्नुहोस्';
-  document.getElementById('lockScreen').style.display='flex';
-  document.getElementById('app').classList.add('hidden');
-  renderPinDots();
-  if(State.html5Qr){ try{ State.html5Qr.stop(); }catch(e){} }
-}
-function startChangePin(){
-  closeModal();
-  State.pinMode='change-old'; State.pinBuffer='';
-  document.getElementById('lockTitle').textContent='हालको पिन हाल्नुहोस्';
-  document.getElementById('lockSub').textContent='पिन परिवर्तन गर्न पहिले हालको पिन प्रविष्ट गर्नुहोस्';
-  document.getElementById('lockScreen').style.display='flex';
-  document.getElementById('app').classList.add('hidden');
-  renderPinDots();
-}
-
-/* ---------------- Nav / Router ---------------- */
-function buildNav(){
-  const nav=document.getElementById('navList');
-  nav.innerHTML=NAV_ITEMS.map(n=>`<div class="nav-item" data-id="${n.id}" onclick="navigate('${n.id}')"><i class="${n.icon}"></i><span>${n.label}</span></div>`).join('');
-  const bn=document.getElementById('bottomNavList');
-  bn.innerHTML=NAV_ITEMS.map(n=>`<div class="bn-item" data-id="${n.id}" onclick="navigate('${n.id}')"><i class="${n.icon}"></i><span>${n.label}</span></div>`).join('');
-}
-async function navigate(view){
-  State.view=view;
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active', el.dataset.id===view));
-  document.querySelectorAll('.bn-item').forEach(el=>el.classList.toggle('active', el.dataset.id===view));
-  const titles={dashboard:['ड्यासबोर्ड','आजको बिक्री सारांश'],addcart:['सामान थप्नुहोस्','सामान स्क्यान वा खोजी गरी कार्टमा थप्नुहोस्'],billing:['बिलिङ','कार्ट जाँची भुक्तानी लिई बिल बनाउनुहोस्'],products:['सामान व्यवस्थापन','आफ्नो स्टक व्यवस्थापन गर्नुहोस्'],customers:['ग्राहक व्यवस्थापन','ग्राहक र उधारो हेर्नुहोस्'],reports:['रिपोर्ट','बिक्री विश्लेषण'],settings:['सेटिङ','पसल र प्रणाली सेटिङ']};
-  document.getElementById('pageTitle').textContent=titles[view][0];
-  document.getElementById('pageSub').textContent=titles[view][1];
-  applyBranding();
-  const c=document.getElementById('content');
-  c.innerHTML='<div class="empty">लोड हुँदै...</div>';
-  if(view==='dashboard') renderDashboard();
-  else if(view==='addcart') renderAddCart();
-  else if(view==='billing') renderBilling();
-  else if(view==='products') renderProducts();
-  else if(view==='customers') renderCustomers();
-  else if(view==='reports') renderReports();
-  else if(view==='settings') renderSettings();
-  window.scrollTo(0,0);
-}
+async function saveSettings(){ await dbPut('settings', state.settings); }
 
 /* ============================================================
-   DASHBOARD
+   ICONS (inline svg, stroke based)
    ============================================================ */
-function renderDashboard(){
-  const c=document.getElementById('content');
-  const today=todayKey();
-  const todaySales=State.sales.filter(s=>s.date.slice(0,10)===today);
-  const todayRevenue=todaySales.reduce((a,s)=>a+s.total,0);
-  const todayProfit=todaySales.reduce((a,s)=>a+(s.profit||0),0);
-  const totalDue=State.customers.reduce((a,cu)=>a+(cu.dueAmount||0),0);
-  const lowStock=State.products.filter(p=>p.stock<=(p.minStock||5));
-  const totalStockValue=State.products.reduce((a,p)=>a+(p.stock*p.costPrice),0);
-
-  const last7=[...Array(7)].map((_,i)=>{
-    const d=new Date(); d.setDate(d.getDate()-(6-i));
-    const key=d.toISOString().slice(0,10);
-    const total=State.sales.filter(s=>s.date.slice(0,10)===key).reduce((a,s)=>a+s.total,0);
-    return {label:d.toLocaleDateString('en-GB',{weekday:'short'}), total};
-  });
-
-  const recentSales=[...State.sales].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
-  const topProducts=Object.values(State.sales.flatMap(s=>s.items).reduce((acc,it)=>{
-    acc[it.productId]=acc[it.productId]||{name:it.name,qty:0,revenue:0};
-    acc[it.productId].qty+=it.qty; acc[it.productId].revenue+=it.qty*it.price;
-    return acc;
-  },{})).sort((a,b)=>b.qty-a.qty).slice(0,5);
-
-  c.innerHTML=`
-    <div class="grid g4" style="margin-bottom:18px;">
-      <div class="card stat-card">
-        <div class="stat-icon" style="background:var(--success-bg);color:var(--success);"><i class="ri-money-rupee-circle-line"></i></div>
-        <div class="stat-val">${NPR(todayRevenue)}</div>
-        <div class="stat-label">आजको बिक्री (${todaySales.length} बिल)</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-icon" style="background:#EAF1FE;color:var(--info);"><i class="ri-line-chart-line"></i></div>
-        <div class="stat-val">${NPR(todayProfit)}</div>
-        <div class="stat-label">आजको नाफा</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="ri-hand-coin-line"></i></div>
-        <div class="stat-val">${NPR(totalDue)}</div>
-        <div class="stat-label">कुल बाँकी उधारो</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-icon" style="background:#FDF3E1;color:#9C6B10;"><i class="ri-archive-2-line"></i></div>
-        <div class="stat-val">${State.products.length}</div>
-        <div class="stat-label">कुल सामान (${lowStock.length} कम स्टक)</div>
-      </div>
-    </div>
-
-    <div class="dash-2col">
-      <div class="card" style="padding:18px;">
-        <h3 style="margin:0 0 14px;font-size:15px;">विगत ७ दिनको बिक्री</h3>
-        <canvas id="salesChart" height="130"></canvas>
-      </div>
-      <div class="card" style="padding:18px;">
-        <h3 style="margin:0 0 12px;font-size:15px;">बढी बिक्री हुने सामान</h3>
-        ${topProducts.length? topProducts.map((p,i)=>`
-          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i<topProducts.length-1?'border-bottom:1px solid var(--border);':''}">
-            <div class="avatar" style="background:linear-gradient(135deg,var(--accent),var(--gold));width:30px;height:30px;font-size:12px;">${i+1}</div>
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name)}</div>
-              <div class="muted" style="font-size:11px;">${p.qty} थान बिक्री</div>
-            </div>
-            <div style="font-weight:700;font-size:12.5px;">${NPR(p.revenue)}</div>
-          </div>`).join('') : `<div class="empty" style="padding:20px;"><i class="ri-bar-chart-line"></i>अझै बिक्री छैन</div>`}
-      </div>
-    </div>
-
-    <div class="dash-2col-even" style="margin-top:18px;">
-      <div class="card" style="padding:18px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <h3 style="margin:0;font-size:15px;">हालैका बिलहरू</h3>
-          <span class="link-btn" onclick="navigate('reports')">सबै हेर्नुहोस्</span>
-        </div>
-        ${recentSales.length? recentSales.map(s=>{ const st=getSaleStatus(s); return `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:8px;">
-            <div>
-              <div style="font-weight:700;font-size:13px;">#${s.billNo}</div>
-              <div class="muted" style="font-size:11px;">${fmtDateTime(s.date)}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:700;font-size:13px;">${NPR(s.total)}</div>
-              <span class="chip ${st.cls}">${st.label}</span>
-            </div>
-            <div style="display:flex;gap:4px;flex-shrink:0;">
-              <button class="btn btn-sm btn-icon" title="हेर्नुहोस्/सम्पादन" onclick="openSaleDetail('${s.id}')"><i class="ri-edit-line"></i></button>
-              <button class="btn btn-sm btn-icon" title="WhatsApp पठाउनुहोस्" onclick="resendSaleWhatsApp('${s.id}')"><i class="ri-whatsapp-line" style="color:#25D366;"></i></button>
-            </div>
-          </div>`; }).join('') : `<div class="empty" style="padding:20px;"><i class="ri-receipt-line"></i>अझै बिल बनेको छैन</div>`}
-      </div>
-      <div class="card" style="padding:18px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <h3 style="margin:0;font-size:15px;">कम स्टक चेतावनी</h3>
-          <span class="link-btn" onclick="navigate('products')">व्यवस्थापन</span>
-        </div>
-        ${lowStock.length? lowStock.slice(0,6).map(p=>`
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);">
-            <div style="font-size:13px;font-weight:700;">${esc(p.name)}</div>
-            <span class="chip chip-danger">${p.stock} बाँकी</span>
-          </div>`).join('') : `<div class="empty" style="padding:20px;"><i class="ri-checkbox-circle-line"></i>सबै स्टक ठिक छ</div>`}
-      </div>
-    </div>
-  `;
-  const ctx=document.getElementById('salesChart');
-  if(ctx && window.Chart){
-    new Chart(ctx,{
-      type:'bar',
-      data:{ labels:last7.map(d=>d.label), datasets:[{ label:'बिक्री', data:last7.map(d=>d.total), backgroundColor:'#D63447', borderRadius:8, maxBarThickness:34 }] },
-      options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true, grid:{color:'#EEF0F6'} }, x:{ grid:{display:false} } } }
-    });
-  }
-}
-function payLabel(t){ return {cash:'नगद',card:'कार्ड',online:'अनलाइन',credit:'उधारो'}[t]||t; }
-function getSaleStatus(sale){
-  if(sale.paymentType!=='credit') return {label:'तिरिएको', cls:'chip-success', due:0};
-  const paid=sale.paidAmount||0;
-  const due=Math.max(0, sale.total-paid);
-  if(due<=0) return {label:'तिरिएको', cls:'chip-success', due:0};
-  if(paid>0) return {label:'आंशिक भुक्तानी', cls:'chip-gold', due};
-  return {label:'बाँकी', cls:'chip-danger', due};
-}
+const ICONS = {
+  bill: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>`,
+  box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>`,
+  chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>`,
+  gear: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.6-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.6V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.6 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.6 1z"/></svg>`,
+  camera: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4V8z"/><circle cx="12" cy="13" r="3.5"/></svg>`,
+  search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`,
+  plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  minus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>`,
+  cart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M3 3h2l2.5 12.5A2 2 0 009.4 17H18a2 2 0 002-1.6L21.6 7H6"/></svg>`,
+  close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+  back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`,
+  edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>`,
+  print: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+  download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>`,
+  upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4"/><path d="M4 17v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>`,
+  scan: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4a1 1 0 011-1h3M17 3h3a1 1 0 011 1v3M21 17v3a1 1 0 01-1 1h-3M7 21H4a1 1 0 01-1-1v-3"/><path d="M3 12h18"/></svg>`,
+  image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/></svg>`,
+};
 
 /* ============================================================
-   PRODUCTS
+   RENDER ROOT
    ============================================================ */
-function renderProducts(){
-  const c=document.getElementById('content');
-  c.innerHTML=`
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;justify-content:space-between;">
-      <div style="display:flex;gap:10px;flex:1;min-width:220px;">
-        <input class="input" id="prodSearch" placeholder="सामान वा बारकोड खोज्नुहोस्..." oninput="filterProductsTable()">
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-outline" onclick="openScannerModal('product-lookup')"><i class="ri-camera-line"></i> स्क्यान</button>
-        <button class="btn btn-primary" onclick="openProductModal()"><i class="ri-add-line"></i> नयाँ सामान</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table id="productsTable">
-          <thead><tr><th>सामान</th><th>बारकोड</th><th>मूल्य</th><th>स्टक</th><th>श्रेणी</th><th></th></tr></thead>
-          <tbody id="productsTbody"></tbody>
-        </table>
-      </div>
-    </div>
-  `;
-  filterProductsTable();
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  app.appendChild(renderHeader());
+  const main = el(`<div class="flex-1 overflow-y-auto pb-28"></div>`);
+  if(state.tab==='billing') main.appendChild(renderBilling());
+  if(state.tab==='products') main.appendChild(renderProducts());
+  if(state.tab==='reports') main.appendChild(renderReports());
+  if(state.tab==='settings') main.appendChild(renderSettings());
+  app.appendChild(main);
+  app.appendChild(renderBottomNav());
+  if(state.tab==='billing') app.appendChild(renderCartBar());
 }
-function filterProductsTable(){
-  const q=(document.getElementById('prodSearch')?.value||'').toLowerCase();
-  const list=State.products.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.barcode||'').includes(q));
-  const tbody=document.getElementById('productsTbody');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="6"><div class="empty"><i class="ri-inbox-line"></i>कुनै सामान भेटिएन</div></td></tr>`; return; }
-  tbody.innerHTML=list.map(p=>`
-    <tr>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="p-thumb" style="width:40px;height:40px;border-radius:9px;flex-shrink:0;">${p.image?`<img src="${p.image}">`:'<i class="ri-shopping-bag-3-line"></i>'}</div>
-          <div>
-            <div style="font-weight:700;font-size:13.5px;">${esc(p.name)}</div>
-            <div class="muted" style="font-size:11px;">लागत: ${NPR(p.costPrice)}</div>
-          </div>
+
+function renderHeader(){
+  const titles = { billing:'बिलिंग', products:'सामान व्यवस्थापन', reports:'बिक्री रिपोर्ट', settings:'सेटिङ' };
+  const header = el(`
+    <div class="safe-top sticky top-0 z-30">
+      <div class="bg-ink text-paper px-4 pt-3 pb-3 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] tracking-wide text-marigold font-medium">${state.settings.shopName || 'मेरो पसल'}</div>
+          <div class="text-lg font-bold leading-tight">${titles[state.tab]}</div>
         </div>
-      </td>
-      <td><span class="muted" style="font-family:monospace;">${esc(p.barcode||'—')}</span></td>
-      <td style="font-weight:700;">${NPR(p.price)}</td>
-      <td>${p.stock<=(p.minStock||5)?`<span class="chip chip-danger">${p.stock}</span>`:`<span class="chip chip-success">${p.stock}</span>`}</td>
-      <td class="muted">${esc(p.category||'—')}</td>
-      <td>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-sm btn-icon" title="बारकोड" onclick="showBarcodeLabel('${p.id}')"><i class="ri-barcode-line"></i></button>
-          <button class="btn btn-sm btn-icon" title="सम्पादन" onclick="openProductModal('${p.id}')"><i class="ri-edit-line"></i></button>
-          <button class="btn btn-sm btn-icon" title="मेटाउनुहोस्" onclick="deleteProduct('${p.id}')"><i class="ri-delete-bin-line" style="color:var(--danger);"></i></button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-function genBarcodeValue(){
-  let code;
-  do{ code='8'+Date.now().toString().slice(-9)+Math.floor(Math.random()*90+10); }
-  while(State.products.some(p=>p.barcode===code));
-  return code;
-}
-function openProductModal(id){
-  const p = id ? State.products.find(x=>x.id===id) : null;
-  const bg=openModalHTML(`
-    <div class="modal">
-      <div class="modal-head"><h3>${p?'सामान सम्पादन':'नयाँ सामान थप्नुहोस्'}</h3><button class="close-x" onclick="closeModal()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body">
-        <div class="field">
-          <label class="label">सामानको नाम *</label>
-          <input class="input" id="pf_name" value="${p?esc(p.name):''}" placeholder="जस्तै: कोकाकोला ५०० मिली">
-        </div>
-        <div class="field">
-          <label class="label">बारकोड</label>
-          <div style="display:flex;gap:8px;">
-            <input class="input" id="pf_barcode" value="${p?esc(p.barcode||''):''}" placeholder="स्क्यान गर्नुहोस् वा खाली छोड्नुहोस्">
-            <button class="btn btn-outline btn-icon" title="क्यामेराबाट स्क्यान" onclick="openScannerModal('product-field')"><i class="ri-camera-line"></i></button>
-            <button class="btn btn-outline btn-icon" title="स्वतः बारकोड बनाउनुहोस्" onclick="document.getElementById('pf_barcode').value=genBarcodeValue()"><i class="ri-magic-line"></i></button>
-          </div>
-        </div>
-        <div class="row">
-          <div class="field"><label class="label">बिक्री मूल्य *</label><input class="input" type="number" step="0.01" id="pf_price" value="${p?p.price:''}"></div>
-          <div class="field"><label class="label">लागत मूल्य</label><input class="input" type="number" step="0.01" id="pf_cost" value="${p?p.costPrice:''}"></div>
-        </div>
-        <div class="row">
-          <div class="field"><label class="label">स्टक परिमाण *</label><input class="input" type="number" id="pf_stock" value="${p?p.stock:''}"></div>
-          <div class="field"><label class="label">न्यून स्टक सीमा</label><input class="input" type="number" id="pf_minstock" value="${p?(p.minStock||5):5}"></div>
-        </div>
-        <div class="field">
-          <label class="label">श्रेणी</label>
-          <div style="display:flex;gap:8px;">
-            <select class="select" id="pf_category">
-              <option value="">श्रेणी छान्नुहोस्</option>
-              ${(State.settings.categories||[]).map(cat=>`<option value="${esc(cat)}" ${p&&p.category===cat?'selected':''}>${esc(cat)}</option>`).join('')}
-            </select>
-            <button type="button" class="btn btn-outline btn-icon" title="नयाँ श्रेणी थप्नुहोस्" onclick="quickAddCategory()"><i class="ri-add-line"></i></button>
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">इकाइ</label>
-          <div style="display:flex;gap:8px;">
-            <select class="select" id="pf_unit">
-              ${(State.settings.units&&State.settings.units.length?State.settings.units:['थान']).map(u=>`<option ${p&&p.unit===u?'selected':''}>${esc(u)}</option>`).join('')}
-            </select>
-            <button type="button" class="btn btn-outline btn-icon" title="नयाँ इकाइ थप्नुहोस्" onclick="quickAddUnit()"><i class="ri-add-line"></i></button>
-          </div>
+        <div class="w-9 h-9 rounded-full bg-crimson flex items-center justify-center text-white font-bold num text-sm">
+          ${(state.settings.shopName||'प').trim().slice(0,1)}
         </div>
       </div>
-      <div class="modal-foot">
-        <button class="btn btn-outline" onclick="closeModal()">रद्द</button>
-        <button class="btn btn-primary" onclick="saveProduct('${p?p.id:''}')"><i class="ri-save-line"></i> सुरक्षित गर्नुहोस्</button>
-      </div>
+      <div class="prayer-strip"></div>
     </div>
   `);
-}
-async function saveProduct(id){
-  const name=document.getElementById('pf_name').value.trim();
-  const price=parseFloat(document.getElementById('pf_price').value);
-  const cost=parseFloat(document.getElementById('pf_cost').value)||0;
-  const stock=parseInt(document.getElementById('pf_stock').value);
-  const minStock=parseInt(document.getElementById('pf_minstock').value)||5;
-  let barcode=document.getElementById('pf_barcode').value.trim();
-  const category=document.getElementById('pf_category').value.trim();
-  const unit=document.getElementById('pf_unit').value;
-  if(!name || isNaN(price) || isNaN(stock)){ toast('कृपया सबै आवश्यक फिल्ड भर्नुहोस्','err'); return; }
-  if(!barcode) barcode=genBarcodeValue();
-  const dupe=State.products.find(p=>p.barcode===barcode && p.id!==id);
-  if(dupe){ toast('यो बारकोड पहिले नै अर्को सामानमा प्रयोग भएको छ','err'); return; }
-  const rec = id ? State.products.find(p=>p.id===id) : {id:uid(), createdAt:new Date().toISOString()};
-  Object.assign(rec,{name,price,costPrice:cost,stock,minStock,barcode,category,unit});
-  await dbPut('products',rec);
-  if(!id) State.products.push(rec);
-  closeModal(); toast('सामान सुरक्षित भयो','ok');
-  if(State.view==='products') renderProducts();
-}
-async function deleteProduct(id){
-  if(!confirm('के तपाईं यो सामान मेटाउन चाहनुहुन्छ?')) return;
-  await dbDelete('products',id);
-  State.products=State.products.filter(p=>p.id!==id);
-  toast('सामान मेटाइयो','ok'); renderProducts();
-}
-async function quickAddCategory(){
-  const val=prompt('नयाँ श्रेणीको नाम लेख्नुहोस्:');
-  if(!val || !val.trim()) return;
-  const v=val.trim();
-  const cats=State.settings.categories||[];
-  if(!cats.includes(v)){ cats.push(v); await saveSetting('categories',cats); }
-  const sel=document.getElementById('pf_category');
-  if(sel){
-    if(![...sel.options].some(o=>o.value===v)){ const opt=document.createElement('option'); opt.value=v; opt.textContent=v; sel.appendChild(opt); }
-    sel.value=v;
-  }
-  toast('श्रेणी थपियो','ok');
-}
-async function quickAddUnit(){
-  const val=prompt('नयाँ इकाइको नाम लेख्नुहोस्:');
-  if(!val || !val.trim()) return;
-  const v=val.trim();
-  const units=State.settings.units||[];
-  if(!units.includes(v)){ units.push(v); await saveSetting('units',units); }
-  const sel=document.getElementById('pf_unit');
-  if(sel){
-    if(![...sel.options].some(o=>o.value===v)){ const opt=document.createElement('option'); opt.value=v; opt.textContent=v; sel.appendChild(opt); }
-    sel.value=v;
-  }
-  toast('इकाइ थपियो','ok');
-}
-function showBarcodeLabel(id){
-  const p=State.products.find(x=>x.id===id);
-  if(!p) return;
-  if(!p.barcode){ toast('यो सामानको बारकोड छैन','err'); return; }
-  openModalHTML(`
-    <div class="modal">
-      <div class="modal-head"><h3>बारकोड लेबल</h3><button class="close-x" onclick="closeModal()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body">
-        <div class="label-preview" id="labelPrintArea">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${esc(p.name)}</div>
-          <svg id="barcodeSvg"></svg>
-          <div style="font-weight:700;font-size:13px;">${NPR(p.price)}</div>
-        </div>
-        <div class="field" style="margin-top:14px;">
-          <label class="label">कति प्रति (Copies) प्रिन्ट गर्ने?</label>
-          <input class="input" type="number" id="labelQty" min="1" value="1">
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn btn-outline" onclick="closeModal()">बन्द</button>
-        <button class="btn btn-primary" onclick="printLabel('${p.id}')"><i class="ri-printer-line"></i> प्रिन्ट</button>
-      </div>
-    </div>
-  `);
-  try{ JsBarcode('#barcodeSvg', p.barcode, {format:'CODE128', width:2, height:55, fontSize:13, margin:6}); }
-  catch(e){ document.getElementById('barcodeSvg').outerHTML='<div class="muted">बारकोड बनाउन सकिएन</div>'; }
-}
-function printLabel(productId){
-  const qty=Math.max(1, parseInt(document.getElementById('labelQty')?.value)||1);
-  const single=document.getElementById('labelPrintArea').outerHTML;
-  let all='';
-  for(let i=0;i<qty;i++){ all += `<div style="display:inline-block;margin:6px;vertical-align:top;">${single}</div>`; }
-  const w=window.open('','_blank','width=440,height=520');
-  w.document.write(`<html><head><title>Barcode Labels</title><style>body{font-family:sans-serif;text-align:center;padding:16px;} .label-preview{border:1px dashed #999;border-radius:8px;padding:10px;}</style></head><body>${all}<script>setTimeout(()=>{window.print();},300);<\/script></body></html>`);
-  w.document.close();
+  return header;
 }
 
-/* ============================================================
-   BARCODE SCANNER (Camera) + Hardware scanner support
-   ============================================================ */
-function openScannerModal(context){
-  State.scanContext=context;
-  openModalHTML(`
-    <div class="modal">
-      <div class="modal-head"><h3><i class="ri-camera-line"></i> बारकोड स्क्यान गर्नुहोस्</h3><button class="close-x" onclick="stopScannerAndClose()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body">
-        <div id="qrReader"></div>
-        <p class="muted" style="text-align:center;margin-top:10px;font-size:12.5px;">क्यामेरालाई बारकोडमा राम्ररी देखाउनुहोस्। कम्प्युटरमा भए USB/ब्लुटुथ स्क्यानर पनि सिधै प्रयोग गर्न मिल्छ।</p>
-      </div>
-    </div>
-  `);
-  setTimeout(startCameraScanner, 150);
-}
-function startCameraScanner(){
-  if(!window.Html5Qrcode){ toast('स्क्यानर लाइब्रेरी लोड हुन सकेन','err'); return; }
-  State.html5Qr=new Html5Qrcode('qrReader');
-  const config={ fps:12, qrbox:{width:250,height:150}, formatsToSupport:[
-      Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.QR_CODE
-  ]};
-  Html5Qrcode.getCameras().then(cams=>{
-    const camId = (cams.find(c=>/back|rear|environment/i.test(c.label))||cams[cams.length-1]||cams[0])?.id;
-    if(!camId){ toast('क्यामेरा भेटिएन','err'); return; }
-    State.html5Qr.start(camId, config, onScanDetected).catch(()=>{
-      toast('क्यामेरा सुरु गर्न सकिएन, अनुमति जाँच्नुहोस्','err');
-    });
-  }).catch(()=> toast('क्यामेरा पहुँच अस्वीकृत भयो','err'));
-}
-function onScanDetected(text){
-  if(State._scanLock) return; State._scanLock=true; setTimeout(()=>State._scanLock=false,1200);
-  handleScannedBarcode(text);
-}
-function stopScannerAndClose(){
-  if(State.html5Qr){ try{ State.html5Qr.stop().then(()=>State.html5Qr.clear()); }catch(e){} }
-  closeModal();
-}
-function handleScannedBarcode(code){
-  code=(code||'').trim();
-  if(State.scanContext==='product-field'){
-    const inp=document.getElementById('pf_barcode');
-    stopScannerAndClose();
-    setTimeout(()=>{ // reopen product form isn't trivial after modal replace; just toast + set if still around
-      if(document.getElementById('pf_barcode')) document.getElementById('pf_barcode').value=code;
-    },50);
-    toast('बारकोड स्क्यान भयो: '+code,'ok');
-  } else if(State.scanContext==='pos'){
-    stopScannerAndClose();
-    addProductByBarcode(code);
-  } else if(State.scanContext==='product-lookup'){
-    stopScannerAndClose();
-    const p=State.products.find(x=>x.barcode===code);
-    if(p) openProductModal(p.id);
-    else { toast('नयाँ सामान — बारकोड सहित थप्नुहोस्','ok'); openProductModal(); setTimeout(()=>{ if(document.getElementById('pf_barcode')) document.getElementById('pf_barcode').value=code; },100); }
-  }
-}
-
-/* Hardware keyboard-wedge scanner: listens globally while POS view active */
-let hwBuffer=''; let hwTimer=null;
-document.addEventListener('keydown', (e)=>{
-  if(State.view!=='addcart') return;
-  const active=document.activeElement;
-  const typingInField = active && (active.tagName==='INPUT'||active.tagName==='TEXTAREA') && active.id!=='hwScanCatcher';
-  if(typingInField) return;
-  if(e.key==='Enter'){
-    if(hwBuffer.length>=3){ handleScannedBarcode(hwBuffer); }
-    hwBuffer=''; return;
-  }
-  if(e.key.length===1){
-    hwBuffer+=e.key;
-    clearTimeout(hwTimer);
-    hwTimer=setTimeout(()=>{ hwBuffer=''; }, 300);
-  }
-});
-
-/* ============================================================
-   POS / BILLING
-   ============================================================ */
-function renderAddCart(){
-  const c=document.getElementById('content');
-  State.cart = State.cart||[];
-  c.innerHTML=`
-    <div class="scan-bar">
-      <input class="input" id="posSearch" placeholder="सामानको नाम खोज्नुहोस् वा बारकोड स्क्यान/टाइप गरी Enter थिच्नुहोस्..." oninput="filterPosGrid()" onkeydown="if(event.key==='Enter'){ posSearchEnter(); }">
-      <button class="btn btn-primary" onclick="openScannerModal('pos')"><i class="ri-camera-line"></i> स्क्यान</button>
-    </div>
-    <div class="product-grid" id="posGrid"></div>
-    <div class="floating-cart-bar hidden" id="floatingCartBar" onclick="navigate('billing')"></div>
-  `;
-  filterPosGrid();
-  updateFloatingCartBar();
-}
-function updateFloatingCartBar(){
-  const bar=document.getElementById('floatingCartBar');
-  if(!bar) return;
-  const count=State.cart.reduce((a,c)=>a+c.qty,0);
-  const {total}=calcTotals();
-  bar.classList.toggle('hidden', count===0);
-  bar.innerHTML=`
-    <div><i class="ri-shopping-cart-2-fill"></i> कार्टमा ${count} सामान</div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <b>${NPR(total)}</b>
-      <span class="btn btn-sm btn-primary">बिलिङमा जानुहोस् <i class="ri-arrow-right-line"></i></span>
-    </div>`;
-}
-function renderBilling(){
-  const c=document.getElementById('content');
-  State.cart = State.cart||[];
-  c.innerHTML=`
-    <div style="max-width:560px;margin:0 auto;">
-      <div class="card cart-panel" style="position:static;max-height:none;">
-        <div class="cart-head">
-          <h3 style="margin:0;font-size:15.5px;"><i class="ri-shopping-cart-2-fill"></i> कार्ट (${State.cart.length})</h3>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-sm btn-outline" onclick="navigate('addcart')"><i class="ri-add-line"></i> थप्नुहोस्</button>
-            <button class="btn btn-sm btn-outline" onclick="clearCart()"><i class="ri-refresh-line"></i> खाली</button>
-          </div>
-        </div>
-        <div class="cart-list" id="cartList" style="max-height:340px;"></div>
-        <div style="padding:10px 16px 0;">
-          <label class="label">ग्राहक (उधारोका लागि आवश्यक)</label>
-          <select class="select" id="posCustomer" onchange="onSelectCustomer(this.value)">
-            <option value="">वाक-इन ग्राहक</option>
-            ${State.customers.map(cu=>`<option value="${cu.id}" ${State.selectedCustomerId===cu.id?'selected':''}>${esc(cu.name)} — ${esc(cu.phone||'')}</option>`).join('')}
-          </select>
-        </div>
-        <div class="cart-summary">
-          <div class="row" style="margin-bottom:8px;">
-            <div class="field" style="margin-bottom:0;"><label class="label">छुट %</label><input class="input" type="number" id="discPct" value="${State.discountPct}" oninput="State.discountPct=parseFloat(this.value)||0;renderCartSummary();"></div>
-            <div class="field" style="margin-bottom:0;"><label class="label">छुट रु</label><input class="input" type="number" id="discFlat" value="${State.discountFlat}" oninput="State.discountFlat=parseFloat(this.value)||0;renderCartSummary();"></div>
-          </div>
-          <div class="pay-types" id="payTypes">
-            ${['cash','card','online','credit'].map(pt=>`
-              <div class="pay-type ${State.paymentType===pt?'active':''}" data-pt="${pt}" onclick="setPayType('${pt}')">
-                <i class="${{cash:'ri-cash-line',card:'ri-bank-card-line',online:'ri-smartphone-line',credit:'ri-hand-coin-line'}[pt]}"></i>${payLabel(pt)}
-              </div>`).join('')}
-          </div>
-          <div id="summaryBlock"></div>
-          <button class="btn btn-primary btn-block" style="margin-top:12px;padding:13px;font-size:14.5px;" onclick="completeSale()"><i class="ri-check-double-line"></i> बिल पूरा गर्नुहोस्</button>
-        </div>
-      </div>
-    </div>
-  `;
-  renderCart();
-}
-function filterPosGrid(){
-  const q=(document.getElementById('posSearch')?.value||'').toLowerCase();
-  const grid=document.getElementById('posGrid');
-  let list=State.products;
-  if(q) list=list.filter(p=>p.name.toLowerCase().includes(q)||(p.barcode||'').includes(q));
-  if(!list.length){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1;"><i class="ri-search-line"></i>सामान भेटिएन</div>`; return; }
-  grid.innerHTML=list.map(p=>`
-    <div class="product-tile ${p.stock<=0?'oos':''}" onclick="${p.stock<=0?'':`addToCart('${p.id}')`}">
-      <div class="p-thumb">${p.image?`<img src="${p.image}">`:'<i class="ri-shopping-bag-3-line"></i>'}</div>
-      <div class="p-name">${esc(p.name)}</div>
-      <div class="p-meta"><span class="p-price">${NPR(p.price)}</span><span class="muted">${p.stock<=0?'सकियो':p.stock+' थान'}</span></div>
-    </div>`).join('');
-}
-function posSearchEnter(){
-  const val=(document.getElementById('posSearch').value||'').trim();
-  if(!val) return;
-  const byBarcode=State.products.find(p=>p.barcode===val);
-  if(byBarcode){ addToCart(byBarcode.id); document.getElementById('posSearch').value=''; filterPosGrid(); return; }
-  const matches=State.products.filter(p=>p.name.toLowerCase().includes(val.toLowerCase()));
-  if(matches.length===1){ addToCart(matches[0].id); document.getElementById('posSearch').value=''; filterPosGrid(); }
-}
-function addProductByBarcode(code){
-  const p=State.products.find(x=>x.barcode===code);
-  if(!p){ toast('यो बारकोडको सामान भेटिएन','err'); return; }
-  addToCart(p.id);
-}
-function addToCart(pid){
-  const p=State.products.find(x=>x.id===pid);
-  if(!p) return;
-  if(p.stock<=0){ toast('स्टकमा छैन','err'); return; }
-  const existing=State.cart.find(ci=>ci.productId===pid);
-  const inCartQty = existing?existing.qty:0;
-  if(inCartQty+1>p.stock){ toast('स्टक अपर्याप्त छ','err'); return; }
-  if(existing) existing.qty+=1;
-  else State.cart.push({productId:p.id,name:p.name,price:p.price,qty:1,unit:p.unit||'थान'});
-  renderCart();
-  updateFloatingCartBar();
-  toast(p.name+' थपियो','ok');
-}
-function changeQty(pid,delta){
-  const ci=State.cart.find(c=>c.productId===pid);
-  const p=State.products.find(x=>x.id===pid);
-  if(!ci) return;
-  const newQty=ci.qty+delta;
-  if(newQty<=0){ State.cart=State.cart.filter(c=>c.productId!==pid); }
-  else if(p && newQty>p.stock){ toast('स्टक अपर्याप्त छ','err'); return; }
-  else ci.qty=newQty;
-  renderCart();
-}
-function removeFromCart(pid){ State.cart=State.cart.filter(c=>c.productId!==pid); renderCart(); updateFloatingCartBar(); }
-function clearCart(){
-  State.cart=[]; State.discountPct=0; State.discountFlat=0; State.selectedCustomerId=null; State.paymentType='cash';
-  if(State.view==='billing') renderBilling(); else renderAddCart();
-}
-function renderCart(){
-  const list=document.getElementById('cartList');
-  const headCount=document.querySelector('.cart-head h3');
-  if(headCount) headCount.innerHTML=`<i class="ri-shopping-cart-2-fill"></i> कार्ट (${State.cart.length})`;
-  updateFloatingCartBar();
-  if(!list) return;
-  if(!State.cart.length){ list.innerHTML=`<div class="empty" style="padding:26px 10px;"><i class="ri-shopping-cart-line"></i>कार्ट खाली छ<br><span style="font-size:11.5px;">सामान थप्न 'सामान थप्नुहोस्' मा जानुहोस्</span><br><button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="navigate('addcart')"><i class="ri-add-line"></i> सामान थप्नुहोस्</button></div>`; renderCartSummary(); return; }
-  list.innerHTML=State.cart.map(ci=>`
-    <div class="cart-item">
-      <div class="ci-name">${esc(ci.name)}<div class="sub">${NPR(ci.price)} × ${ci.qty}</div></div>
-      <div class="qty-ctrl">
-        <button onclick="changeQty('${ci.productId}',-1)">−</button>
-        <span>${ci.qty}</span>
-        <button onclick="changeQty('${ci.productId}',1)">+</button>
-      </div>
-      <div class="ci-price">${NPR(ci.price*ci.qty)}</div>
-      <div class="ci-del" onclick="removeFromCart('${ci.productId}')"><i class="ri-close-circle-fill"></i></div>
-    </div>`).join('');
-  renderCartSummary();
-}
-function computeTotals(items, discountPct, discountFlat, vatPercent){
-  const subtotal=items.reduce((a,c)=>a+c.price*c.qty,0);
-  const pctOff=subtotal*((discountPct||0)/100);
-  const discount=pctOff+(discountFlat||0);
-  const taxable=Math.max(0, subtotal-discount);
-  vatPercent=Number(vatPercent)||0;
-  const vat=taxable*(vatPercent/100);
-  const total=taxable+vat;
-  const cost=items.reduce((a,c)=>{ const p=State.products.find(x=>x.id===c.productId); return a+(p?p.costPrice:0)*c.qty; },0);
-  const profit=total-vat-cost;
-  return {subtotal,discount,vat,vatPercent,total,profit};
-}
-function calcTotals(){
-  return computeTotals(State.cart, State.discountPct, State.discountFlat, State.settings.vatPercent);
-}
-function renderCartSummary(){
-  const el=document.getElementById('summaryBlock');
-  if(!el) return;
-  const {subtotal,discount,vat,vatPercent,total}=calcTotals();
-  el.innerHTML=`
-    <div class="sum-row"><span>उप-जम्मा</span><span>${NPR(subtotal)}</span></div>
-    <div class="sum-row"><span>छुट</span><span>− ${NPR(discount)}</span></div>
-    ${vatPercent>0?`<div class="sum-row"><span>VAT (${vatPercent}%)</span><span>+ ${NPR(vat)}</span></div>`:''}
-    <div class="sum-row total"><span>कुल रकम</span><span>${NPR(total)}</span></div>
-  `;
-}
-function setPayType(pt){
-  if(pt==='credit' && !State.selectedCustomerId){ toast('उधारोका लागि पहिले ग्राहक छनोट गर्नुहोस्','err'); }
-  State.paymentType=pt;
-  document.querySelectorAll('.pay-type').forEach(el=>el.classList.toggle('active', el.dataset.pt===pt));
-}
-function onSelectCustomer(id){ State.selectedCustomerId=id||null; }
-
-async function completeSale(){
-  if(!State.cart.length){ toast('कार्टमा सामान छैन','err'); return; }
-  if(State.paymentType==='credit' && !State.selectedCustomerId){ toast('उधारो बिलका लागि ग्राहक छनोट गर्नुपर्छ','err'); return; }
-  const {subtotal,discount,vat,vatPercent,total,profit}=calcTotals();
-  const billNo = 'B' + (State.sales.length+1).toString().padStart(5,'0');
-  const sale={
-    id:uid(), billNo, date:new Date().toISOString(),
-    items: State.cart.map(c=>({productId:c.productId,name:c.name,price:c.price,qty:c.qty,unit:c.unit})),
-    subtotal, discount, vat, vatPercent, total, profit,
-    paymentType:State.paymentType,
-    customerId: State.selectedCustomerId || null,
-    paidAmount: State.paymentType==='credit' ? 0 : total
-  };
-  // deduct stock
-  for(const ci of State.cart){
-    const p=State.products.find(x=>x.id===ci.productId);
-    if(p){ p.stock-=ci.qty; await dbPut('products',p); }
-  }
-  await dbPut('sales',sale);
-  State.sales.push(sale);
-
-  if(State.paymentType==='credit' && State.selectedCustomerId){
-    const cu=State.customers.find(x=>x.id===State.selectedCustomerId);
-    if(cu){
-      cu.dueAmount=(cu.dueAmount||0)+total;
-      await dbPut('customers',cu);
-      const txn={id:uid(),customerId:cu.id,type:'sale',amount:total,date:new Date().toISOString(),note:'बिल #'+billNo,saleId:sale.id};
-      await dbPut('transactions',txn); State.transactions.push(txn);
-    }
-  }
-
-  State.lastReceipt=sale;
-  toast('बिल सफलतापूर्वक बनाइयो','ok');
-  State.cart=[]; State.discountPct=0; State.discountFlat=0; State.paymentType='cash';
-  const custId=State.selectedCustomerId; State.selectedCustomerId=null;
-  showReceipt(sale, custId);
-  if(State.view==='billing') renderBilling(); else renderAddCart();
-}
-
-/* ============================================================
-   RECEIPT — print / whatsapp / bluetooth
-   ============================================================ */
-function buildReceiptHTML(sale){
-  const cu = sale.customerId ? State.customers.find(c=>c.id===sale.customerId) : null;
-  const logo=State.settings.shopLogo;
-  return `
-  <div class="receipt" id="receiptEl">
-    <div class="dhaka-strip" style="margin-bottom:8px;"></div>
-    <div class="r-head">
-      ${logo?`<div class="r-logo"><img src="${logo}"></div>`:''}
-      <div class="r-shop">${esc(State.settings.shopName||'मेरो पसल')}</div>
-      <div>${esc(State.settings.shopAddr||'')}</div>
-      <div>${esc(State.settings.shopPhone||'')}</div>
-      ${State.settings.shopPan?`<div>PAN: ${esc(State.settings.shopPan)}</div>`:''}
-    </div>
-    <hr>
-    <div>बिल नं: <b>${sale.billNo}</b></div>
-    <div>मिति: ${fmtDateTime(sale.date)}</div>
-    ${cu?`<div>ग्राहक: ${esc(cu.name)} (${esc(cu.phone||'')})</div>`:''}
-    <hr>
-    <table style="width:100%;">
-      <thead><tr><th style="text-align:left;">सामान</th><th>परि</th><th style="text-align:right;">जम्मा</th></tr></thead>
-      <tbody>
-        ${sale.items.map(it=>`<tr><td>${esc(it.name)}</td><td style="text-align:center;">${it.qty}</td><td style="text-align:right;">${NPR(it.price*it.qty)}</td></tr>`).join('')}
-      </tbody>
-    </table>
-    <hr>
-    <div style="display:flex;justify-content:space-between;"><span>उप-जम्मा</span><span>${NPR(sale.subtotal)}</span></div>
-    <div style="display:flex;justify-content:space-between;"><span>छुट</span><span>− ${NPR(sale.discount)}</span></div>
-    ${(sale.vatPercent>0)?`<div style="display:flex;justify-content:space-between;"><span>VAT (${sale.vatPercent}%)</span><span>+ ${NPR(sale.vat)}</span></div>`:''}
-    <div class="r-tot" style="margin-top:4px;"><span>कुल जम्मा</span><span>${NPR(sale.total)}</span></div>
-    <div style="margin-top:4px;">भुक्तानी: <b>${payLabel(sale.paymentType)}</b></div>
-    <hr>
-    <div style="text-align:center;"><svg id="receiptBarcode"></svg></div>
-    <div class="r-foot">धन्यवाद! फेरि आउनुहोला 🙏<br>Powered by पसल POS</div>
-  </div>`;
-}
-function showReceipt(sale, custId){
-  const bg=openModalHTML(`
-    <div class="modal">
-      <div class="modal-head"><h3><i class="ri-file-list-3-line"></i> बिल रसिद</h3><button class="close-x" onclick="closeModal()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body" style="background:var(--surface-alt);" id="printArea">
-        ${buildReceiptHTML(sale)}
-      </div>
-      <div class="modal-body" style="padding-top:0;">
-        <div class="row" style="margin-bottom:10px;">
-          <button class="btn btn-outline btn-block" onclick="printReceipt()"><i class="ri-printer-line"></i> प्रिन्ट</button>
-          <button class="btn btn-outline btn-block" onclick="bluetoothPrintReceipt()"><i class="ri-bluetooth-line"></i> ब्लुटुथ प्रिन्ट</button>
-        </div>
-        <div class="field">
-          <label class="label">WhatsApp मार्फत पठाउनुहोस्</label>
-          <div style="display:flex;gap:8px;">
-            <input class="input" id="waPhone" placeholder="98XXXXXXXX" value="${custId?esc((State.customers.find(c=>c.id===custId)||{}).phone||''):''}">
-            <button class="btn btn-success" onclick="sendWhatsApp('${sale.id}')"><i class="ri-whatsapp-line"></i> पठाउनुहोस्</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `);
-  try{ JsBarcode('#receiptBarcode', sale.billNo.replace(/\\D/g,'')||sale.billNo, {format:'CODE128', width:1.5, height:36, fontSize:10, margin:2}); }catch(e){}
-}
-function printReceipt(){ window.print(); }
-
-function sendWhatsApp(saleId){
-  const sale = State.sales.find(s=>s.id===saleId) || State.lastReceipt;
-  let phone=document.getElementById('waPhone').value.trim().replace(/\D/g,'');
-  if(!phone){ toast('कृपया मोबाइल नम्बर हाल्नुहोस्','err'); return; }
-  sendWhatsAppTo(sale, phone);
-}
-function sendWhatsAppTo(sale, phoneDigits){
-  let phone=phoneDigits;
-  if(phone.length===10) phone='977'+phone; // Nepal default country code
-  const lines=[
-    `*${State.settings.shopName||'मेरो पसल'}*`,
-    State.settings.shopAddr||'', State.settings.shopPhone||'',
-    `बिल नं: ${sale.billNo}`, `मिति: ${fmtDateTime(sale.date)}`, '—'.repeat(20)
+function renderBottomNav(){
+  const items = [
+    {id:'billing', label:'बिलिंग', icon:ICONS.bill},
+    {id:'products', label:'सामान', icon:ICONS.box},
+    {id:'reports', label:'रिपोर्ट', icon:ICONS.chart},
+    {id:'settings', label:'सेटिङ', icon:ICONS.gear},
   ];
-  sale.items.forEach(it=> lines.push(`${it.name} x${it.qty} = ${NPR(it.price*it.qty)}`));
-  lines.push('—'.repeat(20));
-  lines.push(`उप-जम्मा: ${NPR(sale.subtotal)}`);
-  lines.push(`छुट: ${NPR(sale.discount)}`);
-  if(sale.vatPercent>0) lines.push(`VAT (${sale.vatPercent}%): ${NPR(sale.vat)}`);
-  lines.push(`*कुल जम्मा: ${NPR(sale.total)}*`);
-  lines.push(`भुक्तानी: ${payLabel(sale.paymentType)}`);
-  lines.push('', 'धन्यवाद! 🙏');
-  const text=encodeURIComponent(lines.join('\n'));
-  // Directly open WhatsApp chat with this number, message pre-filled and ready to send
-  window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-}
-function resendSaleWhatsApp(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale){ toast('बिल भेटिएन','err'); return; }
-  const cu = sale.customerId ? State.customers.find(c=>c.id===sale.customerId) : null;
-  const phone=prompt('WhatsApp मोबाइल नम्बर हाल्नुहोस्:', cu?(cu.phone||''):'');
-  if(!phone) return;
-  const cleaned=phone.trim().replace(/\D/g,'');
-  if(!cleaned){ toast('मान्य नम्बर हाल्नुहोस्','err'); return; }
-  sendWhatsAppTo(sale, cleaned);
-}
-function printExistingReceipt(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale) return;
-  showReceipt(sale, sale.customerId);
-}
-
-/* Bluetooth ESC/POS thermal printer (Web Bluetooth) */
-async function bluetoothPrintReceipt(){
-  if(!navigator.bluetooth){ toast('यो ब्राउजरले ब्लुटुथ समर्थन गर्दैन। Chrome (Android/Desktop) प्रयोग गर्नुहोस्।','err'); return; }
-  try{
-    const device=await navigator.bluetooth.requestDevice({
-      acceptAllDevices:true,
-      optionalServices:['000018f0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','0000ffe0-0000-1000-8000-00805f9b34fb']
-    });
-    const server=await device.gatt.connect();
-    const svcIds=['000018f0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','0000ffe0-0000-1000-8000-00805f9b34fb'];
-    let writable=null;
-    for(const sid of svcIds){
-      try{
-        const svc=await server.getPrimaryService(sid);
-        const chars=await svc.getCharacteristics();
-        writable=chars.find(c=>c.properties.write||c.properties.writeWithoutResponse) || null;
-        if(writable) break;
-      }catch(e){}
-    }
-    if(!writable){ toast('यो प्रिन्टरसँग मिल्ने सेवा भेटिएन','err'); return; }
-    const sale=State.lastReceipt;
-    const enc=new TextEncoder();
-    let text='';
-    text += (State.settings.shopName||'Pasal POS')+'\n';
-    text += (State.settings.shopAddr||'')+'\n';
-    text += 'Bill: '+sale.billNo+'  '+fmtDateTime(sale.date)+'\n';
-    text += '--------------------------------\n';
-    sale.items.forEach(it=>{ text += `${it.name} x${it.qty} = ${it.price*it.qty}\n`; });
-    text += '--------------------------------\n';
-    text += `TOTAL: Rs. ${sale.total}\n`;
-    text += `Payment: ${sale.paymentType}\n\nDhanyabad!\n\n\n`;
-    const bytes=enc.encode(text);
-    const chunkSize=180;
-    for(let i=0;i<bytes.length;i+=chunkSize){
-      const chunk=bytes.slice(i,i+chunkSize);
-      if(writable.properties.writeWithoutResponse) await writable.writeValueWithoutResponse(chunk);
-      else await writable.writeValue(chunk);
-      await new Promise(r=>setTimeout(r,60));
-    }
-    toast('प्रिन्टरमा पठाइयो','ok');
-  }catch(e){
-    toast('ब्लुटुथ प्रिन्ट असफल भयो: '+(e.message||'unknown'),'err');
-  }
+  const nav = el(`<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto safe-bottom bg-white border-t border-[#E7E1D3] z-40"><div class="flex px-2"></div></div>`);
+  const row = nav.querySelector('div');
+  items.forEach(it=>{
+    const btn = el(`<button class="nav-item ${state.tab===it.id?'active':''}">${it.icon}<span class="text-[11px] font-semibold">${it.label}</span></button>`);
+    btn.onclick = ()=>{ state.tab = it.id; render(); };
+    row.appendChild(btn);
+  });
+  return nav;
 }
 
 /* ============================================================
-   SALE EDIT / DELETE (from Reports / Dashboard)
+   BILLING TAB
    ============================================================ */
-function openSaleDetail(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale){ toast('बिल भेटिएन','err'); return; }
-  const st=getSaleStatus(sale);
-  openModalHTML(`
-    <div class="modal wide">
-      <div class="modal-head"><h3><i class="ri-file-list-3-line"></i> बिल #${sale.billNo}</h3><button class="close-x" onclick="closeModal()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <div class="muted" style="font-size:12.5px;">${fmtDateTime(sale.date)}</div>
-          <div style="text-align:right;">
-            <span class="chip ${st.cls}">${st.label}</span>
-            ${st.due>0?`<div class="muted" style="font-size:11px;margin-top:2px;">बाँकी: ${NPR(st.due)}</div>`:''}
-          </div>
-        </div>
-        <div class="table-wrap" style="margin-bottom:14px;">
-          <table>
-            <thead><tr><th>सामान</th><th>मूल्य</th><th style="width:100px;">परिमाण</th><th style="text-align:right;">जम्मा</th></tr></thead>
-            <tbody id="saleEditItems">
-              ${sale.items.map((it,idx)=>`
-                <tr>
-                  <td>${esc(it.name)}</td>
-                  <td>${NPR(it.price)}</td>
-                  <td><input class="input" type="number" min="0" style="padding:6px 8px;" value="${it.qty}" id="sei_qty_${idx}" oninput="renderSaleEditTotals('${saleId}')"></td>
-                  <td style="text-align:right;" id="sei_line_${idx}">${NPR(it.price*it.qty)}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-        <div class="row">
-          <div class="field">
-            <label class="label">भुक्तानी प्रकार</label>
-            <select class="select" id="sei_paytype" onchange="renderSaleEditTotals('${saleId}')">
-              ${['cash','card','online','credit'].map(pt=>`<option value="${pt}" ${sale.paymentType===pt?'selected':''}>${payLabel(pt)}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field">
-            <label class="label">ग्राहक</label>
-            <select class="select" id="sei_customer" style="${sale.paymentType==='credit'?'':'display:none;'}">
-              <option value="">वाक-इन ग्राहक</option>
-              ${State.customers.map(cu=>`<option value="${cu.id}" ${sale.customerId===cu.id?'selected':''}>${esc(cu.name)} — ${esc(cu.phone||'')}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-        <div class="field"><label class="label">छुट (रु)</label><input class="input" type="number" id="sei_disc" value="${sale.discount||0}" oninput="renderSaleEditTotals('${saleId}')"></div>
-        <div class="divider"></div>
-        <div id="sei_summary"></div>
+function renderBilling(){
+  const wrap = el(`<div class="px-4 pt-4"></div>`);
+
+  // Search + scan row
+  const searchRow = el(`
+    <div class="flex gap-2 mb-3">
+      <div class="flex-1 flex items-center gap-2 bg-white rounded-2xl px-3 h-12 border border-[#E7E1D3]">
+        <span class="text-[#9C9686]">${ICONS.search}</span>
+        <input id="searchInput" type="text" placeholder="सामान खोज्नुहोस्..." class="flex-1 bg-transparent outline-none text-[15px]" value="${state.search}">
       </div>
-      <div class="modal-body" style="padding-top:0;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-outline" onclick="resendSaleWhatsApp('${saleId}')"><i class="ri-whatsapp-line" style="color:#25D366;"></i> WhatsApp पठाउनुहोस्</button>
-        <button class="btn btn-outline" onclick="printExistingReceipt('${saleId}')"><i class="ri-printer-line"></i> रसिद/प्रिन्ट</button>
-        ${st.due>0 && sale.customerId?`<button class="btn btn-success" onclick="closeModal();openLedger('${sale.customerId}')"><i class="ri-money-rupee-circle-line"></i> भुक्तानी प्राप्त गर्नुहोस्</button>`:''}
-        <button class="btn btn-outline" style="color:var(--danger);border-color:var(--danger);margin-left:auto;" onclick="deleteSale('${saleId}')"><i class="ri-delete-bin-line"></i> बिल मेटाउनुहोस्</button>
-      </div>
-      <div class="modal-foot">
-        <button class="btn btn-outline" onclick="closeModal()">रद्द</button>
-        <button class="btn btn-primary" onclick="saveSaleEdit('${saleId}')"><i class="ri-save-line"></i> परिवर्तन सुरक्षित</button>
+      <button id="scanBtn" class="btn btn-primary w-12 h-12 shrink-0">${ICONS.camera}</button>
+    </div>
+  `);
+  searchRow.querySelector('#searchInput').oninput = (e)=>{ state.search = e.target.value; refreshProductGrid(); };
+  searchRow.querySelector('#scanBtn').onclick = ()=> openCamera('detect');
+  wrap.appendChild(searchRow);
+
+  // Category chips
+  const cats = ['सबै', ...state.categories.map(c=>c.name)];
+  const chipRow = el(`<div class="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1"></div>`);
+  cats.forEach(c=>{
+    const chip = el(`<button class="tag whitespace-nowrap shrink-0 ${state.activeCategory===c?'bg-crimson text-white':'bg-white border border-[#E7E1D3] text-ink'}">${c}</button>`);
+    chip.onclick = ()=>{ state.activeCategory = c; refreshProductGrid(); refreshChips(); };
+    chipRow.appendChild(chip);
+  });
+  wrap.appendChild(chipRow);
+
+  const grid = el(`<div id="productGrid" class="grid grid-cols-2 gap-3"></div>`);
+  wrap.appendChild(grid);
+  setTimeout(()=>{ refreshProductGrid(); }, 0);
+
+  function refreshChips(){
+    chipRow.querySelectorAll('button').forEach((b,i)=>{
+      b.className = `tag whitespace-nowrap shrink-0 ${state.activeCategory===cats[i]?'bg-crimson text-white':'bg-white border border-[#E7E1D3] text-ink'}`;
+    });
+  }
+
+  return wrap;
+}
+
+function filteredProducts(){
+  let list = state.products;
+  if(state.activeCategory && state.activeCategory!=='सबै') list = list.filter(p=>p.category===state.activeCategory);
+  if(state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    list = list.filter(p => (p.name||'').toLowerCase().includes(q) || (p.nameEn||'').toLowerCase().includes(q));
+  }
+  return list;
+}
+
+function refreshProductGrid(){
+  const grid = document.getElementById('productGrid');
+  if(!grid) return;
+  const list = filteredProducts();
+  grid.innerHTML = '';
+  if(list.length===0){
+    grid.innerHTML = `<div class="col-span-2 text-center text-[#9C9686] py-14 text-sm">कुनै सामान फेला परेन।<br>तल्लो "सामान" ट्याबबाट थप्नुहोस्।</div>`;
+    return;
+  }
+  list.forEach(p=>{
+    const card = el(`
+      <button class="card p-2.5 text-left active:scale-[0.97] transition-transform">
+        <div class="w-full aspect-square rounded-xl overflow-hidden bg-[#F0EBDF] mb-2 flex items-center justify-center">
+          ${p.photo ? `<img src="${p.photo}" class="w-full h-full object-cover">` : `<span class="text-[#C9C2AE]">${ICONS.image}</span>`}
+        </div>
+        <div class="text-[13.5px] font-semibold leading-tight line-clamp-2">${p.name}</div>
+        <div class="flex items-center justify-between mt-1">
+          <span class="num text-crimson font-bold text-[14px]">${formatMoney(p.price)}</span>
+          <span class="text-[10.5px] ${p.stock<=(p.lowStock||3) ? 'text-crimson':'text-[#9C9686]'} num">स्टक: ${p.stock}</span>
+        </div>
+      </button>
+    `);
+    card.onclick = ()=> addToCart(p);
+    grid.appendChild(card);
+  });
+}
+
+function addToCart(p, qty=1){
+  if(p.stock <= 0){ toast('स्टकमा छैन!'); return; }
+  const existing = state.cart.find(c=>c.productId===p.id);
+  if(existing){
+    if(existing.qty + qty > p.stock){ toast('थप स्टक उपलब्ध छैन'); return; }
+    existing.qty += qty;
+  } else {
+    state.cart.push({ productId:p.id, name:p.name, price:p.price, qty, unit:p.unit||'वटा' });
+  }
+  toast(`${p.name} थपियो`);
+  render();
+}
+
+function renderCartBar(){
+  const count = state.cart.reduce((a,c)=>a+c.qty,0);
+  const total = state.cart.reduce((a,c)=>a+c.qty*c.price,0);
+  const bar = el(`
+    <div class="fixed left-0 right-0 max-w-md mx-auto z-30" style="bottom: calc(64px + env(safe-area-inset-bottom))">
+      ${count>0 ? `
+      <button id="cartBarBtn" class="w-[calc(100%-24px)] mx-3 mb-2 bg-crimson text-white rounded-2xl h-14 flex items-center justify-between px-4 shadow-lg active:scale-[0.98] transition-transform">
+        <div class="flex items-center gap-2">
+          <div class="relative">${ICONS.cart}<span class="absolute -top-2 -right-2 bg-marigold text-ink text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center num">${count}</span></div>
+          <span class="font-semibold text-sm">कार्ट हेर्नुहोस्</span>
+        </div>
+        <span class="num font-bold">${formatMoney(total)}</span>
+      </button>` : ''}
+    </div>
+  `);
+  const btn = bar.querySelector('#cartBarBtn');
+  if(btn) btn.onclick = openCartSheet;
+  return bar;
+}
+
+function openCartSheet(){
+  const root = document.getElementById('overlayRoot');
+  const sheet = el(`
+    <div class="sheet">
+      <div class="sheet-backdrop"></div>
+      <div class="sheet-panel px-4 pt-4">
+        <div class="w-10 h-1.5 bg-[#D9D2C0] rounded-full mx-auto mb-4"></div>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold">कार्ट</h2>
+          <button id="closeCart" class="w-9 h-9 flex items-center justify-center rounded-full bg-[#F0EBDF]">${ICONS.close}</button>
+        </div>
+        <div id="cartItems" class="space-y-2 mb-4"></div>
+        <div id="cartSummary"></div>
+        <div class="h-6"></div>
       </div>
     </div>
   `);
-  renderSaleEditTotals(saleId);
+  root.appendChild(sheet);
+  sheet.querySelector('.sheet-backdrop').onclick = ()=> sheet.remove();
+  sheet.querySelector('#closeCart').onclick = ()=> sheet.remove();
+
+  function refresh(){
+    const itemsWrap = sheet.querySelector('#cartItems');
+    itemsWrap.innerHTML = '';
+    if(state.cart.length===0){
+      itemsWrap.innerHTML = `<div class="text-center text-[#9C9686] py-10 text-sm">कार्ट खाली छ</div>`;
+    }
+    state.cart.forEach((c,idx)=>{
+      const row = el(`
+        <div class="card p-3 flex items-center gap-3">
+          <div class="flex-1">
+            <div class="font-semibold text-[14px]">${c.name}</div>
+            <div class="num text-[13px] text-[#9C9686]">${formatMoney(c.price)} / ${c.unit}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="w-8 h-8 rounded-full bg-[#F0EBDF] flex items-center justify-center minus">${ICONS.minus}</button>
+            <span class="num font-bold w-5 text-center">${c.qty}</span>
+            <button class="w-8 h-8 rounded-full bg-[#F0EBDF] flex items-center justify-center plus">${ICONS.plus}</button>
+          </div>
+          <button class="w-8 h-8 rounded-full bg-crimson/10 text-crimson flex items-center justify-center del">${ICONS.trash}</button>
+        </div>
+      `);
+      row.querySelector('.minus').onclick = ()=>{ c.qty--; if(c.qty<=0) state.cart.splice(idx,1); refresh(); render(); };
+      row.querySelector('.plus').onclick = ()=>{
+        const prod = state.products.find(p=>p.id===c.productId);
+        if(prod && c.qty+1>prod.stock){ toast('थप स्टक उपलब्ध छैन'); return; }
+        c.qty++; refresh(); render();
+      };
+      row.querySelector('.del').onclick = ()=>{ state.cart.splice(idx,1); refresh(); render(); };
+      itemsWrap.appendChild(row);
+    });
+
+    const subtotal = state.cart.reduce((a,c)=>a+c.qty*c.price,0);
+    const summary = sheet.querySelector('#cartSummary');
+    summary.innerHTML = '';
+    if(state.cart.length>0){
+      summary.appendChild(el(`
+        <div class="card p-4 space-y-1 mb-3">
+          <div class="flex justify-between text-sm"><span class="text-[#9C9686]">जम्मा (${state.cart.reduce((a,c)=>a+c.qty,0)} थान)</span><span class="num font-semibold">${formatMoney(subtotal)}</span></div>
+        </div>
+      `));
+      const checkoutBtn = el(`<button class="btn btn-primary w-full h-13 py-3.5 text-[15px]">चेकआउट गर्नुहोस् — ${formatMoney(subtotal)}</button>`);
+      checkoutBtn.onclick = ()=>{ sheet.remove(); openCheckout(); };
+      summary.appendChild(checkoutBtn);
+    }
+  }
+  refresh();
 }
-function getSaleEditItems(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale) return [];
-  return sale.items.map((it,idx)=>{
-    const qtyInput=document.getElementById('sei_qty_'+idx);
-    const qty=qtyInput?Math.max(0,parseInt(qtyInput.value)||0):it.qty;
-    return {...it, qty};
+
+/* ---------- Checkout ---------- */
+function openCheckout(){
+  const subtotal = state.cart.reduce((a,c)=>a+c.qty*c.price,0);
+  const root = document.getElementById('overlayRoot');
+  const modal = el(`
+    <div class="modal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-box p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">भुक्तानी</h2>
+          <button id="closeX" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0EBDF]">${ICONS.close}</button>
+        </div>
+
+        <label class="text-xs font-semibold text-[#9C9686]">ग्राहकको नाम (वैकल्पिक)</label>
+        <input id="custName" class="w-full mt-1 mb-3 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" placeholder="ग्राहकको नाम">
+
+        <label class="text-xs font-semibold text-[#9C9686]">छुट (%)</label>
+        <input id="discountInp" type="number" min="0" max="100" value="0" class="w-full mt-1 mb-3 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" placeholder="0">
+
+        <div class="flex items-center gap-2 mb-3">
+          <label class="flex items-center gap-2 text-sm"><input id="taxToggle" type="checkbox" checked class="w-4 h-4 accent-crimson"> भ्याट लगाउनुहोस् (${state.settings.taxRate}%)</label>
+        </div>
+
+        <div class="text-xs font-semibold text-[#9C9686] mb-2">भुक्तानी विधि</div>
+        <div class="grid grid-cols-3 gap-2 mb-4" id="payMethods">
+          ${['नगद','ईसेवा/खल्ती','कार्ड'].map((m,i)=>`<button data-m="${m}" class="pm tag py-2.5 ${i===0?'bg-crimson text-white':'bg-[#F0EBDF] text-ink'}">${m}</button>`).join('')}
+        </div>
+
+        <div id="totalsBox" class="card p-4 space-y-1.5 mb-4 bg-[#F0EBDF]"></div>
+
+        <button id="confirmPay" class="btn btn-primary w-full h-13 py-3.5 text-[15px]">${ICONS.check} बिल पूरा गर्नुहोस्</button>
+      </div>
+    </div>
+  `);
+  root.appendChild(modal);
+  modal.querySelector('.modal-backdrop').onclick = ()=> modal.remove();
+  modal.querySelector('#closeX').onclick = ()=> modal.remove();
+
+  let payMethod = 'नगद';
+  modal.querySelectorAll('.pm').forEach(b=>{
+    b.onclick = ()=>{
+      payMethod = b.dataset.m;
+      modal.querySelectorAll('.pm').forEach(x=>x.className='pm tag py-2.5 bg-[#F0EBDF] text-ink');
+      b.className='pm tag py-2.5 bg-crimson text-white';
+    };
   });
-}
-function renderSaleEditTotals(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale) return;
-  const items=getSaleEditItems(saleId);
-  items.forEach((it,idx)=>{ const el=document.getElementById('sei_line_'+idx); if(el) el.textContent=NPR(it.price*it.qty); });
-  const discFlat=parseFloat(document.getElementById('sei_disc')?.value)||0;
-  const {subtotal,discount,vat,vatPercent,total}=computeTotals(items,0,discFlat,State.settings.vatPercent);
-  const paytype=document.getElementById('sei_paytype')?.value || sale.paymentType;
-  const custSel=document.getElementById('sei_customer');
-  if(custSel){ custSel.style.display = paytype==='credit' ? '' : 'none'; }
-  const summary=document.getElementById('sei_summary');
-  if(summary){
-    summary.innerHTML=`
-      <div class="sum-row"><span>उप-जम्मा</span><span>${NPR(subtotal)}</span></div>
-      <div class="sum-row"><span>छुट</span><span>− ${NPR(discount)}</span></div>
-      ${vatPercent>0?`<div class="sum-row"><span>VAT (${vatPercent}%)</span><span>+ ${NPR(vat)}</span></div>`:''}
-      <div class="sum-row total"><span>कुल रकम</span><span>${NPR(total)}</span></div>
+
+  function computeTotals(){
+    const discPct = parseFloat(modal.querySelector('#discountInp').value)||0;
+    const useTax = modal.querySelector('#taxToggle').checked;
+    const discAmt = subtotal * (discPct/100);
+    const afterDisc = subtotal - discAmt;
+    const taxAmt = useTax ? afterDisc * (state.settings.taxRate/100) : 0;
+    const grand = afterDisc + taxAmt;
+    return {subtotal, discAmt, taxAmt, grand};
+  }
+  function refreshTotals(){
+    const t = computeTotals();
+    modal.querySelector('#totalsBox').innerHTML = `
+      <div class="flex justify-between text-sm"><span>सबटोटल</span><span class="num">${formatMoney(t.subtotal)}</span></div>
+      <div class="flex justify-between text-sm text-leaf"><span>छुट</span><span class="num">-${formatMoney(t.discAmt)}</span></div>
+      <div class="flex justify-between text-sm"><span>भ्याट (${state.settings.taxRate}%)</span><span class="num">${formatMoney(t.taxAmt)}</span></div>
+      <div class="dashed pt-2 mt-1 flex justify-between text-base font-bold"><span>जम्मा रकम</span><span class="num text-crimson">${formatMoney(t.grand)}</span></div>
     `;
   }
-}
-async function saveSaleEdit(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale) return;
-  const newItems=getSaleEditItems(saleId).filter(it=>it.qty>0);
-  if(!newItems.length){ toast('कम्तिमा एउटा सामान हुनुपर्छ','err'); return; }
-  const discFlat=parseFloat(document.getElementById('sei_disc').value)||0;
-  const paytype=document.getElementById('sei_paytype').value;
-  const custId=document.getElementById('sei_customer').value || null;
-  if(paytype==='credit' && !custId){ toast('उधारोका लागि ग्राहक छनोट गर्नुपर्छ','err'); return; }
+  modal.querySelector('#discountInp').oninput = refreshTotals;
+  modal.querySelector('#taxToggle').onchange = refreshTotals;
+  refreshTotals();
 
-  // 1. reverse old stock deduction
-  for(const it of sale.items){
-    const p=State.products.find(x=>x.id===it.productId);
-    if(p) p.stock += it.qty;
-  }
-  // 2. validate stock for new quantities
-  for(const it of newItems){
-    const p=State.products.find(x=>x.id===it.productId);
-    if(p && it.qty>p.stock){
-      for(const it2 of sale.items){ const p2=State.products.find(x=>x.id===it2.productId); if(p2) p2.stock -= it2.qty; }
-      toast(`${it.name} को लागि पर्याप्त स्टक छैन`,'err');
-      return;
-    }
-  }
-  // 3. deduct new stock
-  for(const it of newItems){
-    const p=State.products.find(x=>x.id===it.productId);
-    if(p) p.stock -= it.qty;
-  }
-  const affectedIds=new Set([...sale.items.map(i=>i.productId), ...newItems.map(i=>i.productId)]);
-  for(const pid of affectedIds){
-    const p=State.products.find(x=>x.id===pid);
-    if(p) await dbPut('products',p);
-  }
-
-  // 4. reverse old customer due / transaction
-  if(sale.paymentType==='credit' && sale.customerId){
-    const oldCu=State.customers.find(x=>x.id===sale.customerId);
-    if(oldCu){ oldCu.dueAmount=Math.max(0,(oldCu.dueAmount||0)-sale.total); await dbPut('customers',oldCu); }
-    const oldTxn=State.transactions.find(t=>t.saleId===sale.id && t.type==='sale');
-    if(oldTxn){ await dbDelete('transactions',oldTxn.id); State.transactions=State.transactions.filter(t=>t.id!==oldTxn.id); }
-  }
-
-  // 5. compute new totals
-  const {subtotal,discount,vat,vatPercent,total,profit}=computeTotals(newItems,0,discFlat,State.settings.vatPercent);
-
-  // 6. apply new customer due / transaction
-  if(paytype==='credit' && custId){
-    const newCu=State.customers.find(x=>x.id===custId);
-    if(newCu){ newCu.dueAmount=(newCu.dueAmount||0)+total; await dbPut('customers',newCu); }
-    const txn={id:uid(),customerId:custId,type:'sale',amount:total,date:sale.date,note:'बिल #'+sale.billNo+' (सम्पादित)',saleId:sale.id};
-    await dbPut('transactions',txn); State.transactions.push(txn);
-  }
-
-  // 7. update sale record
-  const newPaidAmount = paytype==='credit' ? Math.min(sale.paidAmount||0, total) : total;
-  Object.assign(sale,{items:newItems,subtotal,discount,vat,vatPercent,total,profit,paymentType:paytype,customerId:paytype==='credit'?custId:null,paidAmount:newPaidAmount});
-  await dbPut('sales',sale);
-
-  closeModal();
-  toast('बिल अपडेट भयो','ok');
-  if(State.view==='reports') renderReportBody();
-  else if(State.view==='dashboard') renderDashboard();
-  else if(State.view==='customers') filterCustomersTable();
-  else if(State.view==='products') renderProducts();
-}
-async function deleteSale(saleId){
-  const sale=State.sales.find(s=>s.id===saleId);
-  if(!sale) return;
-  if(!confirm('के तपाईं यो बिल पूर्ण रूपमा मेटाउन चाहनुहुन्छ? स्टक र उधारो पनि समायोजन हुनेछ।')) return;
-  for(const it of sale.items){
-    const p=State.products.find(x=>x.id===it.productId);
-    if(p){ p.stock += it.qty; await dbPut('products',p); }
-  }
-  if(sale.paymentType==='credit' && sale.customerId){
-    const cu=State.customers.find(x=>x.id===sale.customerId);
-    if(cu){ cu.dueAmount=Math.max(0,(cu.dueAmount||0)-sale.total); await dbPut('customers',cu); }
-    const txn=State.transactions.find(t=>t.saleId===sale.id && t.type==='sale');
-    if(txn){ await dbDelete('transactions',txn.id); State.transactions=State.transactions.filter(t=>t.id!==txn.id); }
-  }
-  await dbDelete('sales',saleId);
-  State.sales=State.sales.filter(s=>s.id!==saleId);
-  closeModal();
-  toast('बिल मेटाइयो','ok');
-  if(State.view==='reports') renderReportBody();
-  else if(State.view==='dashboard') renderDashboard();
-  else if(State.view==='customers') filterCustomersTable();
-  else if(State.view==='products') renderProducts();
+  modal.querySelector('#confirmPay').onclick = async ()=>{
+    const t = computeTotals();
+    const custName = modal.querySelector('#custName').value.trim();
+    await finalizeSale(t, payMethod, custName);
+    modal.remove();
+  };
 }
 
-/* ============================================================
-   CUSTOMERS
-   ============================================================ */
-function renderCustomers(){
-  const c=document.getElementById('content');
-  c.innerHTML=`
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;justify-content:space-between;">
-      <input class="input" id="custSearch" style="max-width:320px;" placeholder="ग्राहक खोज्नुहोस्..." oninput="filterCustomersTable()">
-      <button class="btn btn-primary" onclick="openCustomerModal()"><i class="ri-user-add-line"></i> नयाँ ग्राहक</button>
-    </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table><thead><tr><th>ग्राहक</th><th>फोन</th><th>कुल किनमेल</th><th>बाँकी उधारो</th><th></th></tr></thead>
-        <tbody id="custTbody"></tbody></table>
-      </div>
-    </div>
-  `;
-  filterCustomersTable();
+async function finalizeSale(totals, payMethod, custName){
+  const invoiceNo = state.settings.invoiceCounter;
+  const sale = {
+    invoiceNo,
+    date: Date.now(),
+    items: state.cart.map(c=>({...c})),
+    subtotal: totals.subtotal,
+    discount: totals.discAmt,
+    tax: totals.taxAmt,
+    total: totals.grand,
+    payMethod, custName,
+  };
+  await dbPut('sales', sale);
+  // reduce stock
+  for(const c of state.cart){
+    const p = state.products.find(pp=>pp.id===c.productId);
+    if(p){ p.stock = Math.max(0, p.stock - c.qty); await dbPut('products', p); }
+  }
+  state.settings.invoiceCounter++;
+  await saveSettings();
+  await loadAll();
+  state.cart = [];
+  state.lastSale = sale;
+  toast('बिल सफल भयो ✓');
+  render();
+  openReceipt(sale);
 }
-function filterCustomersTable(){
-  const q=(document.getElementById('custSearch')?.value||'').toLowerCase();
-  const list=State.customers.filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q));
-  const tbody=document.getElementById('custTbody');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="5"><div class="empty"><i class="ri-team-line"></i>ग्राहक भेटिएन</div></td></tr>`; return; }
-  tbody.innerHTML=list.map(cu=>{
-    const totalBought=State.sales.filter(s=>s.customerId===cu.id).reduce((a,s)=>a+s.total,0);
-    return `<tr>
-      <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar">${esc(cu.name).slice(0,1).toUpperCase()}</div><div><div style="font-weight:700;font-size:13.5px;">${esc(cu.name)}</div><div class="muted" style="font-size:11px;">${esc(cu.address||'')}</div></div></div></td>
-      <td>${esc(cu.phone||'—')}</td>
-      <td>${NPR(totalBought)}</td>
-      <td>${cu.dueAmount>0?`<span class="udhaaro-badge"><i class="ri-hand-coin-line"></i> ${NPR(cu.dueAmount)}</span>`:`<span class="chip chip-success">बाँकी छैन</span>`}</td>
-      <td><div style="display:flex;gap:6px;">
-        <button class="btn btn-sm btn-icon" title="बही" onclick="openLedger('${cu.id}')"><i class="ri-book-2-line"></i></button>
-        <button class="btn btn-sm btn-icon" title="सम्पादन" onclick="openCustomerModal('${cu.id}')"><i class="ri-edit-line"></i></button>
-        <button class="btn btn-sm btn-icon" title="मेटाउनुहोस्" onclick="deleteCustomer('${cu.id}')"><i class="ri-delete-bin-line" style="color:var(--danger);"></i></button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-function openCustomerModal(id){
-  const cu=id?State.customers.find(x=>x.id===id):null;
-  openModalHTML(`
+
+function openReceipt(sale){
+  const root = document.getElementById('overlayRoot');
+  const modal = el(`
     <div class="modal">
-      <div class="modal-head"><h3>${cu?'ग्राहक सम्पादन':'नयाँ ग्राहक'}</h3><button class="close-x" onclick="closeModal()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body">
-        <div class="field"><label class="label">पुरा नाम *</label><input class="input" id="cf_name" value="${cu?esc(cu.name):''}"></div>
-        <div class="field"><label class="label">फोन नम्बर *</label><input class="input" id="cf_phone" value="${cu?esc(cu.phone||''):''}" placeholder="98XXXXXXXX"></div>
-        <div class="field"><label class="label">ठेगाना</label><input class="input" id="cf_addr" value="${cu?esc(cu.address||''):''}"></div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn btn-outline" onclick="closeModal()">रद्द</button>
-        <button class="btn btn-primary" onclick="saveCustomer('${cu?cu.id:''}')"><i class="ri-save-line"></i> सुरक्षित</button>
-      </div>
-    </div>
-  `);
-}
-async function saveCustomer(id){
-  const name=document.getElementById('cf_name').value.trim();
-  const phone=document.getElementById('cf_phone').value.trim();
-  const address=document.getElementById('cf_addr').value.trim();
-  if(!name||!phone){ toast('नाम र फोन नम्बर आवश्यक छ','err'); return; }
-  const rec=id?State.customers.find(x=>x.id===id):{id:uid(),dueAmount:0,createdAt:new Date().toISOString()};
-  Object.assign(rec,{name,phone,address});
-  await dbPut('customers',rec);
-  if(!id) State.customers.push(rec);
-  closeModal(); toast('ग्राहक सुरक्षित भयो','ok'); renderCustomers();
-}
-async function deleteCustomer(id){
-  const cu=State.customers.find(x=>x.id===id);
-  if(cu && cu.dueAmount>0){ toast('बाँकी उधारो भएको ग्राहक मेटाउन मिल्दैन','err'); return; }
-  if(!confirm('के तपाईं यो ग्राहक मेटाउन चाहनुहुन्छ?')) return;
-  await dbDelete('customers',id);
-  State.customers=State.customers.filter(x=>x.id!==id);
-  toast('ग्राहक मेटाइयो','ok'); renderCustomers();
-}
-function openLedger(id){
-  const cu=State.customers.find(x=>x.id===id);
-  if(!cu) return;
-  const txns=State.transactions.filter(t=>t.customerId===id).sort((a,b)=>b.date.localeCompare(a.date));
-  openModalHTML(`
-    <div class="modal wide">
-      <div class="modal-head"><h3><i class="ri-book-2-line"></i> ${esc(cu.name)} — खाता बही</h3><button class="close-x" onclick="closeModal()"><i class="ri-close-line"></i></button></div>
-      <div class="modal-body">
-        <div class="grid g2" style="margin-bottom:16px;">
-          <div class="card" style="padding:14px;text-align:center;"><div class="muted" style="font-size:12px;">बाँकी उधारो</div><div style="font-family:'Sora';font-size:20px;font-weight:800;color:var(--danger);">${NPR(cu.dueAmount||0)}</div></div>
-          <div class="card" style="padding:14px;text-align:center;"><div class="muted" style="font-size:12px;">कुल किनमेल</div><div style="font-family:'Sora';font-size:20px;font-weight:800;">${NPR(State.sales.filter(s=>s.customerId===id).reduce((a,s)=>a+s.total,0))}</div></div>
+      <div class="modal-backdrop"></div>
+      <div class="modal-box p-0">
+        <div id="printArea" class="receipt p-5">
+          <div class="text-center mb-2">
+            <div class="font-bold text-base">${state.settings.shopName}</div>
+            <div class="text-[11px] text-[#666]">${state.settings.address||''}</div>
+            <div class="text-[11px] text-[#666]">${state.settings.phone?('फोन: '+state.settings.phone):''} ${state.settings.pan?(' | PAN: '+state.settings.pan):''}</div>
+          </div>
+          <div class="dashed my-2"></div>
+          <div class="text-[12px] flex justify-between"><span>बिल नं: #${String(sale.invoiceNo).padStart(4,'0')}</span><span>${fmtDate(sale.date)}</span></div>
+          ${sale.custName ? `<div class="text-[12px]">ग्राहक: ${sale.custName}</div>` : ''}
+          <div class="dashed my-2"></div>
+          <div class="space-y-1">
+            ${sale.items.map(it=>`
+              <div class="text-[12.5px]">
+                <div class="flex justify-between font-medium"><span>${it.name}</span><span class="num">${formatMoney(it.qty*it.price)}</span></div>
+                <div class="flex justify-between text-[#777]"><span>${it.qty} x ${formatMoney(it.price)}</span></div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="dashed my-2"></div>
+          <div class="text-[12.5px] space-y-1">
+            <div class="flex justify-between"><span>सबटोटल</span><span class="num">${formatMoney(sale.subtotal)}</span></div>
+            <div class="flex justify-between"><span>छुट</span><span class="num">-${formatMoney(sale.discount)}</span></div>
+            <div class="flex justify-between"><span>भ्याट</span><span class="num">${formatMoney(sale.tax)}</span></div>
+            <div class="flex justify-between font-bold text-[14px] pt-1"><span>जम्मा</span><span class="num">${formatMoney(sale.total)}</span></div>
+            <div class="flex justify-between text-[#777]"><span>भुक्तानी विधि</span><span>${sale.payMethod}</span></div>
+          </div>
+          <div class="dashed my-2"></div>
+          <div class="text-center text-[11px] text-[#777]">धन्यवाद! फेरि आउनुहोस् 🙏</div>
         </div>
-        <div class="row" style="margin-bottom:16px;align-items:flex-end;">
-          <div class="field" style="margin-bottom:0;"><label class="label">भुक्तानी रकम प्राप्त गर्नुहोस्</label><input class="input" type="number" id="payAmt" placeholder="रकम"></div>
-          <button class="btn btn-success" style="height:44px;" onclick="recordPayment('${id}')"><i class="ri-money-rupee-circle-line"></i> जम्मा गर्नुहोस्</button>
-        </div>
-        <div class="table-wrap">
-          <table><thead><tr><th>मिति</th><th>विवरण</th><th style="text-align:right;">रकम</th></tr></thead>
-          <tbody>
-            ${txns.length?txns.map(t=>`<tr><td class="muted">${fmtDateTime(t.date)}</td><td>${esc(t.note||(t.type==='payment'?'भुक्तानी प्राप्त':'बिक्री'))}</td><td style="text-align:right;font-weight:700;color:${t.type==='payment'?'var(--success)':'var(--danger)'};">${t.type==='payment'?'− ':'+ '}${NPR(t.amount)}</td></tr>`).join(''):`<tr><td colspan="3"><div class="empty">कुनै कारोबार छैन</div></td></tr>`}
-          </tbody></table>
+        <div class="p-4 pt-0 flex gap-2">
+          <button id="printBtn" class="btn btn-dark flex-1 h-11">${ICONS.print} प्रिन्ट</button>
+          <button id="doneBtn" class="btn btn-primary flex-1 h-11">${ICONS.check} सम्पन्न</button>
         </div>
       </div>
     </div>
   `);
-}
-async function recordPayment(custId){
-  const amt=parseFloat(document.getElementById('payAmt').value);
-  if(!amt||amt<=0){ toast('मान्य रकम हाल्नुहोस्','err'); return; }
-  const cu=State.customers.find(x=>x.id===custId);
-  if(!cu) return;
-  cu.dueAmount=Math.max(0,(cu.dueAmount||0)-amt);
-  await dbPut('customers',cu);
-  const txn={id:uid(),customerId:custId,type:'payment',amount:amt,date:new Date().toISOString(),note:'भुक्तानी प्राप्त'};
-  await dbPut('transactions',txn); State.transactions.push(txn);
-
-  // allocate this payment across the customer's outstanding credit bills, oldest first,
-  // so each bill's paid/due status stays accurate
-  let remaining=amt;
-  const outstanding=State.sales
-    .filter(s=>s.customerId===custId && s.paymentType==='credit' && (s.paidAmount||0)<s.total)
-    .sort((a,b)=>a.date.localeCompare(b.date));
-  for(const s of outstanding){
-    if(remaining<=0) break;
-    const due=s.total-(s.paidAmount||0);
-    const pay=Math.min(due,remaining);
-    s.paidAmount=(s.paidAmount||0)+pay;
-    remaining-=pay;
-    await dbPut('sales',s);
-  }
-
-  toast('भुक्तानी दर्ता भयो','ok');
-  openLedger(custId);
-  if(State.view==='customers') filterCustomersTable();
-  if(State.view==='reports') renderReportBody();
-  if(State.view==='dashboard') renderDashboard();
+  root.appendChild(modal);
+  modal.querySelector('#printBtn').onclick = ()=> window.print();
+  modal.querySelector('#doneBtn').onclick = ()=> modal.remove();
 }
 
 /* ============================================================
-   REPORTS
+   PRODUCTS TAB
    ============================================================ */
-function renderReports(){
-  const c=document.getElementById('content');
-  const today=todayKey();
-  const monthStart=today.slice(0,7)+'-01';
-  c.innerHTML=`
-    <div class="report-toolbar">
-      <div class="field"><label class="label">देखि</label><input class="input" type="date" id="repFrom" value="${monthStart}" onchange="renderReportBody()"></div>
-      <div class="field"><label class="label">सम्म</label><input class="input" type="date" id="repTo" value="${today}" onchange="renderReportBody()"></div>
-      <button class="btn btn-outline" onclick="exportReportCSV()"><i class="ri-download-2-line"></i> CSV निकाल्नुहोस्</button>
-    </div>
-    <div id="reportBody"></div>
-  `;
-  renderReportBody();
-}
-function renderReportBody(){
-  const from=document.getElementById('repFrom').value;
-  const to=document.getElementById('repTo').value;
-  const sales=State.sales.filter(s=>{ const d=s.date.slice(0,10); return d>=from && d<=to; });
-  const revenue=sales.reduce((a,s)=>a+s.total,0);
-  const profit=sales.reduce((a,s)=>a+(s.profit||0),0);
-  const discount=sales.reduce((a,s)=>a+(s.discount||0),0);
-  const byPay={cash:0,card:0,online:0,credit:0};
-  sales.forEach(s=> byPay[s.paymentType]=(byPay[s.paymentType]||0)+s.total);
-
-  const body=document.getElementById('reportBody');
-  body.innerHTML=`
-    <div class="grid g4" style="margin-bottom:18px;">
-      <div class="card stat-card"><div class="stat-icon" style="background:var(--success-bg);color:var(--success);"><i class="ri-money-rupee-circle-line"></i></div><div class="stat-val">${NPR(revenue)}</div><div class="stat-label">कुल बिक्री (${sales.length} बिल)</div></div>
-      <div class="card stat-card"><div class="stat-icon" style="background:#EAF1FE;color:var(--info);"><i class="ri-line-chart-line"></i></div><div class="stat-val">${NPR(profit)}</div><div class="stat-label">कुल नाफा</div></div>
-      <div class="card stat-card"><div class="stat-icon" style="background:#FDF3E1;color:#9C6B10;"><i class="ri-discount-percent-line"></i></div><div class="stat-val">${NPR(discount)}</div><div class="stat-label">कुल छुट</div></div>
-      <div class="card stat-card"><div class="stat-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="ri-hand-coin-line"></i></div><div class="stat-val">${NPR(byPay.credit)}</div><div class="stat-label">उधारो बिक्री</div></div>
-    </div>
-    <div class="card" style="padding:18px;margin-bottom:18px;">
-      <h3 style="margin:0 0 14px;font-size:15px;">भुक्तानी अनुसार बिक्री</h3>
-      <canvas id="payChart" height="90"></canvas>
-    </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table><thead><tr><th>बिल नं</th><th>मिति</th><th>सामान संख्या</th><th>भुक्तानी</th><th>भुक्तान स्थिति</th><th style="text-align:right;">रकम</th><th></th></tr></thead>
-        <tbody>${sales.length?[...sales].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{ const st=getSaleStatus(s); return `<tr><td style="font-weight:700;">#${s.billNo}</td><td class="muted">${fmtDateTime(s.date)}</td><td>${s.items.reduce((a,i)=>a+i.qty,0)}</td><td><span class="chip ${s.paymentType==='credit'?'chip-danger':'chip-success'}">${payLabel(s.paymentType)}</span></td><td><span class="chip ${st.cls}">${st.label}</span>${st.due>0?`<div class="muted" style="font-size:10.5px;margin-top:2px;">बाँकी: ${NPR(st.due)}</div>`:''}</td><td style="text-align:right;font-weight:700;">${NPR(s.total)}</td><td><div style="display:flex;gap:6px;justify-content:flex-end;"><button class="btn btn-sm btn-icon" title="हेर्नुहोस्/सम्पादन" onclick="openSaleDetail('${s.id}')"><i class="ri-edit-line"></i></button><button class="btn btn-sm btn-icon" title="WhatsApp पठाउनुहोस्" onclick="resendSaleWhatsApp('${s.id}')"><i class="ri-whatsapp-line" style="color:#25D366;"></i></button></div></td></tr>`; }).join(''):`<tr><td colspan="7"><div class="empty">यस अवधिमा बिक्री छैन</div></td></tr>`}</tbody></table>
+function renderProducts(){
+  const wrap = el(`<div class="px-4 pt-4"></div>`);
+  const topRow = el(`
+    <div class="flex gap-2 mb-3">
+      <div class="flex-1 flex items-center gap-2 bg-white rounded-2xl px-3 h-12 border border-[#E7E1D3]">
+        <span class="text-[#9C9686]">${ICONS.search}</span>
+        <input id="prodSearch" type="text" placeholder="सामान खोज्नुहोस्..." class="flex-1 bg-transparent outline-none text-[15px]" value="${state.search}">
       </div>
+      <button id="addProdBtn" class="btn btn-primary w-12 h-12 shrink-0">${ICONS.plus}</button>
     </div>
-  `;
-  const ctx=document.getElementById('payChart');
-  if(ctx && window.Chart){
-    new Chart(ctx,{ type:'bar', data:{ labels:['नगद','कार्ड','अनलाइन','उधारो'], datasets:[{ data:[byPay.cash,byPay.card,byPay.online,byPay.credit], backgroundColor:['#1B9C6E','#2C6BE0','#F1A93B','#E23653'], borderRadius:8 }] }, options:{ indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#EEF0F6'}},y:{grid:{display:false}}} } });
-  }
-}
-function exportReportCSV(){
-  const from=document.getElementById('repFrom').value, to=document.getElementById('repTo').value;
-  const sales=State.sales.filter(s=>{ const d=s.date.slice(0,10); return d>=from && d<=to; });
-  let csv='Bill No,Date,Items,Payment,Total\n';
-  sales.forEach(s=>{ csv+=`${s.billNo},${s.date},${s.items.reduce((a,i)=>a+i.qty,0)},${payLabel(s.paymentType)},${s.total}\n`; });
-  const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`report-${from}-to-${to}.csv`; a.click();
+  `);
+  topRow.querySelector('#prodSearch').oninput = (e)=>{ state.search = e.target.value; refreshProdList(); };
+  topRow.querySelector('#addProdBtn').onclick = ()=> openProductForm(null);
+  wrap.appendChild(topRow);
+
+  const list = el(`<div id="prodList" class="space-y-2"></div>`);
+  wrap.appendChild(list);
+  setTimeout(refreshProdList,0);
+  return wrap;
 }
 
-/* ============================================================
-   SETTINGS
-   ============================================================ */
-function renderSettings(){
-  const c=document.getElementById('content');
-  const s=State.settings;
-  c.innerHTML=`
-    <div class="grid g2">
-      <div class="card" style="padding:20px;">
-        <h3 style="margin:0 0 16px;font-size:15.5px;"><i class="ri-store-2-line"></i> पसलको जानकारी</h3>
-        <div class="field">
-          <label class="label">पसलको लोगो</label>
-          <div class="logo-upload-box">
-            <div class="logo-preview" id="logoPreview">${s.shopLogo?`<img src="${s.shopLogo}">`:'<i class="ri-image-line"></i>'}</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-                <i class="ri-upload-2-line"></i> लोगो अपलोड
-                <input type="file" accept="image/*" style="display:none;" onchange="uploadLogo(this.files[0])">
-              </label>
-              ${s.shopLogo?`<button class="btn btn-outline btn-sm" onclick="removeLogo()"><i class="ri-delete-bin-line"></i> हटाउनुहोस्</button>`:''}
-            </div>
+function refreshProdList(){
+  const list = document.getElementById('prodList');
+  if(!list) return;
+  let items = state.products;
+  if(state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    items = items.filter(p=>(p.name||'').toLowerCase().includes(q) || (p.nameEn||'').toLowerCase().includes(q));
+  }
+  list.innerHTML='';
+  if(items.length===0){
+    list.innerHTML = `<div class="text-center text-[#9C9686] py-14 text-sm">कुनै सामान थपिएको छैन।<br>माथिको + बटन थिच्नुहोस्।</div>`;
+    return;
+  }
+  items.forEach(p=>{
+    const row = el(`
+      <div class="card p-3 flex items-center gap-3">
+        <div class="w-14 h-14 rounded-xl overflow-hidden bg-[#F0EBDF] flex items-center justify-center shrink-0">
+          ${p.photo?`<img src="${p.photo}" class="w-full h-full object-cover">`:`<span class="text-[#C9C2AE]">${ICONS.image}</span>`}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-[14px] truncate">${p.name}</div>
+          <div class="text-[12px] text-[#9C9686]">${p.category||'—'} · ${p.unit||'वटा'}</div>
+          <div class="num text-crimson font-bold text-[13.5px]">${formatMoney(p.price)}</div>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="text-[11px] ${p.stock<=(p.lowStock||3)?'text-crimson font-semibold':'text-[#9C9686]'} num">स्टक: ${p.stock}</div>
+          <button class="editBtn mt-1 w-8 h-8 rounded-full bg-[#F0EBDF] flex items-center justify-center">${ICONS.edit}</button>
+        </div>
+      </div>
+    `);
+    row.querySelector('.editBtn').onclick = ()=> openProductForm(p.id);
+    list.appendChild(row);
+  });
+}
+
+function openProductForm(productId){
+  const isEdit = !!productId;
+  const p = isEdit ? state.products.find(x=>x.id===productId) : {name:'',nameEn:'',category:'',price:'',costPrice:'',stock:'',unit:'वटा',lowStock:3,photo:null,embedding:null};
+  const root = document.getElementById('overlayRoot');
+  const modal = el(`
+    <div class="modal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-box p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">${isEdit?'सामान सम्पादन':'नयाँ सामान थप्नुहोस्'}</h2>
+          <button id="closeX" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0EBDF]">${ICONS.close}</button>
+        </div>
+
+        <div class="flex justify-center mb-4">
+          <div id="photoPreview" class="w-28 h-28 rounded-2xl overflow-hidden bg-[#F0EBDF] flex items-center justify-center border-2 border-dashed border-[#D9D2C0] relative">
+            ${p.photo?`<img src="${p.photo}" class="w-full h-full object-cover">`:`<span class="text-[#C9C2AE]">${ICONS.image}</span>`}
           </div>
         </div>
-        <div class="field"><label class="label">पसलको नाम</label><input class="input" id="st_name" value="${esc(s.shopName||'')}"></div>
-        <div class="field"><label class="label">ठेगाना</label><input class="input" id="st_addr" value="${esc(s.shopAddr||'')}"></div>
-        <div class="field"><label class="label">फोन नम्बर</label><input class="input" id="st_phone" value="${esc(s.shopPhone||'')}"></div>
-        <div class="row">
-          <div class="field"><label class="label">PAN/VAT नं</label><input class="input" id="st_pan" value="${esc(s.shopPan||'')}"></div>
-          <div class="field"><label class="label">VAT प्रतिशत (%)</label><input class="input" type="number" step="0.01" id="st_vat" value="${s.vatPercent!==undefined&&s.vatPercent!==null?s.vatPercent:13}"></div>
+        <div class="flex gap-2 mb-4 justify-center">
+          <button id="capturePhoto" class="btn btn-ghost px-3 h-10 text-sm">${ICONS.camera} क्यामेरा</button>
+          <label class="btn btn-ghost px-3 h-10 text-sm cursor-pointer">${ICONS.upload} अपलोड
+            <input id="uploadPhoto" type="file" accept="image/*" class="hidden">
+          </label>
         </div>
-        <button class="btn btn-primary" onclick="saveShopSettings()"><i class="ri-save-line"></i> सुरक्षित गर्नुहोस्</button>
+
+        <label class="text-xs font-semibold text-[#9C9686]">सामानको नाम (नेपाली)*</label>
+        <input id="fName" class="w-full mt-1 mb-3 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" value="${p.name||''}" placeholder="जस्तै: चिया पत्ती">
+
+        <label class="text-xs font-semibold text-[#9C9686]">नाम (English, वैकल्पिक)</label>
+        <input id="fNameEn" class="w-full mt-1 mb-3 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" value="${p.nameEn||''}" placeholder="e.g. Tea Leaves">
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="text-xs font-semibold text-[#9C9686]">बिक्री मूल्य*</label>
+            <input id="fPrice" type="number" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${p.price||''}" placeholder="0">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-[#9C9686]">लागत मूल्य</label>
+            <input id="fCost" type="number" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${p.costPrice||''}" placeholder="0">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="text-xs font-semibold text-[#9C9686]">स्टक संख्या*</label>
+            <input id="fStock" type="number" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${p.stock??''}" placeholder="0">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-[#9C9686]">एकाइ</label>
+            <select id="fUnit" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none bg-white">
+              ${['वटा','केजी','ग्राम','लिटर','पोका','बोतल','प्याकेट'].map(u=>`<option ${p.unit===u?'selected':''}>${u}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <label class="text-xs font-semibold text-[#9C9686]">श्रेणी</label>
+        <div class="flex gap-2 mt-1 mb-3">
+          <input id="fCategory" list="catList" class="flex-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" value="${p.category||''}" placeholder="जस्तै: किराना">
+          <datalist id="catList">${state.categories.map(c=>`<option value="${c.name}">`).join('')}</datalist>
+        </div>
+
+        <label class="text-xs font-semibold text-[#9C9686]">न्यून स्टक सीमा</label>
+        <input id="fLowStock" type="number" class="w-full mt-1 mb-4 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${p.lowStock??3}">
+
+        <div class="flex gap-2">
+          ${isEdit ? `<button id="delBtn" class="btn btn-ghost h-12 px-4 text-crimson">${ICONS.trash}</button>` : ''}
+          <button id="saveBtn" class="btn btn-primary flex-1 h-12">${ICONS.check} सुरक्षित गर्नुहोस्</button>
+        </div>
       </div>
-      <div class="card" style="padding:20px;">
-        <h3 style="margin:0 0 16px;font-size:15.5px;"><i class="ri-shield-keyhole-line"></i> सुरक्षा</h3>
-        <p class="muted" style="font-size:13px;margin-top:0;">तपाईंको पिन परिवर्तन गरेर पसल सुरक्षित राख्नुहोस्।</p>
-        <button class="btn btn-outline" onclick="startChangePin()"><i class="ri-key-2-line"></i> पिन परिवर्तन गर्नुहोस्</button>
-        <div class="divider"></div>
-        <h3 style="margin:0 0 12px;font-size:15.5px;"><i class="ri-database-2-line"></i> डाटा 
+    </div>
+  `);
+  root.appendChild(modal);
+  let currentPhoto = p.photo, currentEmbedding = p.embedding;
+
+  modal.querySelector('.modal-backdrop').onclick = ()=> modal.remove();
+  modal.querySelector('#closeX').onclick = ()=> modal.remove();
+
+  modal.querySelector('#capturePhoto').onclick = ()=>{
+    openCamera('capture', async (dataURL, embedding)=>{
+      currentPhoto = dataURL; currentEmbedding = embedding;
+      modal.querySelector('#photoPreview').innerHTML = `<img src="${dataURL}" class="w-full h-full object-cover">`;
+    });
+  };
+  modal.querySelector('#uploadPhoto').onchange = async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const img = await fileToImage(file);
+    const {dataURL} = resizeImageToDataURL(img);
+    currentPhoto = dataURL;
+    modal.querySelector('#photoPreview').innerHTML = `<img src="${dataURL}" class="w-full h-full object-cover">`;
+    currentEmbedding = await computeEmbedding(img).catch(()=>null);
+  };
+
+  if(isEdit){
+    modal.querySelector('#delBtn').onclick = async ()=>{
+      confirmDialog('सामान मेटाउने?','यो कार्य फिर्ता हुनेछैन।', async ()=>{
+        await dbDelete('products', p.id);
+        await loadAll();
+        toast('सामान मेटाइयो');
+        modal.remove();
+        render();
+      });
+    };
+  }
+
+  modal.querySelector('#saveBtn').onclick = async ()=>{
+    const name = modal.querySelector('#fName').value.trim();
+    const price = parseFloat(modal.querySelector('#fPrice').value);
+    const stock = parseInt(modal.querySelector('#fStock').value);
+    if(!name){ toast('सामानको नाम लेख्नुहोस्'); return; }
+    if(isNaN(price) || price<0){ toast('मूल्य सही लेख्नुहोस्'); return; }
+    if(isNaN(stock) || stock<0){ toast('स्टक सही लेख्नुहोस्'); return; }
+    const category = modal.querySelector('#fCategory').value.trim();
+    if(category && !state.categories.find(c=>c.name===category)){
+      await dbPut('categories', {name:category});
+    }
+    const record = {
+      name,
+      nameEn: modal.querySelector('#fNameEn').value.trim(),
+      price, costPrice: parseFloat(modal.querySelector('#fCost').value)||0,
+      stock, unit: modal.querySelector('#fUnit').value,
+      category, lowStock: parseInt(modal.querySelector('#fLowStock').value)||3,
+      photo: currentPhoto, embedding: currentEmbedding,
+    };
+    if(isEdit) record.id = p.id;
+    await dbPut('products', record);
+    await loadAll();
+    toast(isEdit ? 'अपडेट भयो ✓' : 'सामान थपियो ✓');
+    modal.remove();
+    render();
+  };
+
+  return modal;
+}
+function fileToImage(file){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+/* ============================================================
+   CAMERA + AI DETECTION
+   ============================================================ */
+async function ensureModel(){
+  if(state.modelStatus==='ready') return state.mobilenetModel;
+  if(state.modelStatus==='loading'){
+    await new Promise(res=>{ const iv=setInterval(()=>{ if(state.modelStatus!=='loading'){clearInterval(iv);res();} },200); });
+    return state.mobilenetModel;
+  }
+  state.modelStatus='loading';
+  try{
+    if(typeof tf==='undefined' || typeof mobilenet==='undefined'){
+      await new Promise((res)=>{ const iv=setInterval(()=>{ if(typeof tf!=='undefined' && typeof mobilenet!=='undefined'){clearInterval(iv);res();} },150); setTimeout(()=>{clearInterval(iv);res();},8000); });
+    }
+    state.mobilenetModel = await mobilenet.load({version:2, alpha:1.0});
+    state.modelStatus='ready';
+  }catch(err){
+    console.error(err);
+    state.modelStatus='error';
+  }
+  return state.mobilenetModel;
+}
+async function computeEmbedding(imgEl){
+  const model = await ensureModel();
+  if(!model) return null;
+  const embTensor = model.infer(imgEl, true);
+  const arr = await embTensor.data();
+  embTensor.dispose();
+  return Array.from(arr);
+}
+
+let cameraStream = null;
+function openCamera(mode, onCapture){
+  state.cameraMode = mode;
+  const root = document.getElementById('overlayRoot');
+  const modal = el(`
+    <div class="modal p-0">
+      <div class="modal-backdrop"></div>
+      <div class="modal-box max-w-full w-full h-full max-h-full rounded-none bg-black flex flex-col">
+        <div class="relative flex-1 flex items-center justify-center overflow-hidden">
+          <video id="camVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+          <div class="scanbox"></div>
+          <div id="camStatus" class="absolute top-5 left-0 right-0 text-center text-white text-sm font-medium px-6"></div>
+          <button id="camClose" class="absolute top-5 right-4 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center">${ICONS.close}</button>
+          <div id="loadingOverlay" class="absolute inset-0 bg-black/60 flex-col items-center justify-center gap-3 hidden">
+            <div class="spinner"></div>
+            <div class="text-white text-sm">बुद्धिमत्ता मोडेल लोड हुँदैछ...</div>
+          </div>
+        </div>
+        <div class="p-5 flex flex-col items-center gap-3 bg-black safe-bottom">
+          <div class="text-white/70 text-xs text-center">${mode==='detect' ? 'सामानलाई क्यामेरा अगाडि राखी क्याप्चर थिच्नुहोस्' : 'सामानको फोटो खिच्नुहोस्'}</div>
+          <button id="captureBtn" class="w-16 h-16 rounded-full bg-white border-4 border-marigold active:scale-95 transition-transform"></button>
+        </div>
+      </div>
+    </div>
+  `);
+  root.appendChild(modal);
+
+  const video = modal.querySelector('#camVideo');
+  const loadingOverlay = modal.querySelector('#loadingOverlay');
+  const statusEl = modal.querySelector('#camStatus');
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment', width:{ideal:640}, height:{ideal:640} }, audio:false })
+    .then(stream=>{ cameraStream = stream; video.srcObject = stream; })
+    .catch(err=>{
+      statusEl.textContent = 'क्यामेरा खोल्न सकिएन। अनुमति दिनुहोस्।';
+      console.error(err);
+    });
+
+  function closeCamera(){
+    if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+    modal.remove();
+  }
+  modal.querySelector('#camClose').onclick = closeCamera;
+
+  modal.querySelector('#captureBtn').onclick = async ()=>{
+    if(!video.videoWidth){ toast('क्यामेरा तयार छैन'); return; }
+    const {dataURL, canvas} = resizeImageToDataURL(video, 320);
+
+    if(mode==='capture'){
+      loadingOverlay.classList.remove('hidden'); loadingOverlay.classList.add('flex');
+      statusEl.textContent='';
+      const embedding = await computeEmbedding(canvas).catch(()=>null);
+      loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex');
+      closeCamera();
+      onCapture && onCapture(dataURL, embedding);
+      return;
+    }
+
+    // detect mode: find best matching product
+    loadingOverlay.classList.remove('hidden'); loadingOverlay.classList.add('flex');
+    loadingOverlay.querySelector('div:last-child').textContent = 'सामान पहिचान हुँदैछ...';
+    const withEmbeddings = state.products.filter(p=>p.embedding && p.embedding.length);
+    if(withEmbeddings.length===0){
+      loadingOverlay.classList.add('hidden');
+      toast('कुनै सामानमा फोटो-पहिचान डाटा छैन। पहिले सामान थप्दा क्यामेराबाट फोटो लिनुहोस्।');
+      return;
+    }
+    const embedding = await computeEmbedding(canvas).catch(()=>null);
+    loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex');
+    if(!embedding){ toast('पहिचान असफल भयो'); return; }
+    let best=null, bestScore=-1;
+    withEmbeddings.forEach(p=>{
+      const s = cosineSim(embedding, p.embedding);
+      if(s>bestScore){ bestScore=s; best=p; }
+    });
+    if(best && bestScore >= state.settings.matchThreshold){
+      closeCamera();
+      confirmDialog(
+        `"${best.name}" फेला पर्‍यो`,
+        `मिल्दो: ${(bestScore*100).toFixed(0)}% — कार्टमा थप्ने हो?`,
+        ()=> addToCart(best),
+        'थप्नुहोस्'
+      );
+    } else {
+      statusEl.textContent = best ? `पक्का पहिचान भएन (${(bestScore*100).toFixed(0)}% मिल्दो) — फेरि प्रयास गर्नुहोस्` : 'सामान फेला परेन';
+    }
+  };
+
+  return modal;
+}
+
+/* ============================================================
+   REPORTS TAB
+   ============================================================ */
+function renderReports(){
+  const wrap = el(`<div class="px-4 pt-4"></div>`);
+
+  const ranges = [
+    {id:'today', label:'आज'},
+    {id:'yesterday', label:'हिजो'},
+    {id:'week', label:'यो हप्ता'},
+    {id:'month', label:'यो महिना'},
+    {id:'all', label:'सबै'},
+  ];
+  const chipRow = el(`<div class="flex gap-2 overflow-x-auto mb-4"></div>`);
+  ranges.forEach(r=>{
+    const chip = el(`<button class="tag whitespace-nowrap shrink-0 ${state.reportRange===r.id?'bg-crimson text-white':'bg-white border border-[#E7E1D3]'}">${r.label}</button>`);
+    chip.onclick = ()=>{ state.reportRange=r.id; render(); };
+    chipRow.appendChild(chip);
+  });
+  wrap.appendChild(chipRow);
+
+  const sales = filteredSales();
+  const totalRevenue = sales.reduce((a,s)=>a+s.total,0);
+  const txCount = sales.length;
+  const avg = txCount ? totalRevenue/txCount : 0;
+
+  wrap.appendChild(el(`
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="card p-4"><div class="text-[11px] text-[#9C9686] mb-1">कुल बिक्री</div><div class="num text-xl font-bold text-crimson">${formatMoney(totalRevenue)}</div></div>
+      <div class="card p-4"><div class="text-[11px] text-[#9C9686] mb-1">जम्मा बिल</div><div class="num text-xl font-bold">${txCount}</div></div>
+      <div class="card p-4"><div class="text-[11px] text-[#9C9686] mb-1">औसत बिल</div><div class="num text-xl font-bold">${formatMoney(avg)}</div></div>
+      <div class="card p-4"><div class="text-[11px] text-[#9C9686] mb-1">कुल थान बिक्री</div><div class="num text-xl font-bold">${sales.reduce((a,s)=>a+s.items.reduce((x,i)=>x+i.qty,0),0)}</div></div>
+    </div>
+  `));
+
+  // top products
+  const qtyMap = {};
+  sales.forEach(s=> s.items.forEach(it=>{ qtyMap[it.name] = (qtyMap[it.name]||0) + it.qty; }));
+  const top = Object.entries(qtyMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(top.length){
+    wrap.appendChild(el(`<div class="text-sm font-bold mb-2">धेरै बिक्री भएका सामान</div>`));
+    const topWrap = el(`<div class="card p-3 mb-4 space-y-2"></div>`);
+    const maxQ = top[0][1];
+    top.forEach(([name,qty])=>{
+      topWrap.appendChild(el(`
+        <div>
+          <div class="flex justify-between text-[13px] mb-1"><span>${name}</span><span class="num font-semibold">${qty}</span></div>
+          <div class="h-2 rounded-full bg-[#F0EBDF] overflow-hidden"><div class="h-full bg-marigold" style="width:${(qty/maxQ*100)}%"></div></div>
+        </div>
+      `));
+    });
+    wrap.appendChild(topWrap);
+  }
+
+  wrap.appendChild(el(`<div class="text-sm font-bold mb-2">बिक्री विवरण</div>`));
+  const list = el(`<div class="space-y-2"></div>`);
+  if(sales.length===0){
+    list.appendChild(el(`<div class="text-center text-[#9C9686] py-10 text-sm">यस अवधिमा बिक्री भएको छैन</div>`));
+  }
+  sales.sort((a,b)=>b.date-a.date).forEach(s=>{
+    const row = el(`
+      <button class="card p-3 w-full flex items-center justify-between text-left">
+        <div>
+          <div class="font-semibold text-[13.5px]">#${String(s.invoiceNo).padStart(4,'0')} ${s.custName?('· '+s.custName):''}</div>
+          <div class="text-[11.5px] text-[#9C9686]">${fmtDate(s.date)} · ${s.payMethod}</div>
+        </div>
+        <div class="num font-bold text-crimson">${formatMoney(s.total)}</div>
+      </button>
+    `);
+    row.onclick = ()=> openReceipt(s);
+    list.appendChild(row);
+  });
+  wrap.appendChild(list);
+
+  return wrap;
+}
+function filteredSales(){
+  const now = new Date();
+  const startOfDay = (d)=> new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
+  if(state.reportRange==='all') return [...state.sales];
+  if(state.reportRange==='today'){
+    const s0 = startOfDay(now);
+    return state.sales.filter(s=>s.date>=s0);
+  }
+  if(state.reportRange==='yesterday'){
+    const y = new Date(now); y.setDate(y.getDate()-1);
+    const s0 = startOfDay(y), s1 = startOfDay(now);
+    return state.sales.filter(s=>s.date>=s0 && s.date<s1);
+  }
+  if(state.reportRange==='week'){
+    const w = new Date(now); w.setDate(w.getDate()-7);
+    return state.sales.filter(s=>s.date>=w.getTime());
+  }
+  if(state.reportRange==='month'){
+    const m = new Date(now.getFullYear(), now.getMonth(), 1);
+    return state.sales.filter(s=>s.date>=m.getTime());
+  }
+  return state.sales;
+}
+
+/* ============================================================
+   SETTINGS TAB
+   ============================================================ */
+function renderSettings(){
+  const wrap = el(`<div class="px-4 pt-4 pb-6 space-y-4"></div>`);
+
+  const shopCard = el(`
+    <div class="card p-4">
+      <div class="font-bold text-sm mb-3">पसलको जानकारी</div>
+      <label class="text-xs font-semibold text-[#9C9686]">पसलको नाम</label>
+      <input id="sName" class="w-full mt-1 mb-3 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" value="${state.settings.shopName}">
+      <label class="text-xs font-semibold text-[#9C9686]">ठेगाना</label>
+      <input id="sAddr" class="w-full mt-1 mb-3 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" value="${state.settings.address}">
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="text-xs font-semibold text-[#9C9686]">फोन</label><input id="sPhone" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${state.settings.phone}"></div>
+        <div><label class="text-xs font-semibold text-[#9C9686]">PAN नं.</label><input id="sPan" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${state.settings.pan}"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="text-xs font-semibold text-[#9C9686]">मुद्रा चिन्ह</label><input id="sCurrency" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none" value="${state.settings.currency}"></div>
+        <div><label class="text-xs font-semibold text-[#9C9686]">भ्याट दर (%)</label><input id="sTax" type="number" class="w-full mt-1 h-11 rounded-xl border border-[#E7E1D3] px-3 outline-none num" value="${state.settings.taxRate}"></div>
+      </div>
+      <button id="saveShop" class="btn btn-primary w-full h-11">${ICONS.check} सुरक्षित गर्नुहोस्</button>
+    </div>
+  `);
+  shopCard.querySelector('#saveShop').onclick = async ()=>{
+    state.settings.shopName = shopCard.querySelector('#sName').value.trim() || 'मेरो पसल';
+    state.settings.address = shopCard.querySelector('#sAddr').value.trim();
+    state.settings.phone = shopCard.querySelector('#sPhone').value.trim();
+    state.settings.pan = shopCard.querySelector('#sPan').value.trim();
+    state.settings.currency = shopCard.querySelector('#sCurrency').value.trim() || 'रु';
+    state.settings.taxRate = parseFloat(shopCard.querySelector('#sTax').value) || 0;
+    await saveSettings();
+    toast('सेटिङ सुरक्षित भयो ✓');
+    render();
+  };
+  wrap.appendChild(shopCard);
+
+  const detectCard = el(`
+    <div class="card p-4">
+      <div class="font-bold text-sm mb-1">फोटो पहिचान संवेदनशीलता</div>
+      <div class="text-[11.5px] text-[#9C9686] mb-3">बढी % राख्दा पक्का मिल्दो सामान मात्र पहिचान हुन्छ</div>
+      <input id="threshRange" type="range" min="0.5" max="0.95" step="0.01" value="${state.settings.matchThreshold}" class="w-full">
+      <div class="text-right num text-sm font-semibold mt-1" id="threshVal">${Math.round(state.settings.matchThreshold*100)}%</div>
+      <div class="text-[11px] text-[#9C9686] mt-2">मोडेल स्थिति: <span class="font-semibold">${ {idle:'तयार हुन बाँकी', loading:'लोड हुँदैछ...', ready:'तयार ✓', error:'त्रुटि'}[state.modelStatus] }</span></div>
+    </div>
+  `);
+  const rangeInp = detectCard.querySelector('#threshRange');
+  rangeInp.oninput = async ()=>{
+    state.settings.matchThreshold = parseFloat(rangeInp.value);
+    detectCard.querySelector('#threshVal').textContent = Math.round(state.settings.matchThreshold*100)+'%';
+    await saveSettings();
+  };
+  wrap.appendChild(detectCard);
+
+  const dataCard = el(`
+    <div class="card p-4 space-y-2">
+      <div class="font-bold text-sm mb-1">डाटा व्यवस्थापन</div>
+      <button id="exportBtn" class="btn btn-ghost w-full h-11">${ICONS.download} ब्याकअप निकाल्नुहोस् (JSON)</button>
+      <label class="btn btn-ghost w-full h-11 cursor-pointer">${ICONS.upload} ब्याकअप फिर्ता ल्याउनुहोस्
+        <input id="importInp" type="file" accept="application/json" class="hidden">
+      </label>
+      <button id="resetBtn" class="btn w-full h-11 bg-crimson/10 text-crimson font-semibold">${ICONS.trash} सबै डाटा मेटाउनुहोस्</button>
+    </div>
+  `);
+  dataCard.querySelector('#exportBtn').onclick = exportData;
+  dataCard.querySelector('#importInp').onchange = importData;
+  dataCard.querySelector('#resetBtn').onclick = ()=>{
+    confirmDialog('सबै डाटा मेटाउने?','सामान, बिक्री रेकर्ड र सेटिङ सबै मेटिनेछ। यो कार्य फिर्ता हुँदैन।', async ()=>{
+      await dbClear('products'); await dbClear('sales'); await dbClear('categories');
+      await loadAll();
+      toast('सबै डाटा मेटियो');
+      render();
+    }, 'मेटाउनुहोस्');
+  };
+  wrap.appendChild(dataCard);
+
+  wrap.appendChild(el(`<div class="text-center text-[11px] text-[#9C9686] pt-2">नेपाली POS · संस्करण १.०<br>सम्पूर्ण डाटा तपाईंको यन्त्रमै सुरक्षित रहन्छ</div>`));
+
+  return wrap;
+}
+
+async function exportData(){
+  const data = {
+    products: await dbGetAll('products'),
+    categories: await dbGetAll('categories'),
+    sales: await dbGetAll('sales'),
+    settings: state.settings,
+    exportedAt: Date.now(),
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `nepali-pos-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('ब्याकअप डाउनलोड भयो');
+}
+async function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    confirmDialog('डाटा फिर्ता ल्याउने?','हालको सबै डाटा बदलिनेछ।', async ()=>{
+      await dbClear('products'); await dbClear('categories'); await dbClear('sales');
+      for(const p of (data.products||[])) await dbPut('products', p);
+      for(const c of (data.categories||[])) await dbPut('categories', c);
+      for(const s of (data.sales||[])) await dbPut('sales', s);
+      if(data.settings) { state.settings = Object.assign(state.settings, data.settings); await saveSettings(); }
+      await loadAll();
+      toast('डाटा फिर्ता ल्याइयो ✓');
+      render();
+    },'फिर्ता ल्याउनुहोस्');
+  }catch(err){
+    toast('फाइल पढ्न सकिएन');
+  }
+}
+
+/* ============================================================
+   Confirm dialog helper
+   ============================================================ */
+function confirmDialog(title, msg, onConfirm, confirmLabel='ठीक छ'){
+  const root = document.getElementById('overlayRoot');
+  const modal = el(`
+    <div class="modal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-box p-5 max-w-xs text-center">
+        <div class="font-bold text-base mb-2">${title}</div>
+        <div class="text-sm text-[#666] mb-5">${msg}</div>
+        <div class="flex gap-2">
+          <button id="cancelB" class="btn btn-ghost flex-1 h-11">रद्द</button>
+          <button id="okB" class="btn btn-primary flex-1 h-11">${confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  `);
+  root.appendChild(modal);
+  modal.querySelector('.modal-backdrop').onclick=()=>modal.remove();
+  modal.querySelector('#cancelB').onclick=()=>modal.remove();
+  modal.querySelector('#okB').onclick=()=>{ modal.remove(); onConfirm(); };
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function init(){
+  await openDB();
+  await loadAll();
+  render();
+  ensureModel(); // preload in background
+}
+init();
+</script>
+</body>
+</html>
