@@ -2,1026 +2,1774 @@
 <html lang="ne">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>सीमा प्रवेश प्रणाली · Entry Gate System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>हाजिर | अनुहार पहिचान हाजिर प्रणाली</title>
+
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Serif+Devanagari:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- face-api.js (face detection + recognition) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+<!-- xlsx-js-style (excel export with cell colours) -->
+<script defer src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+
 <style>
-/* ============ TOKENS ============ */
+/* =========================================================
+   हाजिर — डिजाइन प्रणाली
+   प्यालेट: सिन्दूर रातो, ढाका इन्डिगो, म्यारीगोल्ड सुन, पाटी हरियो
+   ========================================================= */
 :root{
-  --bg:#0A0F1C;
-  --bg-2:#0D1424;
-  --panel:#121B2E;
-  --panel-2:#182338;
-  --border-c:#243154;
-  --text:#EEF2FA;
-  --muted:#8B96AD;
-  --muted-2:#5E6A85;
-  --crimson:#E2334D;
-  --crimson-dim:rgba(226,51,77,.14);
-  --blue:#3D6BFF;
-  --blue-dim:rgba(61,107,255,.14);
-  --green:#2ECC71;
-  --green-dim:rgba(46,204,113,.14);
-  --amber:#F5A623;
-  --amber-dim:rgba(245,166,35,.14);
-  --radius:20px;
-  --radius-sm:12px;
-  --font-d:'Poppins','Noto Sans Devanagari',sans-serif;
-  --font-b:'Noto Sans Devanagari',sans-serif;
-  --font-m:'JetBrains Mono',monospace;
-  --safe-top:env(safe-area-inset-top);
-  --safe-bottom:env(safe-area-inset-bottom);
+  --sindoor:#B8322D;
+  --sindoor-dark:#8f231f;
+  --indigo:#1F3A5F;
+  --indigo-light:#2c5182;
+  --marigold:#E8A33D;
+  --marigold-dark:#c4841f;
+  --pati:#3F6B4C;
+  --cream:#F5EFE1;
+  --paper:#FBF8F1;
+  --charcoal:#2B2420;
+  --line:#E3D9C2;
+  --danger:#B8322D;
+  --ok:#3F6B4C;
+
+  --font-display:'Yatra One', 'Noto Serif Devanagari', serif;
+  --font-body:'Noto Sans Devanagari','Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  --radius:14px;
+  --shadow:0 4px 18px rgba(43,36,32,.08);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font-b);height:100%;overflow-x:hidden;}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
 body{
-  background-image:
-    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(61,107,255,.10), transparent 60%),
-    repeating-linear-gradient(115deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 34px);
+  background:var(--cream);
+  color:var(--charcoal);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.5;
 }
-button{font-family:inherit;}
-::-webkit-scrollbar{width:0;height:0;}
-h1,h2,h3{font-family:var(--font-d);margin:0;letter-spacing:.2px;}
-.mono{font-family:var(--font-m);}
 
-#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;}
+/* ---------- Signature: Dhaka-weave ribbon ---------- */
+.dhaka-ribbon{
+  height:10px;
+  width:100%;
+  background:
+    repeating-linear-gradient(135deg,
+      var(--indigo) 0 8px,
+      var(--marigold) 8px 16px,
+      var(--sindoor) 16px 24px);
+}
 
-/* ============ TOPBAR ============ */
+/* ---------- Layout shell ---------- */
+.app-shell{
+  display:flex;
+  min-height:calc(100vh - 10px);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width:250px;
+  flex-shrink:0;
+  background:var(--indigo);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  border-right:6px solid var(--marigold);
+}
+.sidebar::after{
+  /* carved pillar notches */
+  content:"";
+  position:absolute;
+  top:0;right:-6px;bottom:0;width:6px;
+  background:repeating-linear-gradient(180deg,var(--sindoor) 0 14px, transparent 14px 28px);
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+  padding:22px 18px;
+  border-bottom:1px solid rgba(255,255,255,.15);
+}
+.brand-mark{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--marigold);
+  color:var(--indigo);
+  font-family:var(--font-display);
+  font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 0 0 3px rgba(232,163,61,.25);
+}
+.brand-title{
+  font-family:var(--font-display);
+  font-size:22px;
+  display:block;
+  color:var(--marigold);
+  letter-spacing:.5px;
+}
+.brand-sub{
+  display:block;
+  font-size:11px;
+  color:#cfd9e8;
+}
+.nav{display:flex;flex-direction:column;padding:14px 10px;gap:4px;flex:1;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  background:transparent;border:none;
+  color:#dde5f0;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  padding:11px 14px;
+  border-radius:10px;
+  text-align:left;
+  cursor:pointer;
+  transition:background .15s, color .15s;
+}
+.nav-ico{font-size:16px;width:20px;text-align:center;}
+.nav-item:hover{background:rgba(255,255,255,.08);}
+.nav-item.active{
+  background:var(--marigold);
+  color:var(--indigo);
+  font-weight:700;
+}
+.sidebar-foot{
+  padding:16px 18px 20px;
+  border-top:1px solid rgba(255,255,255,.15);
+  font-size:12.5px;
+}
+.sidebar-foot p{margin:0 0 4px;color:#e9edf3;}
+.muted-xs{font-size:11px;color:#a9b8cc !important;}
+
+/* ---------- Main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
 .topbar{
-  position:sticky;top:0;z-index:40;
-  padding:calc(14px + var(--safe-top)) 18px 12px;
-  background:linear-gradient(180deg,rgba(10,15,28,.97),rgba(10,15,28,.88));
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border-c);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  display:flex;align-items:center;gap:14px;
+  padding:18px 26px;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:5;
 }
-.brand{display:flex;align-items:center;gap:10px;}
-.brand-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,var(--crimson),#8f1730);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(226,51,77,.35);}
-.brand-mark svg{width:20px;height:20px;}
-.brand-text h1{font-size:15px;font-weight:700;line-height:1.15;}
-.brand-text span{font-size:10.5px;color:var(--muted);font-family:var(--font-m);letter-spacing:.5px;}
-.gate-chip{
-  display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:100px;
-  background:var(--panel-2);border:1px solid var(--border-c);font-size:12px;font-weight:600;color:var(--muted);
+.topbar h1{
+  font-family:var(--font-display);
+  font-size:24px;
+  color:var(--sindoor-dark);
+  margin:0;
+  flex:1;
 }
-.gate-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--muted-2);}
-.gate-chip.active-border{color:var(--crimson);border-color:rgba(226,51,77,.35);}
-.gate-chip.active-border .dot{background:var(--crimson);box-shadow:0 0 8px var(--crimson);}
-.gate-chip.active-city{color:var(--blue);border-color:rgba(61,107,255,.35);}
-.gate-chip.active-city .dot{background:var(--blue);box-shadow:0 0 8px var(--blue);}
-
-/* ============ SCREENS ============ */
-main{flex:1;padding:18px 18px calc(90px + var(--safe-bottom));}
-.screen{display:none;animation:fadeUp .32s ease;}
-.screen.active{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-.section-label{font-size:11.5px;color:var(--muted-2);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:22px 0 10px;font-family:var(--font-m);}
-.section-label:first-child{margin-top:0;}
-
-/* stat grid */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.stat-card{background:var(--panel);border:1px solid var(--border-c);border-radius:var(--radius-sm);padding:14px;}
-.stat-card .n{font-family:var(--font-m);font-size:22px;font-weight:700;}
-.stat-card .l{font-size:11.5px;color:var(--muted);margin-top:2px;}
-.stat-card.wide{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;}
-
-/* gate select cards */
-.gate-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.gate-card{
-  background:var(--panel);border:2px solid var(--border-c);border-radius:var(--radius);padding:16px 14px;
-  cursor:pointer;transition:.18s;text-align:left;
+.topbar-date{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--indigo);
+  background:var(--cream);
+  border:1px solid var(--line);
+  padding:6px 10px;
+  border-radius:8px;
 }
-.gate-card svg{width:26px;height:26px;margin-bottom:10px;}
-.gate-card h3{font-size:15px;}
-.gate-card p{font-size:11.5px;color:var(--muted);margin:3px 0 0;line-height:1.4;}
-.gate-card.sel-border{border-color:var(--crimson);background:linear-gradient(160deg,var(--crimson-dim),var(--panel) 60%);}
-.gate-card.sel-city{border-color:var(--blue);background:linear-gradient(160deg,var(--blue-dim),var(--panel) 60%);}
-
-.lane-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
-.lane-btn{
-  background:var(--panel);border:2px solid var(--border-c);border-radius:var(--radius-sm);
-  padding:14px 10px;text-align:center;cursor:pointer;transition:.18s;
+.hamburger{
+  display:none;
+  background:none;border:none;font-size:22px;cursor:pointer;color:var(--indigo);
 }
-.lane-btn svg{width:20px;height:20px;margin-bottom:6px;}
-.lane-btn span{display:block;font-size:13px;font-weight:700;}
-.lane-btn small{display:block;font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--font-m);}
-.lane-btn.sel{border-color:var(--green);background:var(--green-dim);}
 
-.btn-primary{
-  width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(145deg,var(--crimson),#a8203a);
-  color:#fff;font-weight:700;font-size:15.5px;margin-top:20px;cursor:pointer;
-  box-shadow:0 8px 22px rgba(226,51,77,.28);display:flex;align-items:center;justify-content:center;gap:8px;
+.view-wrap{padding:22px 26px 60px;}
+.view{display:none;flex-direction:column;gap:18px;}
+.view.active{display:flex;}
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px 22px;
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
 }
-.btn-primary:active{transform:scale(.98);}
-.btn-primary svg{width:18px;height:18px;}
-.btn-primary.city{background:linear-gradient(145deg,var(--blue),#1f3fb8);box-shadow:0 8px 22px rgba(61,107,255,.28);}
-.btn-secondary{
-  width:100%;padding:14px;border:1px solid var(--border-c);border-radius:14px;background:var(--panel-2);
-  color:var(--text);font-weight:600;font-size:14px;margin-top:10px;cursor:pointer;
+.card::before{
+  content:"";
+  position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--sindoor),var(--marigold),var(--indigo));
 }
-.btn-ghost{background:transparent;border:none;color:var(--muted);font-size:13px;padding:10px;cursor:pointer;width:100%;text-align:center;font-weight:600;}
-
-/* ============ SCAN SCREEN ============ */
-.scan-wrap{display:flex;flex-direction:column;align-items:center;}
-.viewfinder{
-  position:relative;width:100%;aspect-ratio:3/4;max-width:340px;border-radius:26px;overflow:hidden;
-  background:#000;border:1px solid var(--border-c);box-shadow:0 20px 50px rgba(0,0,0,.5);
+.card-title{
+  font-family:var(--font-display);
+  font-size:19px;
+  color:var(--indigo);
+  margin:6px 0 14px;
 }
-.viewfinder video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
-.vf-frame{position:absolute;inset:0;pointer-events:none;}
-.corner{position:absolute;width:34px;height:34px;border-color:var(--crimson);transition:.3s;}
-.corner.tl{top:16px;left:16px;border-top:3px solid;border-left:3px solid;border-radius:10px 0 0 0;}
-.corner.tr{top:16px;right:16px;border-top:3px solid;border-right:3px solid;border-radius:0 10px 0 0;}
-.corner.bl{bottom:16px;left:16px;border-bottom:3px solid;border-left:3px solid;border-radius:0 0 0 10px;}
-.corner.br{bottom:16px;right:16px;border-bottom:3px solid;border-right:3px solid;border-radius:0 0 10px 0;}
-.viewfinder.city .corner{border-color:var(--blue);}
-.viewfinder.matched .corner{border-color:var(--green);}
-.viewfinder.denied .corner{border-color:var(--crimson);}
-.scanline{position:absolute;left:8%;right:8%;height:2px;background:linear-gradient(90deg,transparent,var(--crimson),transparent);opacity:.85;animation:scan 2.1s ease-in-out infinite;}
-.viewfinder.city .scanline{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
-@keyframes scan{0%{top:14%;}50%{top:84%;}100%{top:14%;}}
-.vf-status{position:absolute;bottom:0;left:0;right:0;padding:10px 14px 12px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);font-size:12.5px;font-weight:600;text-align:center;}
+.muted{color:#6b6157;font-size:13.5px;}
 
-.scan-status{margin-top:18px;text-align:center;min-height:26px;font-size:14px;font-weight:600;color:var(--muted);}
-.scan-status.ok{color:var(--green);}
-.scan-status.warn{color:var(--amber);}
-.scan-status.err{color:var(--crimson);}
-
-/* ============ FORM ============ */
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;}
-.field input,.field select,.field textarea{
-  width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--border-c);
-  background:var(--panel-2);color:var(--text);font-size:14.5px;font-family:inherit;
+/* ---------- Stat cards ---------- */
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
 }
-.field input:focus,.field select:focus{outline:none;border-color:var(--blue);}
-.type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
-.type-toggle button{padding:15px 8px;border-radius:14px;border:2px solid var(--border-c);background:var(--panel);color:var(--muted);font-weight:700;font-size:14px;cursor:pointer;}
-.type-toggle button.on{border-color:var(--green);color:var(--green);background:var(--green-dim);}
-.type-toggle button:disabled{opacity:.35;cursor:not-allowed;}
-
-.reg-photo{width:78px;height:78px;border-radius:16px;object-fit:cover;border:2px solid var(--border-c);float:right;margin-left:12px;}
-
-/* ============ PASS CARD ============ */
-.pass-card{
-  border-radius:24px;padding:22px;position:relative;overflow:hidden;
-  background:linear-gradient(160deg,var(--panel-2),var(--panel));border:1px solid var(--border-c);
-  box-shadow:0 20px 45px rgba(0,0,0,.4);
+.stat-card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+  border-left:6px solid var(--indigo);
+  display:flex;flex-direction:column;gap:6px;
 }
-.pass-card::before{content:'';position:absolute;top:-40%;right:-30%;width:70%;height:70%;
-  background:radial-gradient(circle,rgba(46,204,113,.16),transparent 65%);pointer-events:none;}
-.pass-card.foreigner::before{background:radial-gradient(circle,rgba(61,107,255,.18),transparent 65%);}
-.pass-card.exit::before{background:radial-gradient(circle,rgba(245,166,35,.18),transparent 65%);}
-.pass-card.denied::before{background:radial-gradient(circle,rgba(226,51,77,.2),transparent 65%);}
-.pass-head{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
-.pass-head .em{display:flex;align-items:center;gap:9px;}
-.pass-head svg{width:26px;height:26px;}
-.pass-head h3{font-size:13px;line-height:1.3;}
-.pass-head span{display:block;font-size:9.5px;color:var(--muted);font-family:var(--font-m);letter-spacing:.6px;}
-.badge{padding:5px 11px;border-radius:100px;font-size:11px;font-weight:700;font-family:var(--font-m);}
-.badge.citizen{background:var(--green-dim);color:var(--green);}
-.badge.foreigner{background:var(--blue-dim);color:var(--blue);}
-.badge.exit{background:var(--amber-dim);color:var(--amber);}
+.stat-card.accent-sindoor{border-left-color:var(--sindoor);}
+.stat-card.accent-indigo{border-left-color:var(--indigo);}
+.stat-card.accent-marigold{border-left-color:var(--marigold-dark);}
+.stat-card.accent-pati{border-left-color:var(--pati);}
+.stat-label{font-size:12.5px;color:#7a7167;}
+.stat-num{font-family:var(--font-mono);font-size:30px;font-weight:700;color:var(--charcoal);}
 
-.pass-id-row{display:flex;gap:14px;margin-top:20px;position:relative;z-index:1;align-items:center;}
-.pass-photo{width:74px;height:74px;border-radius:14px;object-fit:cover;border:2px solid var(--border-c);flex-shrink:0;}
-.pass-name{font-size:19px;font-weight:800;font-family:var(--font-d);}
-.pass-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-.pass-grid{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1;}
-.pass-grid .g-label{font-size:10px;color:var(--muted-2);font-family:var(--font-m);letter-spacing:.5px;}
-.pass-grid .g-val{font-size:13.5px;font-weight:600;margin-top:2px;}
-.pass-divider{border:none;border-top:1px dashed var(--border-c);margin:18px 0;position:relative;z-index:1;}
-.pass-foot{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
-#qrbox{background:#fff;padding:6px;border-radius:10px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;}
-.pass-note{font-size:10.5px;color:var(--muted-2);text-align:center;margin-top:16px;line-height:1.5;}
+.quick-actions{display:flex;flex-wrap:wrap;gap:10px;}
 
-.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:100px;font-size:11.5px;font-weight:700;margin-top:10px;}
-.status-pill.in{background:var(--green-dim);color:var(--green);}
-.status-pill.out{background:var(--amber-dim);color:var(--amber);}
-
-/* ============ MODAL / DENIED ============ */
-.result-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
-.result-icon.ok{background:var(--green-dim);}
-.result-icon.warn{background:var(--amber-dim);}
-.result-icon.err{background:var(--crimson-dim);}
-.result-icon svg{width:30px;height:30px;}
-.result-title{text-align:center;font-size:17px;font-weight:800;}
-.result-desc{text-align:center;font-size:13px;color:var(--muted);margin-top:6px;line-height:1.55;}
-
-.info-box{background:var(--panel);border:1px solid var(--border-c);border-radius:16px;padding:16px;margin-top:16px;}
-.info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-c);font-size:13.5px;}
-.info-row:last-child{border-bottom:none;}
-.info-row .k{color:var(--muted);}
-.info-row .v{font-weight:600;}
-
-/* ============ HISTORY ============ */
-.filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;}
-.chip{flex-shrink:0;padding:8px 15px;border-radius:100px;background:var(--panel);border:1px solid var(--border-c);font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;}
-.chip.on{background:var(--crimson);border-color:var(--crimson);color:#fff;}
-.search-box{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border-c);background:var(--panel);color:var(--text);font-size:14px;margin-bottom:14px;}
-.log-item{display:flex;align-items:center;gap:12px;padding:13px;background:var(--panel);border:1px solid var(--border-c);border-radius:14px;margin-bottom:9px;}
-.log-photo{width:42px;height:42px;border-radius:11px;object-fit:cover;flex-shrink:0;background:var(--panel-2);}
-.log-body{flex:1;min-width:0;}
-.log-body .n{font-size:13.5px;font-weight:700;}
-.log-body .m{font-size:11px;color:var(--muted);margin-top:1px;}
-.log-tag{font-size:10px;font-weight:700;padding:4px 9px;border-radius:100px;font-family:var(--font-m);flex-shrink:0;}
-.log-tag.entry{background:var(--green-dim);color:var(--green);}
-.log-tag.exit{background:var(--amber-dim);color:var(--amber);}
-.empty{text-align:center;padding:50px 20px;color:var(--muted);}
-.empty svg{width:40px;height:40px;margin-bottom:12px;opacity:.5;}
-
-/* ============ PEOPLE ============ */
-.person-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--panel);border:1px solid var(--border-c);border-radius:16px;margin-bottom:10px;cursor:pointer;}
-.person-photo{width:50px;height:50px;border-radius:13px;object-fit:cover;flex-shrink:0;}
-.person-body{flex:1;min-width:0;}
-.person-body .n{font-size:14.5px;font-weight:700;}
-.person-body .m{font-size:11.5px;color:var(--muted);margin-top:2px;}
-
-.overlay{position:fixed;inset:0;background:rgba(6,9,16,.72);backdrop-filter:blur(4px);z-index:100;display:none;align-items:flex-end;justify-content:center;}
-.overlay.show{display:flex;}
-.sheet{width:100%;max-width:480px;background:var(--bg-2);border-radius:24px 24px 0 0;padding:22px 18px calc(24px + var(--safe-bottom));max-height:82vh;overflow-y:auto;border:1px solid var(--border-c);border-bottom:none;animation:slideUp .28s ease;}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.sheet-handle{width:38px;height:4px;background:var(--border-c);border-radius:10px;margin:0 auto 16px;}
-
-/* ============ BOTTOM NAV ============ */
-.bottomnav{
-  position:fixed;bottom:0;left:0;right:0;z-index:40;max-width:480px;margin:0 auto;
-  background:rgba(13,20,36,.94);backdrop-filter:blur(14px);border-top:1px solid var(--border-c);
-  display:flex;padding:8px 6px calc(8px + var(--safe-bottom));
+/* ---------- Forms ---------- */
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px 18px;
 }
-.nav-btn{flex:1;background:none;border:none;color:var(--muted-2);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;cursor:pointer;border-radius:12px;}
-.nav-btn svg{width:21px;height:21px;}
-.nav-btn span{font-size:10px;font-weight:600;}
-.nav-btn.on{color:var(--crimson);background:var(--crimson-dim);}
+.form-grid label{
+  display:flex;flex-direction:column;gap:6px;
+  font-size:13px;color:var(--indigo);
+  font-weight:600;
+}
+input,select{
+  font-family:var(--font-body);
+  font-size:14px;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fff;
+  color:var(--charcoal);
+}
+input:focus,select:focus{
+  outline:2px solid var(--marigold);
+  outline-offset:1px;
+  border-color:var(--marigold);
+}
+.inline-form{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.filter-label{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;color:var(--indigo);font-weight:600;
+  margin-bottom:12px;
+}
 
-/* loader */
-.loader{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.toast{position:fixed;top:calc(70px + var(--safe-top));left:50%;transform:translateX(-50%);background:var(--panel-2);border:1px solid var(--border-c);color:var(--text);padding:11px 18px;border-radius:100px;font-size:12.5px;font-weight:600;z-index:200;box-shadow:0 8px 20px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.25s;}
-.toast.show{opacity:1;top:calc(80px + var(--safe-top));}
+.btn{
+  font-family:var(--font-body);
+  font-weight:700;
+  font-size:13.5px;
+  border:none;
+  border-radius:10px;
+  padding:10px 16px;
+  cursor:pointer;
+  transition:transform .1s, filter .15s;
+}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn:not(:disabled):hover{filter:brightness(1.06);}
+.btn:not(:disabled):active{transform:scale(.98);}
+.btn-primary{background:var(--sindoor);color:#fff;}
+.btn-secondary{background:var(--indigo);color:#fff;}
+.btn.wide{width:100%;}
+
+/* ---------- Face capture ---------- */
+.face-capture-block{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;align-items:flex-start;}
+.cam-box{
+  position:relative;
+  width:280px;height:210px;
+  background:var(--charcoal);
+  border-radius:12px;
+  overflow:hidden;
+  border:3px solid var(--indigo);
+}
+.cam-box.big{width:100%;max-width:520px;height:390px;}
+.cam-box video{width:100%;height:100%;object-fit:cover;}
+.cam-box canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+.cam-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cam-status{font-size:12.5px;color:#7a7167;font-family:var(--font-mono);}
+.photo-preview{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid var(--marigold);display:none;}
+.photo-preview[src]:not([src=""]){display:block;}
+
+.scan-frame{
+  position:absolute;inset:14px;
+  border:2px dashed var(--marigold);
+  border-radius:10px;
+  pointer-events:none;
+}
+
+.att-live-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
+.att-side{display:flex;flex-direction:column;gap:12px;}
+.att-log h3{margin:6px 0;color:var(--indigo);font-size:15px;}
+.log-list{list-style:none;margin:0;padding:0;max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.log-list li{
+  background:#eef5ee;
+  border-left:4px solid var(--ok);
+  padding:7px 10px;
+  border-radius:8px;
+  font-size:13px;
+}
+.log-list li.dup{background:var(--cream);border-left-color:var(--marigold);}
+
+.mode-switch{display:flex;gap:10px;margin-bottom:14px;}
+.mode-btn{
+  flex:1;padding:12px;border-radius:10px;border:2px solid var(--line);
+  background:#fff;font-weight:700;font-size:14px;cursor:pointer;color:var(--indigo);
+}
+.mode-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+
+/* ---------- Tables ---------- */
+.table-wrap{overflow-x:auto;}
+.data-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.data-table th{
+  background:var(--indigo);color:#fff;
+  padding:9px 10px;text-align:left;
+  font-weight:600;font-size:12.5px;
+  position:sticky;top:0;
+}
+.data-table td{padding:8px 10px;border-bottom:1px solid var(--line);}
+.data-table tr:nth-child(even) td{background:#faf6ec;}
+.avatar-sm{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--marigold);}
+.tag-ok{color:var(--ok);font-weight:700;}
+.tag-no{color:var(--danger);font-weight:700;}
+.icon-btn{
+  background:none;border:none;cursor:pointer;font-size:15px;color:var(--sindoor);
+}
+
+/* ---------- Toast ---------- */
+.toast-host{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:999;}
+.toast{
+  background:var(--charcoal);color:#fff;
+  padding:11px 16px;border-radius:10px;
+  font-size:13.5px;box-shadow:var(--shadow);
+  border-left:5px solid var(--marigold);
+  animation:toastIn .25s ease;
+  max-width:320px;
+}
+.toast.error{border-left-color:var(--sindoor);}
+.toast.success{border-left-color:var(--pati);}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---------- Report table (preview) ---------- */
+.report-table{border-collapse:collapse;font-size:12px;font-family:var(--font-mono);}
+.report-table th,.report-table td{border:1px solid var(--line);padding:4px 6px;text-align:center;}
+.report-table th{background:var(--indigo);color:#fff;}
+.report-table td.name-col{text-align:left;font-family:var(--font-body);}
+.cell-P{background:#c6efce;color:#046a38;font-weight:700;}
+.cell-A{background:#ffc7ce;color:#9c0006;font-weight:700;}
+.cell-H{background:#ffeb9c;color:#7a5b00;font-weight:700;}
+.cell-blank{background:#f2efe6;color:#bbb;}
+
+.logo-preview-wrap{grid-column:1/-1;}
+.logo-preview{max-height:70px;display:none;border-radius:8px;}
+.logo-preview[src]:not([src=""]){display:block;}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .att-live-grid{grid-template-columns:1fr;}
+  .sidebar{
+    position:fixed;left:-260px;top:10px;bottom:0;z-index:20;
+    transition:left .2s;
+  }
+  .sidebar.open{left:0;}
+  .hamburger{display:block;}
+}
+
+:focus-visible{outline:2px solid var(--marigold);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+
 </style>
 </head>
 <body>
-<div id="app">
 
-  <div class="topbar">
+<!-- ===== Dhaka-weave signature ribbon (top) ===== -->
+<div class="dhaka-ribbon" aria-hidden="true"></div>
+
+<div id="app" class="app-shell">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
     <div class="brand">
-      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M3 20 L9 6 L12 12 L15 4 L21 20 Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg></div>
-      <div class="brand-text"><h1>प्रवेश व्यवस्थापन</h1><span>ENTRY GATE SYSTEM</span></div>
+      <div class="brand-mark">ह</div>
+      <div class="brand-text">
+        <span class="brand-title">हाजिर</span>
+        <span class="brand-sub">अनुहार पहिचान प्रणाली</span>
+      </div>
     </div>
-    <div id="gateChip" class="gate-chip"><span class="dot"></span><span id="gateChipText">गेट चयन गर्नुहोस्</span></div>
-  </div>
 
-  <main id="screens">
+    <nav class="nav" id="mainNav">
+      <button class="nav-item active" data-view="dashboard"><span class="nav-ico">⌂</span>ड्यासबोर्ड</button>
+      <button class="nav-item" data-view="school"><span class="nav-ico">🏫</span>विद्यालय दर्ता</button>
+      <button class="nav-item" data-view="teachers"><span class="nav-ico">🧑‍🏫</span>शिक्षक व्यवस्थापन</button>
+      <button class="nav-item" data-view="students"><span class="nav-ico">🎓</span>विद्यार्थी व्यवस्थापन</button>
+      <button class="nav-item" data-view="attendance"><span class="nav-ico">📸</span>हाजिर लगाउने</button>
+      <button class="nav-item" data-view="holidays"><span class="nav-ico">🎊</span>बिदा व्यवस्थापन</button>
+      <button class="nav-item" data-view="reports"><span class="nav-ico">📊</span>मासिक प्रतिवेदन</button>
+    </nav>
 
-    <!-- ================= HOME ================= -->
-    <section class="screen active" id="screen-home">
-      <div class="section-label">आजको सारांश</div>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="n mono" id="statTotal">0</div><div class="l">कुल दर्ता व्यक्ति</div></div>
-        <div class="stat-card"><div class="n mono" id="statToday">0</div><div class="l">आजको इन्ट्री</div></div>
-        <div class="stat-card wide">
-          <div><div class="n mono" id="statInCountry">0</div><div class="l">हाल देशभित्र रहेका विदेशी</div></div>
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>
-        </div>
-      </div>
+    <div class="sidebar-foot">
+      <p id="schoolFootName">विद्यालय दर्ता गर्नुहोस्</p>
+      <p class="muted-xs">स्थानीय ब्राउजरमा सुरक्षित (IndexedDB)</p>
+    </div>
+  </aside>
 
-      <div class="section-label">गेट प्रकार</div>
-      <div class="gate-grid">
-        <button class="gate-card" id="cardBorder" onclick="selectGate('border')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--crimson)" stroke-width="1.6"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/><path d="M4 12h16"/></svg>
-          <h3>बोर्डर गेट</h3>
-          <p>देशको सीमा प्रवेश/निकास नाका</p>
-        </button>
-        <button class="gate-card" id="cardCity" onclick="selectGate('city')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.6"><rect x="4" y="9" width="6" height="12"/><rect x="14" y="4" width="6" height="17"/><path d="M6 13h2M6 16h2M16 8h2M16 11h2M16 14h2"/></svg>
-          <h3>सिटी गेट</h3>
-          <p>शहर/स्थानीय प्रवेश नाका</p>
-        </button>
-      </div>
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburgerBtn" aria-label="मेनु खोल्नुहोस्">☰</button>
+      <h1 id="viewTitle">ड्यासबोर्ड</h1>
+      <div class="topbar-date" id="topbarDate"></div>
+    </header>
 
-      <div class="section-label">लेन (दिशा)</div>
-      <div class="lane-row">
-        <button class="lane-btn" id="laneEntry" onclick="selectLane('entry')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.8" style="margin:0 auto 6px;display:block;"><path d="M12 4v16M6 14l6 6 6-6"/></svg>
-          <span>प्रवेश (Entry)</span><small>IN LANE</small>
-        </button>
-        <button class="lane-btn" id="laneExit" onclick="selectLane('exit')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.8" style="margin:0 auto 6px;display:block;"><path d="M12 20V4M6 10l6-6 6 6"/></svg>
-          <span>निकास (Exit)</span><small>OUT LANE</small>
-        </button>
-      </div>
+    <div class="view-wrap" id="viewWrap">
 
-      <button class="btn-primary" id="startScanBtn" onclick="goScan()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="3.3"/></svg>
-        स्क्यान सुरु गर्नुहोस्
-      </button>
-      <div class="pass-note" style="margin-top:14px;">यो प्रणाली आन्तरिक व्यवस्थापन प्रयोजनका लागि हो — कुनै सरकारी आधिकारिक यात्रा कागजात होइन।</div>
-    </section>
-
-    <!-- ================= SCAN ================= -->
-    <section class="screen" id="screen-scan">
-      <div class="scan-wrap">
-        <div class="viewfinder" id="viewfinder">
-          <video id="video" autoplay muted playsinline></video>
-          <div class="vf-frame">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
-            <div class="scanline" id="scanline"></div>
+      <!-- ---------- DASHBOARD ---------- -->
+      <section class="view active" id="view-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card accent-sindoor">
+            <span class="stat-label">जम्मा शिक्षक</span>
+            <span class="stat-num" id="statTeachers">०</span>
           </div>
-          <div class="vf-status" id="vfStatus">क्यामेरा सुरु हुँदैछ...</div>
-        </div>
-        <div class="scan-status" id="scanStatusText">अनुहार फ्रेममा राख्नुहोस्</div>
-        <button class="btn-secondary" onclick="manualCapture()" id="manualBtn" style="max-width:340px;">म्यानुअल क्याप्चर गर्नुहोस्</button>
-        <button class="btn-ghost" onclick="goHome()">← गृहपृष्ठमा फर्कनुहोस्</button>
-      </div>
-    </section>
-
-    <!-- ================= REGISTER ================= -->
-    <section class="screen" id="screen-register">
-      <h2 style="font-size:19px;margin-bottom:4px;">नयाँ व्यक्ति दर्ता</h2>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px;">अनुहार पहिचान भएन। कृपया विवरण भर्नुहोस्।</p>
-
-      <img id="regPhoto" class="reg-photo" src="">
-      <div class="type-toggle">
-        <button id="typeCitizenBtn" class="on" onclick="setRegType('citizen')">🇳🇵 नागरिक</button>
-        <button id="typeForeignerBtn" onclick="setRegType('foreigner')">🌍 विदेशी</button>
-      </div>
-      <div style="clear:both;"></div>
-
-      <div id="citizenFields">
-        <div class="field"><label>पूरा नाम</label><input id="c_name" type="text" placeholder="जस्तै: राम बहादुर थापा"></div>
-        <div class="field"><label>नागरिकता प्रमाणपत्र नम्बर</label><input id="c_docnum" type="text" placeholder="जस्तै: 12-01-70-01234"></div>
-        <div class="field"><label>जारी जिल्ला</label><input id="c_district" type="text" placeholder="जस्तै: काठमाडौं"></div>
-        <div class="field"><label>जन्म मिति (वि.सं.)</label><input id="c_dob" type="text" placeholder="जस्तै: २०५२/०३/१५"></div>
-        <div class="field"><label>ठेगाना</label><input id="c_address" type="text" placeholder="जिल्ला, नगरपालिका, वडा"></div>
-      </div>
-
-      <div id="foreignerFields" style="display:none;">
-        <div class="field"><label>पूरा नाम</label><input id="f_name" type="text" placeholder="Full Name"></div>
-        <div class="field"><label>राष्ट्रियता</label><input id="f_nationality" type="text" placeholder="जस्तै: भारतीय / चिनियाँ"></div>
-        <div class="field"><label>राहदानी नम्बर (Passport No.)</label><input id="f_passport" type="text" placeholder="जस्तै: N1234567"></div>
-        <div class="field"><label>भिसा प्रकार / नम्बर</label><input id="f_visa" type="text" placeholder="जस्तै: Tourist Visa - V0012"></div>
-        <div class="field"><label>नेपालमा बस्ने ठेगाना</label><input id="f_address" type="text" placeholder="होटल / ठेगाना"></div>
-      </div>
-      <div class="field"><label>लिङ्ग</label>
-        <select id="r_gender"><option value="पुरुष">पुरुष</option><option value="महिला">महिला</option><option value="अन्य">अन्य</option></select>
-      </div>
-
-      <div id="foreignerBorderNote" class="info-box" style="display:none;border-color:rgba(245,166,35,.4);background:var(--amber-dim);">
-        <div style="font-size:12.5px;color:var(--amber);font-weight:600;">⚠️ विदेशी नागरिकको दर्ता र राहदानी जिम्मा लिने प्रक्रिया केवल बोर्डर गेटबाट मात्र गर्न मिल्छ। कृपया गेट परिवर्तन गर्नुहोस्।</div>
-      </div>
-
-      <button class="btn-primary" id="submitRegBtn" onclick="submitRegistration()">दर्ता गरी प्रवेश स्वीकृत गर्नुहोस्</button>
-      <button class="btn-ghost" onclick="goScan()">← फिर्ता जानुहोस्</button>
-    </section>
-
-    <!-- ================= VERIFY (foreigner border entry confirm) ================= -->
-    <section class="screen" id="screen-verify">
-      <h2 style="font-size:19px;text-align:center;">कागजात प्रमाणीकरण</h2>
-      <p style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:4px;">यो व्यक्ति पहिले नै दर्ता भएको फेला पर्यो। बोर्डर प्रवेशको लागि कागजात पुनः प्रमाणित गर्नुहोस्।</p>
-      <div class="info-box" id="verifyInfoBox"></div>
-      <button class="btn-primary" onclick="confirmBorderEntry()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>
-        राहदानी बुझी प्रवेश स्वीकृत गर्नुहोस्
-      </button>
-      <button class="btn-ghost" onclick="goScan()">रद्द गर्नुहोस्</button>
-    </section>
-
-    <!-- ================= EXIT CONFIRM (foreigner border exit) ================= -->
-    <section class="screen" id="screen-exitconfirm">
-      <h2 style="font-size:19px;text-align:center;">निकास प्रक्रिया</h2>
-      <p style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:4px;">यो व्यक्ति देशबाट बाहिर जाँदैहुनुहुन्छ। राहदानी फिर्ता गर्नुहोस्।</p>
-      <div class="info-box" id="exitInfoBox"></div>
-      <button class="btn-primary" style="background:linear-gradient(145deg,var(--amber),#b3760f);box-shadow:0 8px 22px rgba(245,166,35,.28);" onclick="confirmBorderExit()">
-        राहदानी फिर्ता गरियो — निकास स्वीकृत
-      </button>
-      <button class="btn-ghost" onclick="goScan()">रद्द गर्नुहोस्</button>
-    </section>
-
-    <!-- ================= RESULT (denied / generic messages) ================= -->
-    <section class="screen" id="screen-result">
-      <div id="resultIcon" class="result-icon"></div>
-      <div class="result-title" id="resultTitle"></div>
-      <div class="result-desc" id="resultDesc"></div>
-      <div class="info-box" id="resultInfoBox" style="display:none;"></div>
-      <button class="btn-primary" onclick="goScan()">फेरि स्क्यान गर्नुहोस्</button>
-      <button class="btn-ghost" onclick="goHome()">गृहपृष्ठमा फर्कनुहोस्</button>
-    </section>
-
-    <!-- ================= PASS ================= -->
-    <section class="screen" id="screen-pass">
-      <div class="pass-card" id="passCard">
-        <div class="pass-head">
-          <div class="em">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.6"><path d="M3 20 L9 6 L12 12 L15 4 L21 20 Z"/></svg>
-            <div><h3 id="passTitleTop">प्रवेश अनुमतिपत्र</h3><span id="passTitleSub">ENTRY PASS</span></div>
+          <div class="stat-card accent-indigo">
+            <span class="stat-label">जम्मा विद्यार्थी</span>
+            <span class="stat-num" id="statStudents">०</span>
           </div>
-          <div class="badge" id="passBadge">नागरिक</div>
-        </div>
-        <div class="pass-id-row">
-          <img id="passPhoto" class="pass-photo" src="">
-          <div>
-            <div class="pass-name" id="passName">—</div>
-            <div class="pass-sub" id="passSub">—</div>
-            <div class="status-pill in" id="passStatusPill" style="display:none;"></div>
+          <div class="stat-card accent-marigold">
+            <span class="stat-label">आज हाजिर (विद्यार्थी)</span>
+            <span class="stat-num" id="statTodayStudents">०</span>
+          </div>
+          <div class="stat-card accent-pati">
+            <span class="stat-label">आज हाजिर (शिक्षक)</span>
+            <span class="stat-num" id="statTodayTeachers">०</span>
           </div>
         </div>
-        <div class="pass-grid" id="passGrid"></div>
-        <hr class="pass-divider">
-        <div class="pass-foot">
-          <div>
-            <div class="g-label mono">PASS ID</div>
-            <div class="g-val mono" id="passIdVal">—</div>
-            <div class="g-label mono" style="margin-top:8px;">ISSUED</div>
-            <div class="g-val mono" id="passTimeVal">—</div>
-          </div>
-          <div id="qrbox"></div>
+
+        <div class="card">
+          <h2 class="card-title">आजको स्थिति</h2>
+          <p class="muted" id="dashboardToday">—</p>
+          <div id="dashboardHolidayNote"></div>
         </div>
-      </div>
-      <div class="pass-note">यो पास व्यवस्थापन प्रणालीद्वारा स्वतः उत्पन्न गरिएको हो, यो कुनै आधिकारिक राहदानी वा भिसा कागजात होइन।</div>
-      <button class="btn-primary" onclick="goHome()">गृहपृष्ठमा फर्कनुहोस्</button>
-      <button class="btn-secondary" onclick="goScan()">थप स्क्यान गर्नुहोस्</button>
-    </section>
 
-    <!-- ================= HISTORY ================= -->
-    <section class="screen" id="screen-history">
-      <h2 style="font-size:19px;margin-bottom:14px;">इन्ट्री लगबुक</h2>
-      <input class="search-box" id="historySearch" placeholder="नामले खोज्नुहोस्..." oninput="renderHistory()">
-      <div class="filter-row">
-        <div class="chip on" data-f="all" onclick="setHistFilter('all')">सबै</div>
-        <div class="chip" data-f="border" onclick="setHistFilter('border')">बोर्डर</div>
-        <div class="chip" data-f="city" onclick="setHistFilter('city')">सिटी</div>
-        <div class="chip" data-f="entry" onclick="setHistFilter('entry')">प्रवेश</div>
-        <div class="chip" data-f="exit" onclick="setHistFilter('exit')">निकास</div>
-      </div>
-      <div id="historyList"></div>
-    </section>
+        <div class="card">
+          <h2 class="card-title">छिटो सुरुवात</h2>
+          <div class="quick-actions">
+            <button class="btn btn-primary" data-goto="school">१. विद्यालय दर्ता</button>
+            <button class="btn btn-primary" data-goto="teachers">२. शिक्षक/विद्यार्थी दर्ता</button>
+            <button class="btn btn-primary" data-goto="attendance">३. हाजिर लगाउनुहोस्</button>
+            <button class="btn btn-primary" data-goto="reports">४. प्रतिवेदन निकाल्नुहोस्</button>
+          </div>
+        </div>
+      </section>
 
-    <!-- ================= PEOPLE ================= -->
-    <section class="screen" id="screen-people">
-      <h2 style="font-size:19px;margin-bottom:14px;">दर्ता भएका व्यक्तिहरू</h2>
-      <input class="search-box" id="peopleSearch" placeholder="नामले खोज्नुहोस्..." oninput="renderPeople()">
-      <div id="peopleList"></div>
-      <button class="btn-secondary" style="border-color:rgba(226,51,77,.4);color:var(--crimson);" onclick="confirmResetDb()">⚠️ सम्पूर्ण डाटा रिसेट गर्नुहोस्</button>
-    </section>
+      <!-- ---------- SCHOOL SETUP ---------- -->
+      <section class="view" id="view-school">
+        <div class="card">
+          <h2 class="card-title">विद्यालयको विवरण</h2>
+          <form id="schoolForm" class="form-grid">
+            <label>विद्यालयको नाम<input required type="text" id="schName" placeholder="जस्तै: श्री सरस्वती माध्यमिक विद्यालय"></label>
+            <label>ठेगाना<input type="text" id="schAddress" placeholder="जस्तै: पोखरा-५, कास्की"></label>
+            <label>प्रधानाध्यापकको नाम<input type="text" id="schPrincipal" placeholder="प्रधानाध्यापकको नाम"></label>
+            <label>स्थापना वर्ष (वि.सं.)<input type="text" id="schEstd" placeholder="जस्तै: २०४५"></label>
+            <label>लोगो <input type="file" id="schLogo" accept="image/*"></label>
+            <div class="logo-preview-wrap"><img id="schLogoPreview" class="logo-preview" alt=""></div>
+            <button class="btn btn-primary" type="submit">सुरक्षित गर्नुहोस्</button>
+          </form>
+        </div>
 
+        <div class="card">
+          <h2 class="card-title">कक्षा व्यवस्थापन</h2>
+          <form id="classForm" class="inline-form">
+            <input required type="text" id="className" placeholder="जस्तै: कक्षा १० - क">
+            <button class="btn btn-secondary" type="submit">कक्षा थप्नुहोस्</button>
+          </form>
+          <div class="table-wrap">
+            <table class="data-table" id="classTable">
+              <thead><tr><th>कक्षा</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- TEACHERS ---------- -->
+      <section class="view" id="view-teachers">
+        <div class="card">
+          <h2 class="card-title">नयाँ शिक्षक दर्ता</h2>
+          <form id="teacherForm" class="form-grid">
+            <label>पूरा नाम<input required type="text" id="tName" placeholder="शिक्षकको नाम"></label>
+            <label>विषय<input type="text" id="tSubject" placeholder="जस्तै: गणित"></label>
+            <label>फोन नम्बर<input type="text" id="tPhone" placeholder="९८XXXXXXXX"></label>
+            <div class="face-capture-block" data-target="teacher">
+              <div class="cam-box">
+                <video autoplay muted playsinline id="tVideo"></video>
+                <canvas id="tOverlay"></canvas>
+              </div>
+              <div class="cam-controls">
+                <button type="button" class="btn btn-secondary" id="tCamStart">क्यामेरा सुरु गर्नुहोस्</button>
+                <button type="button" class="btn btn-primary" id="tCapture" disabled>अनुहार खिच्नुहोस्</button>
+                <span class="cam-status" id="tCamStatus">क्यामेरा बन्द छ</span>
+              </div>
+              <img id="tPhotoPreview" class="photo-preview" alt="">
+            </div>
+            <button class="btn btn-primary" type="submit" id="tSubmitBtn" disabled>शिक्षक दर्ता गर्नुहोस्</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">दर्ता भएका शिक्षकहरू</h2>
+          <div class="table-wrap">
+            <table class="data-table" id="teacherTable">
+              <thead><tr><th>फोटो</th><th>नाम</th><th>विषय</th><th>फोन</th><th>अनुहार डाटा</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- STUDENTS ---------- -->
+      <section class="view" id="view-students">
+        <div class="card">
+          <h2 class="card-title">नयाँ विद्यार्थी दर्ता</h2>
+          <form id="studentForm" class="form-grid">
+            <label>पूरा नाम<input required type="text" id="sName" placeholder="विद्यार्थीको नाम"></label>
+            <label>रोल नम्बर<input type="text" id="sRoll" placeholder="जस्तै: ०१"></label>
+            <label>कक्षा
+              <select required id="sClass"><option value="">कक्षा छान्नुहोस्</option></select>
+            </label>
+            <label>अभिभावकको नाम<input type="text" id="sGuardian" placeholder="अभिभावकको नाम"></label>
+            <div class="face-capture-block" data-target="student">
+              <div class="cam-box">
+                <video autoplay muted playsinline id="sVideo"></video>
+                <canvas id="sOverlay"></canvas>
+              </div>
+              <div class="cam-controls">
+                <button type="button" class="btn btn-secondary" id="sCamStart">क्यामेरा सुरु गर्नुहोस्</button>
+                <button type="button" class="btn btn-primary" id="sCapture" disabled>अनुहार खिच्नुहोस्</button>
+                <span class="cam-status" id="sCamStatus">क्यामेरा बन्द छ</span>
+              </div>
+              <img id="sPhotoPreview" class="photo-preview" alt="">
+            </div>
+            <button class="btn btn-primary" type="submit" id="sSubmitBtn" disabled>विद्यार्थी दर्ता गर्नुहोस्</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">दर्ता भएका विद्यार्थीहरू</h2>
+          <label class="filter-label">कक्षा अनुसार फिल्टर
+            <select id="studentFilterClass"><option value="">सबै कक्षा</option></select>
+          </label>
+          <div class="table-wrap">
+            <table class="data-table" id="studentTable">
+              <thead><tr><th>फोटो</th><th>नाम</th><th>रोल</th><th>कक्षा</th><th>अभिभावक</th><th>अनुहार डाटा</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- ATTENDANCE ---------- -->
+      <section class="view" id="view-attendance">
+        <div class="card">
+          <h2 class="card-title">हाजिर लगाउने मोड छान्नुहोस्</h2>
+          <div class="mode-switch">
+            <button class="mode-btn active" data-mode="student">🎓 विद्यार्थी हाजिर</button>
+            <button class="mode-btn" data-mode="teacher">🧑‍🏫 शिक्षक हाजिर</button>
+          </div>
+          <div id="attClassPicker" class="filter-label">
+            कक्षा छान्नुहोस्
+            <select id="attClassSelect"><option value="">कक्षा छान्नुहोस्</option></select>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">लाइभ अनुहार पहिचान</h2>
+          <div class="att-live-grid">
+            <div class="cam-box big">
+              <video autoplay muted playsinline id="attVideo"></video>
+              <canvas id="attOverlay"></canvas>
+              <div class="scan-frame" aria-hidden="true"></div>
+            </div>
+            <div class="att-side">
+              <button class="btn btn-primary wide" id="attCamStart">क्यामेरा सुरु गर्नुहोस्</button>
+              <p class="cam-status" id="attCamStatus">क्यामेरा बन्द छ</p>
+              <div class="att-log">
+                <h3>आजको हाजिर लग</h3>
+                <ul id="attLogList" class="log-list"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">म्यानुअल हाजिर (क्यामेरा नभएमा)</h2>
+          <p class="muted">कुनै कारणले अनुहार पहिचान नभएमा तलबाट म्यानुअल रूपमा हाजिर लगाउन सकिन्छ।</p>
+          <div class="table-wrap">
+            <table class="data-table" id="manualAttTable">
+              <thead><tr><th>नाम</th><th>स्थिति</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- HOLIDAYS ---------- -->
+      <section class="view" id="view-holidays">
+        <div class="card">
+          <h2 class="card-title">बिदा थप्नुहोस्</h2>
+          <form id="holidayForm" class="form-grid">
+            <label>मिति<input required type="date" id="hDate"></label>
+            <label>कारण<input type="text" id="hReason" placeholder="जस्तै: दशैं बिदा, शनिबार, राष्ट्रिय बिदा"></label>
+            <button class="btn btn-primary" type="submit">बिदा थप्नुहोस्</button>
+          </form>
+          <p class="muted">सुझाव: प्रत्येक शनिबारलाई साप्ताहिक बिदाको रूपमा एकैचोटि थप्न तलको बटन प्रयोग गर्नुहोस्।</p>
+          <div class="inline-form">
+            <select id="satMonthPicker"></select>
+            <button type="button" class="btn btn-secondary" id="addSaturdaysBtn">यस महिनाका शनिबार थप्नुहोस्</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">थपिएका बिदाहरू</h2>
+          <div class="table-wrap">
+            <table class="data-table" id="holidayTable">
+              <thead><tr><th>मिति</th><th>कारण</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- REPORTS ---------- -->
+      <section class="view" id="view-reports">
+        <div class="card">
+          <h2 class="card-title">मासिक हाजिर प्रतिवेदन</h2>
+          <div class="form-grid">
+            <label>प्रतिवेदन प्रकार
+              <select id="repType">
+                <option value="student">विद्यार्थी (कक्षा अनुसार)</option>
+                <option value="teacher">शिक्षक</option>
+              </select>
+            </label>
+            <label id="repClassWrap">कक्षा
+              <select id="repClass"></select>
+            </label>
+            <label>वर्ष (ई.सं.)
+              <input type="number" id="repYear">
+            </label>
+            <label>महिना
+              <select id="repMonth"></select>
+            </label>
+          </div>
+          <button class="btn btn-primary" id="genReportBtn">तालिका बनाउनुहोस्</button>
+          <button class="btn btn-secondary" id="exportExcelBtn" disabled>📥 एक्सेलमा निर्यात गर्नुहोस्</button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">पूर्वावलोकन</h2>
+          <div class="table-wrap" id="reportPreviewWrap">
+            <p class="muted">माथिबाट विवरण छानेर "तालिका बनाउनुहोस्" थिच्नुहोस्।</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
-
-  <nav class="bottomnav">
-    <button class="nav-btn on" data-n="home" onclick="nav('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>गृह</span>
-    </button>
-    <button class="nav-btn" data-n="scan" onclick="goScan()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="3.2"/></svg><span>स्क्यान</span>
-    </button>
-    <button class="nav-btn" data-n="history" onclick="nav('history')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v4l3 2"/></svg><span>इतिहास</span>
-    </button>
-    <button class="nav-btn" data-n="people" onclick="nav('people')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14c2.6.3 4.5 2.3 4.5 5.5"/></svg><span>व्यक्ति</span>
-    </button>
-  </nav>
-
-  <div class="overlay" id="personSheetOverlay" onclick="closeSheetOnBg(event)">
-    <div class="sheet" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div id="personSheetBody"></div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
 </div>
 
+<div id="toastHost" class="toast-host"></div>
 <script>
-/* ================= STATE ================= */
-let state = { gate:null, lane:'entry', regType:'citizen', pendingDescriptor:null, pendingPhoto:null, activePerson:null, histFilter:'all' };
-let modelsReady = false;
-let currentStream = null;
-let detectLoop = null;
-let lastMatchTime = 0;
-let db;
 
-/* ================= INDEXEDDB ================= */
-function openDb(){
-  return new Promise((resolve,reject)=>{
-    const req = indexedDB.open('entryPassDB', 1);
-    req.onupgradeneeded = (e)=>{
-      const d = e.target.result;
-      if(!d.objectStoreNames.contains('people')) d.createObjectStore('people',{keyPath:'id'});
-      if(!d.objectStoreNames.contains('logs')) d.createObjectStore('logs',{keyPath:'logId',autoIncrement:true});
-    };
-    req.onsuccess = (e)=>{ db=e.target.result; resolve(db); };
-    req.onerror = (e)=> reject(e);
-  });
-}
-function tx(store,mode){ return db.transaction(store,mode).objectStore(store); }
-function dbGetAll(store){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
-function dbPut(store,val){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(val); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
-function dbDelete(store,key){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').delete(key); r.onsuccess=()=>res(); r.onerror=rej; }); }
-function dbClear(store){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').clear(); r.onsuccess=()=>res(); r.onerror=rej; }); }
+/* ===== db.js ===== */
+/* =========================================================
+   db.js — IndexedDB wrapper
+   Stores: meta, classes, teachers, students, attendance, holidays
+   ========================================================= */
+const HDB = (() => {
+  const DB_NAME = 'hajirDB';
+  const DB_VERSION = 1;
+  let dbInstance = null;
 
-/* ================= UTIL ================= */
-function toast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200);
-}
-function uid(){ return 'P-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(); }
-function nowStr(){ return new Date().toLocaleString('ne-NP',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short',year:'numeric'}); }
-function euclid(a,b){ let s=0; for(let i=0;i<a.length;i++){ s+=(a[i]-b[i])**2; } return Math.sqrt(s); }
-
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function setNav(name){
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on', b.dataset.n===name));
-}
-function updateGateChip(){
-  const chip = document.getElementById('gateChip');
-  const txt = document.getElementById('gateChipText');
-  chip.className='gate-chip';
-  if(!state.gate){ txt.textContent='गेट चयन गर्नुहोस्'; return; }
-  chip.classList.add(state.gate==='border' ? 'active-border':'active-city');
-  txt.textContent = (state.gate==='border'?'बोर्डर':'सिटी') + ' · ' + (state.lane==='entry'?'प्रवेश':'निकास');
-}
-
-/* ================= NAVIGATION ================= */
-function nav(name){
-  stopCamera();
-  if(name==='home') goHome();
-  if(name==='history'){ show('screen-history'); setNav('history'); renderHistory(); }
-  if(name==='people'){ show('screen-people'); setNav('people'); renderPeople(); }
-}
-function goHome(){ stopCamera(); show('screen-home'); setNav('home'); refreshStats(); }
-function selectGate(g){
-  state.gate=g;
-  document.getElementById('cardBorder').classList.toggle('sel-border', g==='border');
-  document.getElementById('cardCity').classList.toggle('sel-city', g==='city');
-  updateGateChip();
-}
-function selectLane(l){
-  state.lane=l;
-  document.getElementById('laneEntry').classList.toggle('sel', l==='entry');
-  document.getElementById('laneExit').classList.toggle('sel', l==='exit');
-  updateGateChip();
-}
-selectGate('border'); selectLane('entry');
-
-/* ================= STATS ================= */
-async function refreshStats(){
-  const people = await dbGetAll('people');
-  const logs = await dbGetAll('logs');
-  document.getElementById('statTotal').textContent = people.length;
-  const today = new Date().toDateString();
-  document.getElementById('statToday').textContent = logs.filter(l=> new Date(l.timestamp).toDateString()===today && l.action==='entry').length;
-  document.getElementById('statInCountry').textContent = people.filter(p=>p.type==='foreigner' && p.inCountry).length;
-}
-
-/* ================= CAMERA + FACE MODELS ================= */
-async function loadModels(){
-  if(modelsReady) return true;
-  try{
-    const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-    modelsReady = true;
-    return true;
-  }catch(err){
-    console.error(err);
-    return false;
-  }
-}
-async function startCamera(){
-  const video = document.getElementById('video');
-  document.getElementById('vfStatus').textContent = 'क्यामेरा अनुमति माग्दैछ...';
-  try{
-    currentStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:480}, height:{ideal:640}}, audio:false});
-    video.srcObject = currentStream;
-    document.getElementById('vfStatus').textContent = 'मोडेल लोड हुँदैछ...';
-    const ok = await loadModels();
-    if(!ok){
-      document.getElementById('vfStatus').textContent = '⚠️ मोडेल लोड असफल — इन्टरनेट जाँच्नुहोस्';
-      return;
-    }
-    document.getElementById('vfStatus').textContent = 'अनुहार स्क्यान गर्दैछ...';
-    startDetectLoop();
-  }catch(err){
-    console.error(err);
-    document.getElementById('vfStatus').textContent = '⚠️ क्यामेरा पहुँच अस्वीकृत भयो';
-  }
-}
-function stopCamera(){
-  if(detectLoop){ clearInterval(detectLoop); detectLoop=null; }
-  if(currentStream){ currentStream.getTracks().forEach(t=>t.stop()); currentStream=null; }
-}
-function startDetectLoop(){
-  const video = document.getElementById('video');
-  detectLoop = setInterval(async ()=>{
-    if(!modelsReady || video.readyState<2) return;
-    try{
-      const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224})).withFaceLandmarks().withFaceDescriptor();
-      if(det){
-        document.getElementById('scanStatusText').textContent = 'अनुहार फेला पर्यो — पहिचान गर्दैछ...';
-        document.getElementById('scanStatusText').className='scan-status warn';
-        const now = Date.now();
-        if(now - lastMatchTime > 1600){
-          lastMatchTime = now;
-          handleDetection(det.descriptor);
+  function open() {
+    if (dbInstance) return Promise.resolve(dbInstance);
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('meta')) {
+          db.createObjectStore('meta', { keyPath: 'key' });
         }
-      } else {
-        document.getElementById('scanStatusText').textContent = 'अनुहार फ्रेममा राख्नुहोस्';
-        document.getElementById('scanStatusText').className='scan-status';
+        if (!db.objectStoreNames.contains('classes')) {
+          db.createObjectStore('classes', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('teachers')) {
+          db.createObjectStore('teachers', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('students')) {
+          const s = db.createObjectStore('students', { keyPath: 'id', autoIncrement: true });
+          s.createIndex('classId', 'classId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('attendance')) {
+          const a = db.createObjectStore('attendance', { keyPath: 'id', autoIncrement: true });
+          a.createIndex('date', 'date', { unique: false });
+          a.createIndex('person', ['personType', 'personId', 'date'], { unique: false });
+        }
+        if (!db.objectStoreNames.contains('holidays')) {
+          db.createObjectStore('holidays', { keyPath: 'date' });
+        }
+      };
+      req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
+      req.onerror = (e) => reject(e.target.error);
+    });
+  }
+
+  async function tx(storeName, mode = 'readonly') {
+    const db = await open();
+    return db.transaction(storeName, mode).objectStore(storeName);
+  }
+
+  function reqToPromise(req) {
+    return new Promise((resolve, reject) => {
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  return {
+    async put(storeName, value) {
+      const store = await tx(storeName, 'readwrite');
+      return reqToPromise(store.put(value));
+    },
+    async add(storeName, value) {
+      const store = await tx(storeName, 'readwrite');
+      return reqToPromise(store.add(value));
+    },
+    async get(storeName, key) {
+      const store = await tx(storeName, 'readonly');
+      return reqToPromise(store.get(key));
+    },
+    async getAll(storeName) {
+      const store = await tx(storeName, 'readonly');
+      return reqToPromise(store.getAll());
+    },
+    async delete(storeName, key) {
+      const store = await tx(storeName, 'readwrite');
+      return reqToPromise(store.delete(key));
+    },
+    async getByIndex(storeName, indexName, value) {
+      const store = await tx(storeName, 'readonly');
+      const idx = store.index(indexName);
+      return reqToPromise(idx.getAll(value));
+    },
+    async clearStore(storeName) {
+      const store = await tx(storeName, 'readwrite');
+      return reqToPromise(store.clear());
+    }
+  };
+})();
+
+
+/* ===== face.js ===== */
+/* =========================================================
+   face.js — face-api.js को माध्यमबाट अनुहार पहिचान/म्याचिङ
+   ========================================================= */
+const HFace = (() => {
+  const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+  let modelsReady = false;
+  let loadingPromise = null;
+
+  function ensureModels() {
+    if (modelsReady) return Promise.resolve();
+    if (loadingPromise) return loadingPromise;
+    loadingPromise = (async () => {
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+      await faceapi.nets.faceLandmark68Tiny.loadFromUri(MODEL_URL);
+      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+      modelsReady = true;
+    })();
+    return loadingPromise;
+  }
+
+  async function startCamera(videoEl) {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360 }, audio: false });
+    videoEl.srcObject = stream;
+    await new Promise((res) => { videoEl.onloadedmetadata = () => res(); });
+    return stream;
+  }
+
+  function stopCamera(stream) {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+  }
+
+  const detectorOpts = () => new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+
+  /** एउटा भिडियो फ्रेमबाट एउटा मात्र (सबैभन्दा ठूलो) अनुहारको डिस्क्रिप्टर निकाल्ने */
+  async function getSingleDescriptor(videoEl) {
+    await ensureModels();
+    const result = await faceapi
+      .detectSingleFace(videoEl, detectorOpts())
+      .withFaceLandmarks(true)
+      .withFaceDescriptor();
+    if (!result) return null;
+    return { descriptor: Array.from(result.descriptor), box: result.detection.box };
+  }
+
+  /** भिडियो फ्रेमबाट भएजति सबै अनुहार पत्ता लगाउने (लाइभ हाजिरका लागि) */
+  async function detectAll(videoEl) {
+    await ensureModels();
+    const results = await faceapi
+      .detectAllFaces(videoEl, detectorOpts())
+      .withFaceLandmarks(true)
+      .withFaceDescriptors();
+    return results;
+  }
+
+  /** दर्ता भएका सबैको डिस्क्रिप्टरबाट FaceMatcher बनाउने
+   *  people: [{id, type, name, descriptor:[...]}] */
+  function buildMatcher(people, threshold = 0.5) {
+    const labeled = people
+      .filter(p => Array.isArray(p.descriptor) && p.descriptor.length)
+      .map(p => new faceapi.LabeledFaceDescriptors(
+        `${p.type}:${p.id}:${p.name}`,
+        [new Float32Array(p.descriptor)]
+      ));
+    if (!labeled.length) return null;
+    return new faceapi.FaceMatcher(labeled, threshold);
+  }
+
+  function drawDetections(canvas, videoEl, detections, labels) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = videoEl.videoWidth || videoEl.clientWidth;
+    canvas.height = videoEl.videoHeight || videoEl.clientHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    detections.forEach((d, i) => {
+      const box = d.detection.box;
+      ctx.strokeStyle = '#E8A33D';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(box.x, box.y, box.width, box.height);
+      if (labels && labels[i]) {
+        ctx.fillStyle = 'rgba(31,58,95,.85)';
+        const label = labels[i];
+        ctx.font = '14px Noto Sans Devanagari, sans-serif';
+        const textW = ctx.measureText(label).width + 12;
+        ctx.fillRect(box.x, box.y - 22, textW, 22);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, box.x + 6, box.y - 6);
       }
-    }catch(e){ /* ignore transient */ }
-  }, 500);
-}
-function manualCapture(){
-  const video = document.getElementById('video');
-  if(!modelsReady){ toast('मोडेल अझै लोड हुँदैछ...'); return; }
-  faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224})).withFaceLandmarks().withFaceDescriptor()
-  .then(det=>{
-    if(det) handleDetection(det.descriptor);
-    else toast('अनुहार फेला परेन, फेरि प्रयास गर्नुहोस्');
-  });
-}
-function captureSnapshot(){
-  const video = document.getElementById('video');
-  const c = document.createElement('canvas');
-  c.width = 240; c.height = 320;
-  const ctx = c.getContext('2d');
-  ctx.translate(c.width,0); ctx.scale(-1,1);
-  ctx.drawImage(video, 0,0,c.width,c.height);
-  return c.toDataURL('image/jpeg',0.85);
-}
+    });
+  }
 
-/* ================= SCAN ENTRY ================= */
-function goScan(){
-  if(!state.gate){ toast('कृपया पहिले गेट चयन गर्नुहोस्'); goHome(); return; }
-  show('screen-scan'); setNav('scan');
-  const vf = document.getElementById('viewfinder');
-  vf.className = 'viewfinder' + (state.gate==='city' ? ' city':'');
-  document.getElementById('scanline').style.background = state.gate==='city'
-    ? 'linear-gradient(90deg,transparent,var(--blue),transparent)'
-    : 'linear-gradient(90deg,transparent,var(--crimson),transparent)';
-  document.getElementById('scanStatusText').textContent = 'अनुहार फ्रेममा राख्नुहोस्';
-  document.getElementById('scanStatusText').className='scan-status';
-  updateGateChip();
-  startCamera();
-}
+  return { ensureModels, startCamera, stopCamera, getSingleDescriptor, detectAll, buildMatcher, drawDetections };
+})();
 
-/* ================= MATCHING ================= */
-async function findMatch(descriptor){
-  const people = await dbGetAll('people');
-  let best=null, bestDist=999;
-  people.forEach(p=>{
-    if(!p.descriptor) return;
-    const d = euclid(descriptor, p.descriptor);
-    if(d < bestDist){ bestDist=d; best=p; }
-  });
-  if(best && bestDist < 0.5) return best;
-  return null;
-}
 
-async function handleDetection(descriptor){
-  stopCamera();
-  const photo = captureSnapshot();
-  const person = await findMatch(descriptor);
-  if(person){
-    await processKnownPerson(person, photo);
-  } else {
-    if(state.lane==='exit'){
-      showResult('err','दर्ता फेला परेन','यो व्यक्ति प्रणालीमा दर्ता फेला परेन। निकासको लागि पहिले प्रवेश दर्ता आवश्यक छ।');
+/* ===== school.js ===== */
+/* =========================================================
+   school.js — विद्यालय विवरण र कक्षा व्यवस्थापन
+   ========================================================= */
+const HSchool = (() => {
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function loadSchoolInfo() {
+    const rec = await HDB.get('meta', 'school');
+    if (!rec) return null;
+    const info = rec.value;
+    document.getElementById('schName').value = info.name || '';
+    document.getElementById('schAddress').value = info.address || '';
+    document.getElementById('schPrincipal').value = info.principal || '';
+    document.getElementById('schEstd').value = info.estd || '';
+    if (info.logo) document.getElementById('schLogoPreview').src = info.logo;
+    document.getElementById('schoolFootName').textContent = info.name || 'विद्यालय दर्ता गर्नुहोस्';
+    return info;
+  }
+
+  async function getSchoolInfo() {
+    const rec = await HDB.get('meta', 'school');
+    return rec ? rec.value : null;
+  }
+
+  function initForm() {
+    const form = document.getElementById('schoolForm');
+    const logoInput = document.getElementById('schLogo');
+    logoInput.addEventListener('change', async () => {
+      if (logoInput.files[0]) {
+        const url = await fileToDataURL(logoInput.files[0]);
+        document.getElementById('schLogoPreview').src = url;
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let logo = document.getElementById('schLogoPreview').src || '';
+      if (logo.startsWith(location.origin) || logo === location.href) logo = '';
+      const info = {
+        name: document.getElementById('schName').value.trim(),
+        address: document.getElementById('schAddress').value.trim(),
+        principal: document.getElementById('schPrincipal').value.trim(),
+        estd: document.getElementById('schEstd').value.trim(),
+        logo
+      };
+      await HDB.put('meta', { key: 'school', value: info });
+      document.getElementById('schoolFootName').textContent = info.name || 'विद्यालय';
+      HApp.toast('विद्यालयको विवरण सुरक्षित भयो', 'success');
+      HApp.refreshDashboard();
+    });
+  }
+
+  /* ---------------- Classes ---------------- */
+  async function getClasses() {
+    const list = await HDB.getAll('classes');
+    return list.sort((a, b) => a.name.localeCompare(b.name, 'ne'));
+  }
+
+  async function renderClassTable() {
+    const classes = await getClasses();
+    const tbody = document.querySelector('#classTable tbody');
+    tbody.innerHTML = '';
+    if (!classes.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="muted">अहिलेसम्म कुनै कक्षा थपिएको छैन</td></tr>';
+    }
+    classes.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${HApp.esc(c.name)}</td>
+        <td><button class="icon-btn" data-del-class="${c.id}" title="मेटाउनुहोस्">🗑</button></td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-del-class]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('यो कक्षा मेटाउने हो?')) return;
+        await HDB.delete('classes', Number(btn.dataset.delClass));
+        await renderClassTable();
+        await populateClassDropdowns();
+      });
+    });
+  }
+
+  async function populateClassDropdowns() {
+    const classes = await getClasses();
+    const selects = [
+      document.getElementById('sClass'),
+      document.getElementById('studentFilterClass'),
+      document.getElementById('attClassSelect'),
+      document.getElementById('repClass')
+    ];
+    selects.forEach(sel => {
+      if (!sel) return;
+      const keepFirst = sel.id === 'studentFilterClass' || sel.id === 'attClassSelect';
+      const firstOptHtml = sel.id === 'studentFilterClass' ? '<option value="">सबै कक्षा</option>'
+        : sel.id === 'attClassSelect' ? '<option value="">कक्षा छान्नुहोस्</option>'
+        : sel.id === 'sClass' ? '<option value="">कक्षा छान्नुहोस्</option>' : '';
+      sel.innerHTML = firstOptHtml + classes.map(c => `<option value="${c.id}">${HApp.esc(c.name)}</option>`).join('');
+    });
+  }
+
+  function initClassForm() {
+    const form = document.getElementById('classForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nameInput = document.getElementById('className');
+      const name = nameInput.value.trim();
+      if (!name) return;
+      await HDB.add('classes', { name });
+      nameInput.value = '';
+      await renderClassTable();
+      await populateClassDropdowns();
+      HApp.toast('कक्षा थपियो', 'success');
+    });
+  }
+
+  function init() {
+    initForm();
+    initClassForm();
+    loadSchoolInfo();
+    renderClassTable();
+    populateClassDropdowns();
+  }
+
+  return { init, getSchoolInfo, getClasses, populateClassDropdowns };
+})();
+
+
+/* ===== people.js ===== */
+/* =========================================================
+   people.js — शिक्षक/विद्यार्थी दर्ता (अनुहार खिचाइसहित)
+   ========================================================= */
+const HPeople = (() => {
+  const camState = { teacher: { stream: null, descriptor: null, photo: null },
+                      student: { stream: null, descriptor: null, photo: null } };
+
+  function captureSnapshot(videoEl) {
+    const c = document.createElement('canvas');
+    c.width = videoEl.videoWidth; c.height = videoEl.videoHeight;
+    c.getContext('2d').drawImage(videoEl, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.85);
+  }
+
+  function setupCapture(kind) {
+    const prefix = kind === 'teacher' ? 't' : 's';
+    const video = document.getElementById(prefix + 'Video');
+    const overlay = document.getElementById(prefix + 'Overlay');
+    const startBtn = document.getElementById(prefix + 'CamStart');
+    const capBtn = document.getElementById(prefix + 'Capture');
+    const statusEl = document.getElementById(prefix + 'CamStatus');
+    const preview = document.getElementById(prefix + 'PhotoPreview');
+    const submitBtn = document.getElementById(prefix + 'SubmitBtn');
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        statusEl.textContent = 'मोडेल लोड हुँदैछ...';
+        await HFace.ensureModels();
+        camState[kind].stream = await HFace.startCamera(video);
+        statusEl.textContent = 'क्यामेरा चलिरहेको छ — अनुहार सिधा पारेर देखाउनुहोस्';
+        capBtn.disabled = false;
+      } catch (err) {
+        statusEl.textContent = 'क्यामेरा खोल्न सकिएन: ' + err.message;
+        HApp.toast('क्यामेरा अनुमति दिनुहोस्', 'error');
+      }
+    });
+
+    capBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'अनुहार खोजिँदैछ...';
+      const result = await HFace.getSingleDescriptor(video);
+      if (!result) {
+        statusEl.textContent = 'अनुहार भेटिएन, फेरि प्रयास गर्नुहोस्';
+        HApp.toast('अनुहार पत्ता लागेन। उज्यालोमा फेरि प्रयास गर्नुहोस्।', 'error');
+        return;
+      }
+      HFace.drawDetections(overlay, video, [{ detection: { box: result.box } }]);
+      camState[kind].descriptor = result.descriptor;
+      camState[kind].photo = captureSnapshot(video);
+      preview.src = camState[kind].photo;
+      statusEl.textContent = 'अनुहार सफलतापूर्वक खिचियो ✔';
+      submitBtn.disabled = false;
+      HApp.toast('अनुहार खिचियो', 'success');
+    });
+  }
+
+  function resetCapture(kind) {
+    const prefix = kind === 'teacher' ? 't' : 's';
+    HFace.stopCamera(camState[kind].stream);
+    camState[kind].stream = null;
+    camState[kind].descriptor = null;
+    camState[kind].photo = null;
+    document.getElementById(prefix + 'PhotoPreview').src = '';
+    document.getElementById(prefix + 'Capture').disabled = true;
+    document.getElementById(prefix + 'SubmitBtn').disabled = true;
+    document.getElementById(prefix + 'CamStatus').textContent = 'क्यामेरा बन्द छ';
+    const video = document.getElementById(prefix + 'Video');
+    video.srcObject = null;
+  }
+
+  /* ---------------- Teacher ---------------- */
+  function initTeacherForm() {
+    setupCapture('teacher');
+    const form = document.getElementById('teacherForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!camState.teacher.descriptor) { HApp.toast('कृपया पहिले अनुहार खिच्नुहोस्', 'error'); return; }
+      const rec = {
+        name: document.getElementById('tName').value.trim(),
+        subject: document.getElementById('tSubject').value.trim(),
+        phone: document.getElementById('tPhone').value.trim(),
+        photo: camState.teacher.photo,
+        descriptor: camState.teacher.descriptor,
+        createdAt: new Date().toISOString()
+      };
+      await HDB.add('teachers', rec);
+      form.reset();
+      resetCapture('teacher');
+      await renderTeacherTable();
+      HApp.toast('शिक्षक सफलतापूर्वक दर्ता भयो', 'success');
+      HApp.refreshDashboard();
+    });
+  }
+
+  async function renderTeacherTable() {
+    const teachers = await HDB.getAll('teachers');
+    const tbody = document.querySelector('#teacherTable tbody');
+    tbody.innerHTML = '';
+    if (!teachers.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">अहिलेसम्म कुनै शिक्षक दर्ता भएको छैन</td></tr>';
       return;
     }
-    state.pendingDescriptor = descriptor;
-    state.pendingPhoto = photo;
-    openRegisterScreen();
+    teachers.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><img class="avatar-sm" src="${t.photo || ''}" alt=""></td>
+        <td>${HApp.esc(t.name)}</td>
+        <td>${HApp.esc(t.subject || '-')}</td>
+        <td>${HApp.esc(t.phone || '-')}</td>
+        <td>${t.descriptor ? '<span class="tag-ok">✔ दर्ता</span>' : '<span class="tag-no">✘ छैन</span>'}</td>
+        <td><button class="icon-btn" data-del-teacher="${t.id}">🗑</button></td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-del-teacher]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('यो शिक्षकको विवरण मेटाउने हो?')) return;
+        await HDB.delete('teachers', Number(btn.dataset.delTeacher));
+        await renderTeacherTable();
+        HApp.refreshDashboard();
+      });
+    });
   }
-}
 
-async function processKnownPerson(person, photo){
-  state.activePerson = person;
-  person.lastPhoto = photo;
+  /* ---------------- Student ---------------- */
+  function initStudentForm() {
+    setupCapture('student');
+    const form = document.getElementById('studentForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!camState.student.descriptor) { HApp.toast('कृपया पहिले अनुहार खिच्नुहोस्', 'error'); return; }
+      const classId = Number(document.getElementById('sClass').value);
+      if (!classId) { HApp.toast('कृपया कक्षा छान्नुहोस्', 'error'); return; }
+      const rec = {
+        name: document.getElementById('sName').value.trim(),
+        roll: document.getElementById('sRoll').value.trim(),
+        classId,
+        guardian: document.getElementById('sGuardian').value.trim(),
+        photo: camState.student.photo,
+        descriptor: camState.student.descriptor,
+        createdAt: new Date().toISOString()
+      };
+      await HDB.add('students', rec);
+      form.reset();
+      resetCapture('student');
+      await renderStudentTable();
+      HApp.toast('विद्यार्थी सफलतापूर्वक दर्ता भयो', 'success');
+      HApp.refreshDashboard();
+    });
 
-  if(person.type==='citizen'){
-    // Citizen: always auto entry/exit, any number of times
-    await logAction(person, state.gate, state.lane);
-    if(state.lane==='entry'){
-      showPass(person, false);
-    } else {
-      showPass(person, false, true); // exit pass style, still fine, no restriction
+    document.getElementById('studentFilterClass').addEventListener('change', renderStudentTable);
+  }
+
+  async function renderStudentTable() {
+    const filterClassId = Number(document.getElementById('studentFilterClass').value) || null;
+    let students = await HDB.getAll('students');
+    if (filterClassId) students = students.filter(s => s.classId === filterClassId);
+    const classes = await HSchool.getClasses();
+    const classMap = Object.fromEntries(classes.map(c => [c.id, c.name]));
+    const tbody = document.querySelector('#studentTable tbody');
+    tbody.innerHTML = '';
+    if (!students.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="muted">कुनै विद्यार्थी भेटिएन</td></tr>';
+      return;
     }
-    return;
+    students.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><img class="avatar-sm" src="${s.photo || ''}" alt=""></td>
+        <td>${HApp.esc(s.name)}</td>
+        <td>${HApp.esc(s.roll || '-')}</td>
+        <td>${HApp.esc(classMap[s.classId] || '-')}</td>
+        <td>${HApp.esc(s.guardian || '-')}</td>
+        <td>${s.descriptor ? '<span class="tag-ok">✔ दर्ता</span>' : '<span class="tag-no">✘ छैन</span>'}</td>
+        <td><button class="icon-btn" data-del-student="${s.id}">🗑</button></td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-del-student]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('यो विद्यार्थीको विवरण मेटाउने हो?')) return;
+        await HDB.delete('students', Number(btn.dataset.delStudent));
+        await renderStudentTable();
+        HApp.refreshDashboard();
+      });
+    });
   }
 
-  // Foreigner
-  if(state.gate==='border'){
-    if(state.lane==='entry'){
-      if(person.inCountry){
-        showResult('err','प्रवेश अस्वीकृत','यो व्यक्ति पहिले नै देशभित्र हुनुहुन्छ। पुनः प्रवेशको लागि पहिले निकास (Exit) आवश्यक छ।', person);
-      } else {
-        openVerifyScreen(person);
-      }
-    } else { // border exit
-      if(person.inCountry){
-        openExitConfirmScreen(person);
-      } else {
-        showResult('err','निकास अस्वीकृत','यो व्यक्ति हाल देशभित्र दर्ता अवस्थामा हुनुहुन्न।', person);
-      }
-    }
-  } else { // city gate
-    if(state.lane==='entry'){
-      if(person.inCountry){
-        await logAction(person, 'city', 'entry');
-        showPass(person, false);
-      } else {
-        showResult('err','सिटी प्रवेश अस्वीकृत','यो विदेशी नागरिकले अझै बोर्डरबाट देश प्रवेश गर्नुभएको छैन। कृपया पहिले बोर्डर गेटबाट प्रवेश गराउनुहोस्।', person);
-      }
-    } else { // city exit - just a movement log
-      if(person.inCountry){
-        await logAction(person, 'city', 'exit');
-        showPass(person, false, true);
-      } else {
-        showResult('err','त्रुटि','यो व्यक्तिको हाल देशभित्र अवस्था फेला परेन।', person);
-      }
-    }
-  }
-}
-
-/* ================= REGISTER FLOW ================= */
-function openRegisterScreen(){
-  document.getElementById('regPhoto').src = state.pendingPhoto;
-  setRegType(state.gate==='city' ? 'citizen':'citizen');
-  document.getElementById('typeForeignerBtn').disabled = (state.gate==='city');
-  document.getElementById('foreignerBorderNote').style.display = (state.gate==='city') ? 'block':'none';
-  ['c_name','c_docnum','c_district','c_dob','c_address','f_name','f_nationality','f_passport','f_visa','f_address'].forEach(id=>document.getElementById(id).value='');
-  show('screen-register');
-}
-function setRegType(t){
-  if(t==='foreigner' && state.gate==='city'){ toast('विदेशी दर्ता बोर्डर गेटबाट मात्र सम्भव छ'); return; }
-  state.regType = t;
-  document.getElementById('typeCitizenBtn').classList.toggle('on', t==='citizen');
-  document.getElementById('typeForeignerBtn').classList.toggle('on', t==='foreigner');
-  document.getElementById('citizenFields').style.display = t==='citizen' ? 'block':'none';
-  document.getElementById('foreignerFields').style.display = t==='foreigner' ? 'block':'none';
-}
-async function submitRegistration(){
-  const t = state.regType;
-  let person = {
-    id: uid(),
-    type: t,
-    descriptor: Array.from(state.pendingDescriptor),
-    photo: state.pendingPhoto,
-    gender: document.getElementById('r_gender').value,
-    registeredAt: Date.now(),
-    inCountry: false,
-    docHeld: false
-  };
-  if(t==='citizen'){
-    const name = document.getElementById('c_name').value.trim();
-    if(!name){ toast('कृपया नाम भर्नुहोस्'); return; }
-    person.name = name;
-    person.docNumber = document.getElementById('c_docnum').value.trim();
-    person.district = document.getElementById('c_district').value.trim();
-    person.dob = document.getElementById('c_dob').value.trim();
-    person.address = document.getElementById('c_address').value.trim();
-    person.inCountry = true;
-  } else {
-    if(state.gate!=='border'){ toast('विदेशी दर्ता बोर्डरबाट मात्र गर्नुहोस्'); return; }
-    const name = document.getElementById('f_name').value.trim();
-    if(!name){ toast('कृपया नाम भर्नुहोस्'); return; }
-    person.name = name;
-    person.nationality = document.getElementById('f_nationality').value.trim();
-    person.docNumber = document.getElementById('f_passport').value.trim();
-    person.visa = document.getElementById('f_visa').value.trim();
-    person.address = document.getElementById('f_address').value.trim();
-    person.inCountry = true;
-    person.docHeld = true;
-  }
-  await dbPut('people', person);
-  await logAction(person, state.gate, 'entry');
-  showPass(person, true);
-}
-
-/* ================= VERIFY / EXIT SCREENS ================= */
-function personInfoRows(p){
-  let rows = `
-    <div class="info-row"><span class="k">नाम</span><span class="v">${p.name}</span></div>
-    <div class="info-row"><span class="k">प्रकार</span><span class="v">${p.type==='citizen'?'नागरिक':'विदेशी'}</span></div>`;
-  if(p.type==='citizen'){
-    rows += `<div class="info-row"><span class="k">नागरिकता नं.</span><span class="v mono">${p.docNumber||'—'}</span></div>`;
-  } else {
-    rows += `
-    <div class="info-row"><span class="k">राष्ट्रियता</span><span class="v">${p.nationality||'—'}</span></div>
-    <div class="info-row"><span class="k">राहदानी नं.</span><span class="v mono">${p.docNumber||'—'}</span></div>
-    <div class="info-row"><span class="k">भिसा</span><span class="v">${p.visa||'—'}</span></div>`;
-  }
-  return rows;
-}
-function openVerifyScreen(person){
-  state.activePerson = person;
-  document.getElementById('verifyInfoBox').innerHTML = personInfoRows(person);
-  show('screen-verify');
-}
-async function confirmBorderEntry(){
-  const p = state.activePerson;
-  p.inCountry = true; p.docHeld = true;
-  await dbPut('people', p);
-  await logAction(p, 'border', 'entry');
-  showPass(p, true);
-}
-function openExitConfirmScreen(person){
-  state.activePerson = person;
-  document.getElementById('exitInfoBox').innerHTML = personInfoRows(person) + `<div class="info-row"><span class="k">राहदानी अवस्था</span><span class="v" style="color:var(--amber)">कार्यालयमा जम्मा</span></div>`;
-  show('screen-exitconfirm');
-}
-async function confirmBorderExit(){
-  const p = state.activePerson;
-  p.inCountry = false; p.docHeld = false;
-  await dbPut('people', p);
-  await logAction(p, 'border', 'exit');
-  showPass(p, false, true);
-}
-
-/* ================= LOGGING ================= */
-async function logAction(person, gate, action){
-  const log = {
-    personId: person.id, name: person.name, type: person.type,
-    gate, action, timestamp: Date.now(), photo: person.photo
-  };
-  await dbPut('logs', log);
-}
-
-/* ================= RESULT SCREEN ================= */
-function showResult(kind, title, desc, person){
-  show('screen-result');
-  const icon = document.getElementById('resultIcon');
-  icon.className = 'result-icon ' + (kind==='ok'?'ok':kind==='warn'?'warn':'err');
-  icon.innerHTML = kind==='err'
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="var(--crimson)" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>'
-    : '<svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
-  document.getElementById('resultTitle').textContent = title;
-  document.getElementById('resultDesc').textContent = desc;
-  const box = document.getElementById('resultInfoBox');
-  if(person){ box.style.display='block'; box.innerHTML = personInfoRows(person); }
-  else{ box.style.display='none'; }
-}
-
-/* ================= PASS SCREEN ================= */
-function showPass(person, isNew, isExit){
-  show('screen-pass');
-  const card = document.getElementById('passCard');
-  card.className = 'pass-card' + (person.type==='foreigner' ? ' foreigner':'') + (isExit ? ' exit':'');
-
-  document.getElementById('passTitleTop').textContent = isExit ? 'निकास पुष्टि पर्ची' : 'प्रवेश अनुमतिपत्र';
-  document.getElementById('passTitleSub').textContent = isExit ? 'EXIT CONFIRMATION' : 'ENTRY PASS';
-  const badge = document.getElementById('passBadge');
-  badge.className = 'badge ' + (isExit ? 'exit' : (person.type==='citizen'?'citizen':'foreigner'));
-  badge.textContent = isExit ? 'EXIT' : (person.type==='citizen' ? 'नागरिक' : 'विदेशी');
-
-  document.getElementById('passPhoto').src = person.lastPhoto || person.photo;
-  document.getElementById('passName').textContent = person.name;
-  document.getElementById('passSub').textContent = person.type==='citizen'
-    ? ('नागरिकता नं: ' + (person.docNumber||'—'))
-    : ((person.nationality||'—') + ' · ' + (person.docNumber||'—'));
-
-  const pill = document.getElementById('passStatusPill');
-  if(person.type==='foreigner'){
-    pill.style.display='inline-flex';
-    pill.className = 'status-pill ' + (person.inCountry ? 'in':'out');
-    pill.textContent = person.inCountry ? '● हाल देशभित्र' : '● देश बाहिर';
-  } else {
-    pill.style.display='none';
+  function init() {
+    initTeacherForm();
+    initStudentForm();
+    renderTeacherTable();
+    renderStudentTable();
   }
 
-  const grid = document.getElementById('passGrid');
-  let cells = [
-    ['गेट', state.gate==='border'?'बोर्डर गेट':'सिटी गेट'],
-    ['लेन', isExit?'निकास':'प्रवेश'],
-    ['मिति/समय', nowStr()],
-    ['लिङ्ग', person.gender||'—']
-  ];
-  if(person.type==='foreigner'){
-    cells.push(['राहदानी अवस्था', person.docHeld ? 'कार्यालयमा जम्मा':'फिर्ता भयो']);
-    cells.push(['भिसा', person.visa||'—']);
-  } else {
-    cells.push(['ठेगाना', person.address||'—']);
-    cells.push(['जारी जिल्ला', person.district||'—']);
-  }
-  grid.innerHTML = cells.map(c=>`<div><div class="g-label mono">${c[0].toUpperCase()}</div><div class="g-val">${c[1]}</div></div>`).join('');
-
-  const passId = 'EP-'+person.id.slice(-6)+'-'+Date.now().toString(36).slice(-4).toUpperCase();
-  document.getElementById('passIdVal').textContent = passId;
-  document.getElementById('passTimeVal').textContent = nowStr();
-
-  const qrbox = document.getElementById('qrbox');
-  qrbox.innerHTML='';
-  try{
-    new QRCode(qrbox, { text: passId+'|'+person.name+'|'+person.type, width:52, height:52, colorDark:'#0A0F1C', colorLight:'#ffffff' });
-  }catch(e){ qrbox.textContent='QR'; }
-
-  refreshStats();
-}
-
-/* ================= HISTORY ================= */
-function setHistFilter(f){
-  state.histFilter = f;
-  document.querySelectorAll('.filter-row .chip').forEach(c=>c.classList.toggle('on', c.dataset.f===f));
-  renderHistory();
-}
-async function renderHistory(){
-  const logs = (await dbGetAll('logs')).sort((a,b)=>b.timestamp-a.timestamp);
-  const q = document.getElementById('historySearch').value.trim().toLowerCase();
-  const f = state.histFilter;
-  const filtered = logs.filter(l=>{
-    if(q && !l.name.toLowerCase().includes(q)) return false;
-    if(f==='all') return true;
-    if(f==='border'||f==='city') return l.gate===f;
-    if(f==='entry'||f==='exit') return l.action===f;
-    return true;
-  });
-  const list = document.getElementById('historyList');
-  if(filtered.length===0){
-    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg><div>कुनै लग रेकर्ड फेला परेन</div></div>`;
-    return;
-  }
-  list.innerHTML = filtered.map(l=>`
-    <div class="log-item">
-      <img class="log-photo" src="${l.photo||''}">
-      <div class="log-body">
-        <div class="n">${l.name}</div>
-        <div class="m">${l.type==='citizen'?'नागरिक':'विदेशी'} · ${l.gate==='border'?'बोर्डर':'सिटी'} · ${new Date(l.timestamp).toLocaleString('ne-NP',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})}</div>
-      </div>
-      <div class="log-tag ${l.action}">${l.action==='entry'?'प्रवेश':'निकास'}</div>
-    </div>
-  `).join('');
-}
-
-/* ================= PEOPLE ================= */
-async function renderPeople(){
-  const people = (await dbGetAll('people')).sort((a,b)=>b.registeredAt-a.registeredAt);
-  const q = document.getElementById('peopleSearch').value.trim().toLowerCase();
-  const filtered = people.filter(p=> !q || p.name.toLowerCase().includes(q));
-  const list = document.getElementById('peopleList');
-  if(filtered.length===0){
-    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg><div>कुनै व्यक्ति दर्ता भएको छैन</div></div>`;
-    return;
-  }
-  list.innerHTML = filtered.map(p=>`
-    <div class="person-item" onclick="openPersonSheet('${p.id}')">
-      <img class="person-photo" src="${p.photo}">
-      <div class="person-body">
-        <div class="n">${p.name}</div>
-        <div class="m">${p.type==='citizen' ? 'नागरिक' : ('विदेशी · '+(p.nationality||'—')) + (p.inCountry?' · देशभित्र':' · देश बाहिर')}</div>
-      </div>
-    </div>
-  `).join('');
-}
-async function openPersonSheet(id){
-  const people = await dbGetAll('people');
-  const p = people.find(x=>x.id===id);
-  if(!p) return;
-  document.getElementById('personSheetBody').innerHTML = `
-    <div style="display:flex;gap:14px;align-items:center;">
-      <img src="${p.photo}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;">
-      <div><div style="font-size:17px;font-weight:800;">${p.name}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px;">दर्ता मिति: ${new Date(p.registeredAt).toLocaleDateString('ne-NP')}</div></div>
-    </div>
-    <div class="info-box">${personInfoRows(p)}
-      ${p.type==='foreigner' ? `<div class="info-row"><span class="k">अवस्था</span><span class="v">${p.inCountry?'देशभित्र':'देश बाहिर'}</span></div><div class="info-row"><span class="k">राहदानी</span><span class="v">${p.docHeld?'कार्यालयमा जम्मा':'फिर्ता भएको'}</span></div>` : ''}
-    </div>
-    <button class="btn-secondary" style="border-color:rgba(226,51,77,.4);color:var(--crimson);" onclick="deletePerson('${p.id}')">यो दर्ता मेटाउनुहोस्</button>
-    <button class="btn-ghost" onclick="closeSheet()">बन्द गर्नुहोस्</button>
-  `;
-  document.getElementById('personSheetOverlay').classList.add('show');
-}
-function closeSheet(){ document.getElementById('personSheetOverlay').classList.remove('show'); }
-function closeSheetOnBg(e){ if(e.target.id==='personSheetOverlay') closeSheet(); }
-async function deletePerson(id){
-  await dbDelete('people', id);
-  closeSheet();
-  toast('दर्ता मेटाइयो');
-  renderPeople(); refreshStats();
-}
-async function confirmResetDb(){
-  if(!confirm('साँच्चै सम्पूर्ण डाटा (सबै व्यक्ति र लग) मेटाउने हो?')) return;
-  await dbClear('people'); await dbClear('logs');
-  toast('डाटा रिसेट भयो');
-  renderPeople(); renderHistory(); refreshStats();
-}
-
-/* ================= INIT ================= */
-(async function init(){
-  await openDb();
-  refreshStats();
-  loadModels(); // preload in background
+  return { init, renderTeacherTable, renderStudentTable };
 })();
+
+
+/* ===== attendance.js ===== */
+/* =========================================================
+   attendance.js — लाइभ अनुहार पहिचानद्वारा हाजिर लगाउने
+   ========================================================= */
+const HAttendance = (() => {
+  let mode = 'student';      // 'student' | 'teacher'
+  let stream = null;
+  let loopTimer = null;
+  let matcher = null;
+  let peopleCache = [];       // people currently eligible for this mode/class
+  const markedToday = new Set(); // `${type}:${id}` marked in this session/today
+
+  function todayStr() {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  }
+
+  async function alreadyMarked(type, id, date) {
+    const list = await HDB.getByIndex('attendance', 'person', [type, id, date]);
+    return list && list.length > 0;
+  }
+
+  async function markPresent(type, id, classId) {
+    const date = todayStr();
+    const time = new Date().toLocaleTimeString('ne-NP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    await HDB.add('attendance', { personType: type, personId: id, classId: classId || null, date, time, status: 'present' });
+  }
+
+  function logEntry(text, dup = false) {
+    const list = document.getElementById('attLogList');
+    const li = document.createElement('li');
+    li.textContent = text;
+    if (dup) li.classList.add('dup');
+    list.prepend(li);
+  }
+
+  async function buildPeopleList() {
+    const date = todayStr();
+    if (mode === 'teacher') {
+      peopleCache = (await HDB.getAll('teachers')).map(t => ({ id: t.id, type: 'teacher', name: t.name, descriptor: t.descriptor, classId: null }));
+    } else {
+      const classId = Number(document.getElementById('attClassSelect').value) || null;
+      let students = await HDB.getAll('students');
+      if (classId) students = students.filter(s => s.classId === classId);
+      peopleCache = students.map(s => ({ id: s.id, type: 'student', name: s.name, descriptor: s.descriptor, classId: s.classId }));
+    }
+    matcher = HFace.buildMatcher(peopleCache, 0.5);
+    // preload today's already-marked set
+    markedToday.clear();
+    for (const p of peopleCache) {
+      if (await alreadyMarked(p.type, p.id, date)) markedToday.add(`${p.type}:${p.id}`);
+    }
+  }
+
+  async function renderManualTable() {
+    await buildPeopleList();
+    const tbody = document.querySelector('#manualAttTable tbody');
+    tbody.innerHTML = '';
+    if (!peopleCache.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="muted">${mode === 'teacher' ? 'कुनै शिक्षक दर्ता भएको छैन' : 'यस कक्षामा कुनै विद्यार्थी छैन (कक्षा छान्नुहोस्)'}</td></tr>`;
+      return;
+    }
+    peopleCache.forEach(p => {
+      const key = `${p.type}:${p.id}`;
+      const done = markedToday.has(key);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${HApp.esc(p.name)}</td>
+        <td>${done ? '<span class="tag-ok">✔ हाजिर भयो</span>' : '<span class="tag-no">✘ हाजिर छैन</span>'}</td>
+        <td>${done ? '' : `<button class="btn btn-secondary" data-manual-mark="${p.type}:${p.id}">हाजिर लगाउनुहोस्</button>`}</td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-manual-mark]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const [type, idStr] = btn.dataset.manualMark.split(':');
+        const id = Number(idStr);
+        const person = peopleCache.find(p => p.type === type && p.id === id);
+        await markPresent(type, id, person ? person.classId : null);
+        markedToday.add(`${type}:${id}`);
+        logEntry(`✅ ${person.name} — म्यानुअल हाजिर लगाइयो`, false);
+        await renderManualTable();
+        HApp.refreshDashboard();
+      });
+    });
+  }
+
+  async function detectionLoop(video, overlay) {
+    if (!matcher) { loopTimer = setTimeout(() => detectionLoop(video, overlay), 900); return; }
+    const detections = await HFace.detectAll(video);
+    const labels = [];
+    for (const d of detections) {
+      const best = matcher.findBestMatch(d.descriptor);
+      if (best.label === 'unknown') { labels.push('अज्ञात'); continue; }
+      const [type, idStr, ...nameParts] = best.label.split(':');
+      const id = Number(idStr);
+      const name = nameParts.join(':');
+      labels.push(`${name} (${(1 - best.distance).toFixed(2)})`);
+      const key = `${type}:${id}`;
+      if (!markedToday.has(key)) {
+        markedToday.add(key);
+        const person = peopleCache.find(p => p.type === type && p.id === id);
+        await markPresent(type, id, person ? person.classId : null);
+        logEntry(`✅ ${name} — हाजिर भयो (${new Date().toLocaleTimeString('ne-NP')})`, false);
+        HApp.refreshDashboard();
+        renderManualTable();
+      }
+    }
+    HFace.drawDetections(overlay, video, detections, labels);
+    loopTimer = setTimeout(() => detectionLoop(video, overlay), 900);
+  }
+
+  function initModeSwitch() {
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        mode = btn.dataset.mode;
+        document.getElementById('attClassPicker').style.display = mode === 'student' ? 'flex' : 'none';
+        await renderManualTable();
+      });
+    });
+    document.getElementById('attClassSelect').addEventListener('change', renderManualTable);
+    document.getElementById('attClassPicker').style.display = mode === 'student' ? 'flex' : 'none';
+  }
+
+  function initCamera() {
+    const startBtn = document.getElementById('attCamStart');
+    const video = document.getElementById('attVideo');
+    const overlay = document.getElementById('attOverlay');
+    const statusEl = document.getElementById('attCamStatus');
+
+    startBtn.addEventListener('click', async () => {
+      if (stream) {
+        HFace.stopCamera(stream);
+        stream = null;
+        clearTimeout(loopTimer);
+        video.srcObject = null;
+        statusEl.textContent = 'क्यामेरा बन्द छ';
+        startBtn.textContent = 'क्यामेरा सुरु गर्नुहोस्';
+        return;
+      }
+      try {
+        statusEl.textContent = 'मोडेल लोड हुँदैछ...';
+        await HFace.ensureModels();
+        await buildPeopleList();
+        if (!peopleCache.length) {
+          statusEl.textContent = 'दर्ता भएको कोही भेटिएन';
+          HApp.toast(mode === 'student' ? 'पहिले कक्षा छान्नुहोस् र विद्यार्थी दर्ता गर्नुहोस्' : 'पहिले शिक्षक दर्ता गर्नुहोस्', 'error');
+          return;
+        }
+        stream = await HFace.startCamera(video);
+        statusEl.textContent = `पहिचान चालु — ${peopleCache.length} जना दर्ता छन्`;
+        startBtn.textContent = 'क्यामेरा बन्द गर्नुहोस्';
+        detectionLoop(video, overlay);
+      } catch (err) {
+        statusEl.textContent = 'क्यामेरा खोल्न सकिएन';
+        HApp.toast('क्यामेरा त्रुटि: ' + err.message, 'error');
+      }
+    });
+  }
+
+  function init() {
+    initModeSwitch();
+    initCamera();
+    renderManualTable();
+  }
+
+  return { init, renderManualTable };
+})();
+
+
+/* ===== holiday.js ===== */
+/* =========================================================
+   holiday.js — बिदा व्यवस्थापन
+   ========================================================= */
+const HHoliday = (() => {
+
+  async function getAllHolidays() {
+    const list = await HDB.getAll('holidays');
+    return list.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async function isHoliday(dateStr) {
+    const rec = await HDB.get('holidays', dateStr);
+    return !!rec;
+  }
+
+  async function renderTable() {
+    const holidays = await getAllHolidays();
+    const tbody = document.querySelector('#holidayTable tbody');
+    tbody.innerHTML = '';
+    if (!holidays.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="muted">अहिलेसम्म कुनै बिदा थपिएको छैन</td></tr>';
+      return;
+    }
+    holidays.forEach(h => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${HApp.formatDateNe(h.date)}</td>
+        <td>${HApp.esc(h.reason || '-')}</td>
+        <td><button class="icon-btn" data-del-holiday="${h.date}">🗑</button></td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-del-holiday]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await HDB.delete('holidays', btn.dataset.delHoliday);
+        await renderTable();
+      });
+    });
+  }
+
+  function populateSatPicker() {
+    const sel = document.getElementById('satMonthPicker');
+    const now = new Date();
+    const opts = [];
+    for (let i = -1; i <= 2; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      opts.push(`<option value="${d.getFullYear()}-${d.getMonth()}">${HApp.monthNameNe(d.getMonth())} ${d.getFullYear()}</option>`);
+    }
+    sel.innerHTML = opts.join('');
+    sel.selectedIndex = 1;
+  }
+
+  function initForm() {
+    const form = document.getElementById('holidayForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const date = document.getElementById('hDate').value;
+      const reason = document.getElementById('hReason').value.trim();
+      if (!date) return;
+      await HDB.put('holidays', { date, reason });
+      form.reset();
+      await renderTable();
+      HApp.toast('बिदा थपियो', 'success');
+    });
+
+    document.getElementById('addSaturdaysBtn').addEventListener('click', async () => {
+      const [y, m] = document.getElementById('satMonthPicker').value.split('-').map(Number);
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      let count = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dt = new Date(y, m, d);
+        if (dt.getDay() === 6) { // Saturday
+          const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          await HDB.put('holidays', { date: dateStr, reason: 'साप्ताहिक बिदा (शनिबार)' });
+          count++;
+        }
+      }
+      await renderTable();
+      HApp.toast(`${count} शनिबार बिदाको रूपमा थपियो`, 'success');
+    });
+  }
+
+  function init() {
+    populateSatPicker();
+    initForm();
+    renderTable();
+  }
+
+  return { init, getAllHolidays, isHoliday };
+})();
+
+
+/* ===== report.js ===== */
+/* =========================================================
+   report.js — मासिक हाजिर प्रतिवेदन + रंगीन एक्सेल निर्यात
+   ========================================================= */
+const HReport = (() => {
+  let lastReport = null; // cached generated report for export
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+
+  function populateMonthYear() {
+    const monthSel = document.getElementById('repMonth');
+    monthSel.innerHTML = HApp.MONTHS_NE.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+    const now = new Date();
+    monthSel.value = now.getMonth();
+    document.getElementById('repYear').value = now.getFullYear();
+  }
+
+  function toggleClassWrap() {
+    const type = document.getElementById('repType').value;
+    document.getElementById('repClassWrap').style.display = type === 'student' ? 'flex' : 'none';
+  }
+
+  /** दिइएको वर्ष/महिनाका सबै व्यक्तिको दैनिक स्थिति (P/A/H/'') निकाल्ने */
+  async function buildReportData(type, classId, year, month) {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const holidays = await HHoliday.getAllHolidays();
+    const holidaySet = new Set(holidays.filter(h => h.date.startsWith(`${year}-${pad2(month + 1)}`)).map(h => h.date));
+
+    let people;
+    if (type === 'teacher') {
+      people = (await HDB.getAll('teachers')).map(t => ({ id: t.id, name: t.name, extra: t.subject || '' }));
+    } else {
+      let students = await HDB.getAll('students');
+      if (classId) students = students.filter(s => s.classId === classId);
+      people = students.sort((a, b) => (a.roll || '').localeCompare(b.roll || '', 'ne', { numeric: true }))
+        .map(s => ({ id: s.id, name: s.name, extra: s.roll || '' }));
+    }
+
+    const attendanceAll = await HDB.getAll('attendance');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    const rows = [];
+    for (const p of people) {
+      const days = [];
+      let presentCount = 0, absentCount = 0, holidayCount = 0, workingDays = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${pad2(month + 1)}-${pad2(d)}`;
+        const cellDate = new Date(year, month, d);
+        const isFuture = cellDate > today;
+        let status = '';
+        if (holidaySet.has(dateStr)) {
+          status = 'H'; holidayCount++;
+        } else if (isFuture) {
+          status = '';
+        } else {
+          const found = attendanceAll.find(a => a.personType === type && a.personId === p.id && a.date === dateStr);
+          if (found) { status = 'P'; presentCount++; workingDays++; }
+          else { status = 'A'; absentCount++; workingDays++; }
+        }
+        days.push(status);
+      }
+      const pct = workingDays > 0 ? ((presentCount / workingDays) * 100).toFixed(1) : '0.0';
+      rows.push({ name: p.name, extra: p.extra, days, presentCount, absentCount, holidayCount, workingDays, pct });
+    }
+
+    return { type, year, month, daysInMonth, rows };
+  }
+
+  function renderPreview(report) {
+    const wrap = document.getElementById('reportPreviewWrap');
+    if (!report.rows.length) {
+      wrap.innerHTML = '<p class="muted">यस समूहमा कुनै व्यक्ति भेटिएन।</p>';
+      return;
+    }
+    const extraLabel = report.type === 'teacher' ? 'विषय' : 'रोल';
+    let html = '<table class="report-table"><thead><tr>';
+    html += `<th class="name-col">नाम</th><th>${extraLabel}</th>`;
+    for (let d = 1; d <= report.daysInMonth; d++) html += `<th>${d}</th>`;
+    html += '<th>हाजिर</th><th>अनुपस्थित</th><th>बिदा</th><th>%</th></tr></thead><tbody>';
+    report.rows.forEach(r => {
+      html += `<tr><td class="name-col">${HApp.esc(r.name)}</td><td>${HApp.esc(r.extra)}</td>`;
+      r.days.forEach(s => {
+        const cls = s === 'P' ? 'cell-P' : s === 'A' ? 'cell-A' : s === 'H' ? 'cell-H' : 'cell-blank';
+        const txt = s || '·';
+        html += `<td class="${cls}">${txt}</td>`;
+      });
+      html += `<td><b>${r.presentCount}</b></td><td>${r.absentCount}</td><td>${r.holidayCount}</td><td>${r.pct}%</td></tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  async function generate() {
+    const type = document.getElementById('repType').value;
+    const classId = Number(document.getElementById('repClass').value) || null;
+    const year = Number(document.getElementById('repYear').value);
+    const month = Number(document.getElementById('repMonth').value);
+    if (type === 'student' && !classId) {
+      HApp.toast('कृपया कक्षा छान्नुहोस्', 'error');
+      return;
+    }
+    const report = await buildReportData(type, classId, year, month);
+    lastReport = report;
+    lastReport.classId = classId;
+    renderPreview(report);
+    document.getElementById('exportExcelBtn').disabled = false;
+  }
+
+  async function exportExcel() {
+    if (!lastReport || typeof XLSX === 'undefined') {
+      HApp.toast('पहिले तालिका बनाउनुहोस्', 'error'); return;
+    }
+    const school = await HSchool.getSchoolInfo();
+    let className = '';
+    if (lastReport.type === 'student' && lastReport.classId) {
+      const classes = await HSchool.getClasses();
+      const c = classes.find(cl => cl.id === lastReport.classId);
+      className = c ? c.name : '';
+    }
+    const extraLabel = lastReport.type === 'teacher' ? 'विषय' : 'रोल';
+    const groupLabel = lastReport.type === 'teacher' ? 'शिक्षक हाजिर विवरण' : `विद्यार्थी हाजिर विवरण — ${className}`;
+
+    const headerRow1 = [school && school.name ? school.name : 'विद्यालय हाजिर प्रणाली'];
+    const headerRow2 = [`${groupLabel}  |  महिना: ${HApp.MONTHS_NE[lastReport.month]} ${lastReport.year}`];
+    const colHeader = ['नाम', extraLabel];
+    for (let d = 1; d <= lastReport.daysInMonth; d++) colHeader.push(String(d));
+    colHeader.push('हाजिर', 'अनुपस्थित', 'बिदा', 'प्रतिशत');
+
+    const aoa = [headerRow1, headerRow2, [], colHeader];
+    lastReport.rows.forEach(r => {
+      const row = [r.name, r.extra, ...r.days.map(s => s || ''), r.presentCount, r.absentCount, r.holidayCount, r.pct + '%'];
+      aoa.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    const totalCols = colHeader.length;
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } }
+    ];
+    ws['!cols'] = [{ wch: 20 }, { wch: 10 }, ...Array(lastReport.daysInMonth).fill({ wch: 4 }), { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 9 }];
+
+    const FILL = {
+      P: { fgColor: { rgb: 'C6EFCE' } }, A: { fgColor: { rgb: 'FFC7CE' } },
+      H: { fgColor: { rgb: 'FFEB9C' } }, blank: { fgColor: { rgb: 'F2EFE6' } }
+    };
+    const FONT = { P: { color: { rgb: '046A38' }, bold: true }, A: { color: { rgb: '9C0006' }, bold: true },
+      H: { color: { rgb: '7A5B00' }, bold: true }, blank: { color: { rgb: 'B0B0B0' } } };
+
+    const titleStyle = { font: { bold: true, sz: 14, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1F3A5F' } }, alignment: { horizontal: 'center', vertical: 'center' } };
+    const subStyle = { font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: 'B8322D' } }, alignment: { horizontal: 'center', vertical: 'center' } };
+    const headStyle = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: 'E8A33D' } }, alignment: { horizontal: 'center', vertical: 'center' }, border: allBorder() };
+    const nameStyle = { font: { bold: true }, border: allBorder() };
+    const totalsStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'EFE7D2' } }, alignment: { horizontal: 'center' }, border: allBorder() };
+
+    function allBorder() {
+      return { top: { style: 'thin', color: { rgb: 'CCCCCC' } }, bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
+        left: { style: 'thin', color: { rgb: 'CCCCCC' } }, right: { style: 'thin', color: { rgb: 'CCCCCC' } } };
+    }
+
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r; R <= range.e.r; R++) {
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+        if (R === 0) ws[addr].s = titleStyle;
+        else if (R === 1) ws[addr].s = subStyle;
+        else if (R === 3) ws[addr].s = headStyle;
+        else if (R > 3) {
+          const isDayCol = C >= 2 && C < 2 + lastReport.daysInMonth;
+          if (C === 0) ws[addr].s = nameStyle;
+          else if (C === 1) ws[addr].s = { alignment: { horizontal: 'center' }, border: allBorder() };
+          else if (isDayCol) {
+            const val = ws[addr].v;
+            const key = val === 'P' ? 'P' : val === 'A' ? 'A' : val === 'H' ? 'H' : 'blank';
+            ws[addr].s = { fill: FILL[key], font: FONT[key], alignment: { horizontal: 'center' }, border: allBorder() };
+          } else {
+            ws[addr].s = totalsStyle;
+          }
+        }
+      }
+    }
+
+    const wb = XLSX.utils.book_new();
+    const sheetName = (lastReport.type === 'teacher' ? 'शिक्षक-' : 'विद्यार्थी-') + HApp.MONTHS_NE[lastReport.month];
+    XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+    const fname = `hajir-${lastReport.type}-${lastReport.year}-${pad2(lastReport.month + 1)}.xlsx`;
+    XLSX.writeFile(wb, fname);
+    HApp.toast('एक्सेल फाइल डाउनलोड भयो', 'success');
+  }
+
+  function init() {
+    populateMonthYear();
+    toggleClassWrap();
+    document.getElementById('repType').addEventListener('change', toggleClassWrap);
+    document.getElementById('genReportBtn').addEventListener('click', generate);
+    document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
+  }
+
+  return { init };
+})();
+
+
+/* ===== app.js ===== */
+/* =========================================================
+   app.js — नेभिगेसन, ड्यासबोर्ड, साझा सहायक प्रकार्यहरू, सुरुवात
+   ========================================================= */
+const HApp = (() => {
+  const MONTHS_NE = ['जनवरी', 'फेब्रुअरी', 'मार्च', 'अप्रिल', 'मे', 'जुन', 'जुलाई', 'अगस्ट', 'सेप्टेम्बर', 'अक्टोबर', 'नोभेम्बर', 'डिसेम्बर'];
+  const NEP_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+
+  function esc(str) {
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
+  function toNepaliDigits(n) {
+    return String(n).replace(/[0-9]/g, d => NEP_DIGITS[d]);
+  }
+
+  function monthNameNe(idx) { return MONTHS_NE[idx]; }
+
+  function formatDateNe(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return `${toNepaliDigits(d)} ${MONTHS_NE[m - 1]} ${toNepaliDigits(y)}`;
+  }
+
+  function toast(message, type = 'info') {
+    const host = document.getElementById('toastHost');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    host.appendChild(el);
+    setTimeout(() => el.remove(), 3800);
+  }
+
+  /* ---------------- Navigation ---------------- */
+  function showView(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const target = document.getElementById('view-' + view);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
+    const titles = {
+      dashboard: 'ड्यासबोर्ड', school: 'विद्यालय दर्ता', teachers: 'शिक्षक व्यवस्थापन',
+      students: 'विद्यार्थी व्यवस्थापन', attendance: 'हाजिर लगाउने', holidays: 'बिदा व्यवस्थापन', reports: 'मासिक प्रतिवेदन'
+    };
+    document.getElementById('viewTitle').textContent = titles[view] || '';
+    document.querySelector('.sidebar').classList.remove('open');
+    if (view === 'dashboard') refreshDashboard();
+  }
+
+  function initNav() {
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.dataset.view));
+    });
+    document.querySelectorAll('[data-goto]').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.dataset.goto));
+    });
+    document.getElementById('hamburgerBtn').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('open');
+    });
+  }
+
+  /* ---------------- Dashboard ---------------- */
+  async function refreshDashboard() {
+    const [teachers, students] = await Promise.all([HDB.getAll('teachers'), HDB.getAll('students')]);
+    document.getElementById('statTeachers').textContent = toNepaliDigits(teachers.length);
+    document.getElementById('statStudents').textContent = toNepaliDigits(students.length);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const allAtt = await HDB.getAll('attendance');
+    const todayAtt = allAtt.filter(a => a.date === today);
+    document.getElementById('statTodayStudents').textContent = toNepaliDigits(todayAtt.filter(a => a.personType === 'student').length);
+    document.getElementById('statTodayTeachers').textContent = toNepaliDigits(todayAtt.filter(a => a.personType === 'teacher').length);
+
+    const isHol = await HHoliday.isHoliday(today);
+    const dNow = new Date();
+    document.getElementById('dashboardToday').textContent =
+      `${dNow.toLocaleDateString('ne-NP', { weekday: 'long' })}, ${MONTHS_NE[dNow.getMonth()]} ${toNepaliDigits(dNow.getDate())}, ${toNepaliDigits(dNow.getFullYear())}`;
+    const note = document.getElementById('dashboardHolidayNote');
+    if (isHol) {
+      const rec = await HDB.get('holidays', today);
+      note.innerHTML = `<p class="tag-no">🎊 आज बिदा हो — ${esc(rec.reason || '')}</p>`;
+    } else {
+      note.innerHTML = '';
+    }
+  }
+
+  function tickTopbarClock() {
+    const el = document.getElementById('topbarDate');
+    function tick() {
+      const d = new Date();
+      el.textContent = d.toLocaleDateString('ne-NP', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }) + '  ' + d.toLocaleTimeString('ne-NP');
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  async function init() {
+    initNav();
+    tickTopbarClock();
+    HSchool.init();
+    HPeople.init();
+    HAttendance.init();
+    HHoliday.init();
+    HReport.init();
+    await refreshDashboard();
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  return { showView, toast, esc, refreshDashboard, MONTHS_NE, monthNameNe, formatDateNe, toNepaliDigits };
+})();
+
 </script>
 </body>
 </html>
