@@ -297,6 +297,54 @@ input:focus,select:focus{
   pointer-events:none;
 }
 
+/* ---------- Capture mode toggle (camera / upload) ---------- */
+.capture-toggle{display:flex;gap:8px;margin-bottom:10px;grid-column:1/-1;}
+.toggle-btn{
+  padding:8px 14px;border-radius:20px;
+  border:2px solid var(--indigo);background:#fff;color:var(--indigo);
+  font-weight:700;font-size:12.5px;cursor:pointer;
+}
+.toggle-btn.active{background:var(--indigo);color:#fff;}
+.capture-panel{display:flex;flex-direction:column;gap:10px;grid-column:1/-1;}
+
+/* ---------- Photo upload (fallback face capture) ---------- */
+.upload-label{display:inline-block;cursor:pointer;}
+.upload-box{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:280px;min-height:150px;
+  border:3px dashed var(--indigo);
+  border-radius:12px;
+  background:#fff;
+  color:var(--indigo);
+  font-weight:700;
+  font-size:14px;
+  text-align:center;
+  padding:16px;
+  transition:border-color .15s, background .15s;
+}
+.upload-box.wide{width:100%;max-width:520px;}
+.upload-box:hover{border-color:var(--marigold);background:var(--cream);}
+.upload-ico{font-size:32px;}
+.upload-hint{font-size:11.5px;font-weight:400;color:#7a7167;}
+
+.photo-preview-lg{
+  max-width:220px;max-height:220px;
+  border-radius:12px;border:3px solid var(--marigold);
+  object-fit:cover;display:none;margin-top:6px;
+}
+.photo-preview-lg[src]:not([src=""]){display:block;}
+
+.photo-result-box{
+  position:relative;width:100%;
+  border:3px solid var(--indigo);border-radius:12px;overflow:hidden;
+  background:var(--charcoal);
+  min-height:220px;
+  display:flex;align-items:center;justify-content:center;
+}
+.photo-result-box canvas{max-width:100%;max-height:440px;display:none;}
+.photo-result-box canvas[data-ready="true"]{display:block;}
+.photo-result-box .muted{color:#d8d3c8;padding:20px;margin:0;}
+
 .att-live-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
 .att-side{display:flex;flex-direction:column;gap:12px;}
 .att-log h3{margin:6px 0;color:var(--indigo);font-size:15px;}
@@ -501,16 +549,34 @@ input:focus,select:focus{
             <label>विषय<input type="text" id="tSubject" placeholder="जस्तै: गणित"></label>
             <label>फोन नम्बर<input type="text" id="tPhone" placeholder="९८XXXXXXXX"></label>
             <div class="face-capture-block" data-target="teacher">
-              <div class="cam-box">
-                <video autoplay muted playsinline id="tVideo"></video>
-                <canvas id="tOverlay"></canvas>
+              <div class="capture-toggle">
+                <button type="button" class="toggle-btn active" data-captype="camera" data-prefix="t">📷 लाइभ क्यामेरा</button>
+                <button type="button" class="toggle-btn" data-captype="upload" data-prefix="t">🖼 फोटो अपलोड</button>
               </div>
-              <div class="cam-controls">
-                <button type="button" class="btn btn-secondary" id="tCamStart">क्यामेरा सुरु गर्नुहोस्</button>
-                <button type="button" class="btn btn-primary" id="tCapture" disabled>अनुहार खिच्नुहोस्</button>
-                <span class="cam-status" id="tCamStatus">क्यामेरा बन्द छ</span>
+
+              <div class="capture-panel" id="tCameraPanel">
+                <div class="cam-box">
+                  <video autoplay muted playsinline id="tVideo"></video>
+                  <canvas id="tOverlay"></canvas>
+                </div>
+                <div class="cam-controls">
+                  <button type="button" class="btn btn-secondary" id="tCamStart">क्यामेरा सुरु गर्नुहोस्</button>
+                  <button type="button" class="btn btn-primary" id="tCapture" disabled>अनुहार खिच्नुहोस्</button>
+                </div>
               </div>
-              <img id="tPhotoPreview" class="photo-preview" alt="">
+
+              <div class="capture-panel" id="tUploadPanel" style="display:none;">
+                <label class="upload-label" for="tPhotoInput">
+                  <input type="file" id="tPhotoInput" accept="image/*" capture="user" hidden>
+                  <span class="upload-box" id="tUploadBox">
+                    <span class="upload-ico">🖼</span>
+                    <span>फोटो छान्नुहोस् / खिच्नुहोस्</span>
+                  </span>
+                </label>
+              </div>
+
+              <span class="cam-status" id="tCamStatus">क्यामेरा बन्द छ</span>
+              <img id="tPhotoPreview" class="photo-preview-lg" alt="">
             </div>
             <button class="btn btn-primary" type="submit" id="tSubmitBtn" disabled>शिक्षक दर्ता गर्नुहोस्</button>
           </form>
@@ -539,16 +605,34 @@ input:focus,select:focus{
             </label>
             <label>अभिभावकको नाम<input type="text" id="sGuardian" placeholder="अभिभावकको नाम"></label>
             <div class="face-capture-block" data-target="student">
-              <div class="cam-box">
-                <video autoplay muted playsinline id="sVideo"></video>
-                <canvas id="sOverlay"></canvas>
+              <div class="capture-toggle">
+                <button type="button" class="toggle-btn active" data-captype="camera" data-prefix="s">📷 लाइभ क्यामेरा</button>
+                <button type="button" class="toggle-btn" data-captype="upload" data-prefix="s">🖼 फोटो अपलोड</button>
               </div>
-              <div class="cam-controls">
-                <button type="button" class="btn btn-secondary" id="sCamStart">क्यामेरा सुरु गर्नुहोस्</button>
-                <button type="button" class="btn btn-primary" id="sCapture" disabled>अनुहार खिच्नुहोस्</button>
-                <span class="cam-status" id="sCamStatus">क्यामेरा बन्द छ</span>
+
+              <div class="capture-panel" id="sCameraPanel">
+                <div class="cam-box">
+                  <video autoplay muted playsinline id="sVideo"></video>
+                  <canvas id="sOverlay"></canvas>
+                </div>
+                <div class="cam-controls">
+                  <button type="button" class="btn btn-secondary" id="sCamStart">क्यामेरा सुरु गर्नुहोस्</button>
+                  <button type="button" class="btn btn-primary" id="sCapture" disabled>अनुहार खिच्नुहोस्</button>
+                </div>
               </div>
-              <img id="sPhotoPreview" class="photo-preview" alt="">
+
+              <div class="capture-panel" id="sUploadPanel" style="display:none;">
+                <label class="upload-label" for="sPhotoInput">
+                  <input type="file" id="sPhotoInput" accept="image/*" capture="user" hidden>
+                  <span class="upload-box" id="sUploadBox">
+                    <span class="upload-ico">🖼</span>
+                    <span>फोटो छान्नुहोस् / खिच्नुहोस्</span>
+                  </span>
+                </label>
+              </div>
+
+              <span class="cam-status" id="sCamStatus">क्यामेरा बन्द छ</span>
+              <img id="sPhotoPreview" class="photo-preview-lg" alt="">
             </div>
             <button class="btn btn-primary" type="submit" id="sSubmitBtn" disabled>विद्यार्थी दर्ता गर्नुहोस्</button>
           </form>
@@ -583,8 +667,13 @@ input:focus,select:focus{
         </div>
 
         <div class="card">
-          <h2 class="card-title">लाइभ अनुहार पहिचान</h2>
-          <div class="att-live-grid">
+          <h2 class="card-title">अनुहार पहिचान गरी हाजिर लगाउनुहोस्</h2>
+          <div class="capture-toggle">
+            <button type="button" class="toggle-btn active" data-atttype="camera">📷 लाइभ क्यामेरा</button>
+            <button type="button" class="toggle-btn" data-atttype="upload">🖼 फोटो अपलोड</button>
+          </div>
+
+          <div class="att-live-grid" id="attCameraPanel">
             <div class="cam-box big">
               <video autoplay muted playsinline id="attVideo"></video>
               <canvas id="attOverlay"></canvas>
@@ -593,16 +682,34 @@ input:focus,select:focus{
             <div class="att-side">
               <button class="btn btn-primary wide" id="attCamStart">क्यामेरा सुरु गर्नुहोस्</button>
               <p class="cam-status" id="attCamStatus">क्यामेरा बन्द छ</p>
-              <div class="att-log">
-                <h3>आजको हाजिर लग</h3>
-                <ul id="attLogList" class="log-list"></ul>
-              </div>
             </div>
+          </div>
+
+          <div class="att-live-grid" id="attUploadPanel" style="display:none;">
+            <div class="photo-result-box">
+              <canvas id="attResultCanvas"></canvas>
+              <p class="muted" id="attResultEmpty">फोटो अपलोड गरेपछि नतिजा यहाँ देखिनेछ</p>
+            </div>
+            <div class="att-side">
+              <label class="upload-label" for="attPhotoInput">
+                <input type="file" id="attPhotoInput" accept="image/*" capture="environment" hidden>
+                <span class="upload-box wide" id="attUploadBox">
+                  <span class="upload-ico">🖼</span>
+                  <span>समूह फोटो छान्नुहोस् / खिच्नुहोस्</span>
+                </span>
+              </label>
+              <p class="cam-status" id="attUploadStatus">फोटो अपलोड गरिएको छैन</p>
+            </div>
+          </div>
+
+          <div class="att-log">
+            <h3>आजको हाजिर लग</h3>
+            <ul id="attLogList" class="log-list"></ul>
           </div>
         </div>
 
         <div class="card">
-          <h2 class="card-title">म्यानुअल हाजिर (क्यामेरा नभएमा)</h2>
+          <h2 class="card-title">म्यानुअल हाजिर (अनुहार पहिचान नभएमा)</h2>
           <p class="muted">कुनै कारणले अनुहार पहिचान नभएमा तलबाट म्यानुअल रूपमा हाजिर लगाउन सकिन्छ।</p>
           <div class="table-wrap">
             <table class="data-table" id="manualAttTable">
@@ -771,6 +878,7 @@ const HDB = (() => {
 /* ===== face.js ===== */
 /* =========================================================
    face.js — face-api.js को माध्यमबाट अनुहार पहिचान/म्याचिङ
+   दुवै लाइभ क्यामेरा र फोटो-अपलोड (fallback) समर्थन गर्छ
    ========================================================= */
 const HFace = (() => {
   const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
@@ -789,7 +897,14 @@ const HFace = (() => {
     return loadingPromise;
   }
 
+  const detectorOpts = () => new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+  const detectorOptsHi = () => new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 });
+
+  /* ---------------- लाइभ क्यामेरा ---------------- */
   async function startCamera(videoEl) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('यो ब्राउजर/पृष्ठमा क्यामेरा उपलब्ध छैन (HTTPS वा localhost मार्फत खोल्नुहोस्)');
+    }
     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360 }, audio: false });
     videoEl.srcObject = stream;
     await new Promise((res) => { videoEl.onloadedmetadata = () => res(); });
@@ -800,9 +915,7 @@ const HFace = (() => {
     if (stream) stream.getTracks().forEach(t => t.stop());
   }
 
-  const detectorOpts = () => new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
-
-  /** एउटा भिडियो फ्रेमबाट एउटा मात्र (सबैभन्दा ठूलो) अनुहारको डिस्क्रिप्टर निकाल्ने */
+  /** लाइभ भिडियो फ्रेमबाट एउटा मात्र (सबैभन्दा ठूलो) अनुहारको डिस्क्रिप्टर निकाल्ने — दर्ताका लागि */
   async function getSingleDescriptor(videoEl) {
     await ensureModels();
     const result = await faceapi
@@ -813,16 +926,89 @@ const HFace = (() => {
     return { descriptor: Array.from(result.descriptor), box: result.detection.box };
   }
 
-  /** भिडियो फ्रेमबाट भएजति सबै अनुहार पत्ता लगाउने (लाइभ हाजिरका लागि) */
+  /** लाइभ भिडियो फ्रेमबाट भएजति सबै अनुहार पत्ता लगाउने — हाजिरका लागि */
   async function detectAll(videoEl) {
     await ensureModels();
-    const results = await faceapi
+    return await faceapi
       .detectAllFaces(videoEl, detectorOpts())
       .withFaceLandmarks(true)
       .withFaceDescriptors();
-    return results;
   }
 
+  /** लाइभ भिडियोमाथिको पारदर्शी क्यानभासमा बक्स/लेबल कोर्ने */
+  function drawDetections(canvas, videoEl, detections, labels) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = videoEl.videoWidth || videoEl.clientWidth;
+    canvas.height = videoEl.videoHeight || videoEl.clientHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    detections.forEach((d, i) => {
+      const box = d.detection.box;
+      ctx.strokeStyle = '#E8A33D';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(box.x, box.y, box.width, box.height);
+      if (labels && labels[i]) {
+        const label = labels[i];
+        ctx.font = '14px Noto Sans Devanagari, sans-serif';
+        const textW = ctx.measureText(label).width + 12;
+        ctx.fillStyle = 'rgba(31,58,95,.85)';
+        ctx.fillRect(box.x, Math.max(0, box.y - 22), textW, 22);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, box.x + 6, Math.max(14, box.y - 6));
+      }
+    });
+  }
+
+  /* ---------------- फोटो अपलोड (fallback) ---------------- */
+  /** एउटा फोटो (Image एलिमेन्ट) बाट एउटा मात्र अनुहारको डिस्क्रिप्टर निकाल्ने — दर्ताका लागि */
+  async function getDescriptorFromImage(imgEl) {
+    await ensureModels();
+    const result = await faceapi
+      .detectSingleFace(imgEl, detectorOptsHi())
+      .withFaceLandmarks(true)
+      .withFaceDescriptor();
+    if (!result) return null;
+    return { descriptor: Array.from(result.descriptor), box: result.detection.box };
+  }
+
+  /** एउटा समूह फोटोबाट भएजति सबै अनुहार पत्ता लगाउने — हाजिरका लागि */
+  async function detectAllFromImage(imgEl) {
+    await ensureModels();
+    return await faceapi
+      .detectAllFaces(imgEl, detectorOptsHi())
+      .withFaceLandmarks(true)
+      .withFaceDescriptors();
+  }
+
+  /** पत्ता लागेका अनुहारहरूलाई बक्स/लेबलसहित क्यानभासमा फोटोमाथि नै कोर्ने */
+  function drawOnImage(canvas, imgEl, detections, labels) {
+    const w = imgEl.naturalWidth || imgEl.width;
+    const h = imgEl.naturalHeight || imgEl.height;
+    canvas.width = w;
+    canvas.height = h;
+    canvas.setAttribute('data-ready', 'true');
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(imgEl, 0, 0, w, h);
+    const lineW = Math.max(3, Math.round(w / 220));
+    const fontSize = Math.max(14, Math.round(w / 45));
+    detections.forEach((d, i) => {
+      const box = d.detection.box;
+      ctx.strokeStyle = '#E8A33D';
+      ctx.lineWidth = lineW;
+      ctx.strokeRect(box.x, box.y, box.width, box.height);
+      if (labels && labels[i]) {
+        const label = labels[i];
+        ctx.font = `${fontSize}px Noto Sans Devanagari, sans-serif`;
+        const textW = ctx.measureText(label).width + 14;
+        const textH = fontSize + 10;
+        ctx.fillStyle = 'rgba(31,58,95,.88)';
+        ctx.fillRect(box.x, Math.max(0, box.y - textH), textW, textH);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, box.x + 7, Math.max(fontSize, box.y - 8));
+      }
+    });
+  }
+
+  /* ---------------- साझा ---------------- */
   /** दर्ता भएका सबैको डिस्क्रिप्टरबाट FaceMatcher बनाउने
    *  people: [{id, type, name, descriptor:[...]}] */
   function buildMatcher(people, threshold = 0.5) {
@@ -836,29 +1022,12 @@ const HFace = (() => {
     return new faceapi.FaceMatcher(labeled, threshold);
   }
 
-  function drawDetections(canvas, videoEl, detections, labels) {
-    const ctx = canvas.getContext('2d');
-    canvas.width = videoEl.videoWidth || videoEl.clientWidth;
-    canvas.height = videoEl.videoHeight || videoEl.clientHeight;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    detections.forEach((d, i) => {
-      const box = d.detection.box;
-      ctx.strokeStyle = '#E8A33D';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(box.x, box.y, box.width, box.height);
-      if (labels && labels[i]) {
-        ctx.fillStyle = 'rgba(31,58,95,.85)';
-        const label = labels[i];
-        ctx.font = '14px Noto Sans Devanagari, sans-serif';
-        const textW = ctx.measureText(label).width + 12;
-        ctx.fillRect(box.x, box.y - 22, textW, 22);
-        ctx.fillStyle = '#fff';
-        ctx.fillText(label, box.x + 6, box.y - 6);
-      }
-    });
-  }
-
-  return { ensureModels, startCamera, stopCamera, getSingleDescriptor, detectAll, buildMatcher, drawDetections };
+  return {
+    ensureModels,
+    startCamera, stopCamera, getSingleDescriptor, detectAll, drawDetections,
+    getDescriptorFromImage, detectAllFromImage, drawOnImage,
+    buildMatcher
+  };
 })();
 
 
@@ -999,11 +1168,30 @@ const HSchool = (() => {
 
 /* ===== people.js ===== */
 /* =========================================================
-   people.js — शिक्षक/विद्यार्थी दर्ता (अनुहार खिचाइसहित)
+   people.js — शिक्षक/विद्यार्थी दर्ता
+   (लाइभ क्यामेरा — मुख्य तरिका, फोटो अपलोड — विकल्प/fallback)
    ========================================================= */
 const HPeople = (() => {
   const camState = { teacher: { stream: null, descriptor: null, photo: null },
                       student: { stream: null, descriptor: null, photo: null } };
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function loadImage(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
 
   function captureSnapshot(videoEl) {
     const c = document.createElement('canvas');
@@ -1012,7 +1200,34 @@ const HPeople = (() => {
     return c.toDataURL('image/jpeg', 0.85);
   }
 
-  function setupCapture(kind) {
+  /* ---------------- मोड टगल (क्यामेरा / अपलोड) ---------------- */
+  function setupToggle(kind) {
+    const prefix = kind === 'teacher' ? 't' : 's';
+    const toggleBtns = document.querySelectorAll(`.toggle-btn[data-prefix="${prefix}"]`);
+    const cameraPanel = document.getElementById(prefix + 'CameraPanel');
+    const uploadPanel = document.getElementById(prefix + 'UploadPanel');
+
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toggleBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const isCamera = btn.dataset.captype === 'camera';
+        cameraPanel.style.display = isCamera ? 'flex' : 'none';
+        uploadPanel.style.display = isCamera ? 'none' : 'flex';
+        if (!isCamera) {
+          // upload मा सर्दा चलिरहेको क्यामेरा बन्द गर्ने
+          HFace.stopCamera(camState[kind].stream);
+          camState[kind].stream = null;
+          document.getElementById(prefix + 'Video').srcObject = null;
+          document.getElementById(prefix + 'Capture').disabled = true;
+          document.getElementById(prefix + 'CamStart').textContent = 'क्यामेरा सुरु गर्नुहोस्';
+        }
+      });
+    });
+  }
+
+  /* ---------------- क्यामेरा तरिका ---------------- */
+  function setupCameraCapture(kind) {
     const prefix = kind === 'teacher' ? 't' : 's';
     const video = document.getElementById(prefix + 'Video');
     const overlay = document.getElementById(prefix + 'Overlay');
@@ -1023,15 +1238,25 @@ const HPeople = (() => {
     const submitBtn = document.getElementById(prefix + 'SubmitBtn');
 
     startBtn.addEventListener('click', async () => {
+      if (camState[kind].stream) {
+        HFace.stopCamera(camState[kind].stream);
+        camState[kind].stream = null;
+        video.srcObject = null;
+        capBtn.disabled = true;
+        startBtn.textContent = 'क्यामेरा सुरु गर्नुहोस्';
+        statusEl.textContent = 'क्यामेरा बन्द छ';
+        return;
+      }
       try {
         statusEl.textContent = 'मोडेल लोड हुँदैछ...';
         await HFace.ensureModels();
         camState[kind].stream = await HFace.startCamera(video);
         statusEl.textContent = 'क्यामेरा चलिरहेको छ — अनुहार सिधा पारेर देखाउनुहोस्';
+        startBtn.textContent = 'क्यामेरा बन्द गर्नुहोस्';
         capBtn.disabled = false;
       } catch (err) {
         statusEl.textContent = 'क्यामेरा खोल्न सकिएन: ' + err.message;
-        HApp.toast('क्यामेरा अनुमति दिनुहोस्', 'error');
+        HApp.toast('क्यामेरा चलाउन सकिएन। यदि फाइल सिधै (file://) खोलिएको हो भने, अपलोड विकल्प प्रयोग गर्नुहोस् वा लोकल सर्भरबाट चलाउनुहोस्।', 'error');
       }
     });
 
@@ -1053,6 +1278,44 @@ const HPeople = (() => {
     });
   }
 
+  /* ---------------- अपलोड तरिका (fallback) ---------------- */
+  function setupUploadCapture(kind) {
+    const prefix = kind === 'teacher' ? 't' : 's';
+    const input = document.getElementById(prefix + 'PhotoInput');
+    const statusEl = document.getElementById(prefix + 'CamStatus');
+    const preview = document.getElementById(prefix + 'PhotoPreview');
+    const submitBtn = document.getElementById(prefix + 'SubmitBtn');
+
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) return;
+      camState[kind].descriptor = null;
+      submitBtn.disabled = true;
+      statusEl.textContent = 'फोटो प्रशोधन हुँदैछ...';
+      try {
+        const dataUrl = await fileToDataURL(file);
+        const img = await loadImage(dataUrl);
+        await HFace.ensureModels();
+        const result = await HFace.getDescriptorFromImage(img);
+        if (!result) {
+          statusEl.textContent = 'फोटोमा अनुहार भेटिएन — स्पष्ट, उज्यालो र सोझो फोटो प्रयोग गर्नुहोस्';
+          HApp.toast('अनुहार पत्ता लागेन। फेरि प्रयास गर्नुहोस्।', 'error');
+          preview.src = '';
+          return;
+        }
+        camState[kind].descriptor = result.descriptor;
+        camState[kind].photo = dataUrl;
+        preview.src = dataUrl;
+        statusEl.textContent = 'अनुहार सफलतापूर्वक पहिचान भयो ✔';
+        submitBtn.disabled = false;
+        HApp.toast('अनुहार पहिचान भयो', 'success');
+      } catch (err) {
+        statusEl.textContent = 'फोटो प्रशोधनमा त्रुटि भयो';
+        HApp.toast('त्रुटि: ' + err.message, 'error');
+      }
+    });
+  }
+
   function resetCapture(kind) {
     const prefix = kind === 'teacher' ? 't' : 's';
     HFace.stopCamera(camState[kind].stream);
@@ -1060,20 +1323,23 @@ const HPeople = (() => {
     camState[kind].descriptor = null;
     camState[kind].photo = null;
     document.getElementById(prefix + 'PhotoPreview').src = '';
+    document.getElementById(prefix + 'PhotoInput').value = '';
     document.getElementById(prefix + 'Capture').disabled = true;
     document.getElementById(prefix + 'SubmitBtn').disabled = true;
     document.getElementById(prefix + 'CamStatus').textContent = 'क्यामेरा बन्द छ';
-    const video = document.getElementById(prefix + 'Video');
-    video.srcObject = null;
+    document.getElementById(prefix + 'Video').srcObject = null;
+    document.getElementById(prefix + 'CamStart').textContent = 'क्यामेरा सुरु गर्नुहोस्';
   }
 
   /* ---------------- Teacher ---------------- */
   function initTeacherForm() {
-    setupCapture('teacher');
+    setupToggle('teacher');
+    setupCameraCapture('teacher');
+    setupUploadCapture('teacher');
     const form = document.getElementById('teacherForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!camState.teacher.descriptor) { HApp.toast('कृपया पहिले अनुहार खिच्नुहोस्', 'error'); return; }
+      if (!camState.teacher.descriptor) { HApp.toast('कृपया पहिले अनुहार खिच्नुहोस् वा फोटो अपलोड गर्नुहोस्', 'error'); return; }
       const rec = {
         name: document.getElementById('tName').value.trim(),
         subject: document.getElementById('tSubject').value.trim(),
@@ -1122,11 +1388,13 @@ const HPeople = (() => {
 
   /* ---------------- Student ---------------- */
   function initStudentForm() {
-    setupCapture('student');
+    setupToggle('student');
+    setupCameraCapture('student');
+    setupUploadCapture('student');
     const form = document.getElementById('studentForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!camState.student.descriptor) { HApp.toast('कृपया पहिले अनुहार खिच्नुहोस्', 'error'); return; }
+      if (!camState.student.descriptor) { HApp.toast('कृपया पहिले अनुहार खिच्नुहोस् वा फोटो अपलोड गर्नुहोस्', 'error'); return; }
       const classId = Number(document.getElementById('sClass').value);
       if (!classId) { HApp.toast('कृपया कक्षा छान्नुहोस्', 'error'); return; }
       const rec = {
@@ -1196,20 +1464,19 @@ const HPeople = (() => {
 
 /* ===== attendance.js ===== */
 /* =========================================================
-   attendance.js — लाइभ अनुहार पहिचानद्वारा हाजिर लगाउने
+   attendance.js — अनुहार पहिचानद्वारा हाजिर लगाउने
+   (लाइभ क्यामेरा — मुख्य तरिका, फोटो अपलोड — विकल्प/fallback)
    ========================================================= */
 const HAttendance = (() => {
-  let mode = 'student';      // 'student' | 'teacher'
+  let personMode = 'student';   // 'student' | 'teacher'
+  let captureMode = 'camera';   // 'camera' | 'upload'
   let stream = null;
   let loopTimer = null;
   let matcher = null;
-  let peopleCache = [];       // people currently eligible for this mode/class
-  const markedToday = new Set(); // `${type}:${id}` marked in this session/today
+  let peopleCache = [];
+  const markedToday = new Set(); // `${type}:${id}`
 
-  function todayStr() {
-    const d = new Date();
-    return d.toISOString().slice(0, 10);
-  }
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
 
   async function alreadyMarked(type, id, date) {
     const list = await HDB.getByIndex('attendance', 'person', [type, id, date]);
@@ -1232,7 +1499,7 @@ const HAttendance = (() => {
 
   async function buildPeopleList() {
     const date = todayStr();
-    if (mode === 'teacher') {
+    if (personMode === 'teacher') {
       peopleCache = (await HDB.getAll('teachers')).map(t => ({ id: t.id, type: 'teacher', name: t.name, descriptor: t.descriptor, classId: null }));
     } else {
       const classId = Number(document.getElementById('attClassSelect').value) || null;
@@ -1241,7 +1508,6 @@ const HAttendance = (() => {
       peopleCache = students.map(s => ({ id: s.id, type: 'student', name: s.name, descriptor: s.descriptor, classId: s.classId }));
     }
     matcher = HFace.buildMatcher(peopleCache, 0.5);
-    // preload today's already-marked set
     markedToday.clear();
     for (const p of peopleCache) {
       if (await alreadyMarked(p.type, p.id, date)) markedToday.add(`${p.type}:${p.id}`);
@@ -1253,7 +1519,7 @@ const HAttendance = (() => {
     const tbody = document.querySelector('#manualAttTable tbody');
     tbody.innerHTML = '';
     if (!peopleCache.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="muted">${mode === 'teacher' ? 'कुनै शिक्षक दर्ता भएको छैन' : 'यस कक्षामा कुनै विद्यार्थी छैन (कक्षा छान्नुहोस्)'}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3" class="muted">${personMode === 'teacher' ? 'कुनै शिक्षक दर्ता भएको छैन' : 'यस कक्षामा कुनै विद्यार्थी छैन (कक्षा छान्नुहोस्)'}</td></tr>`;
       return;
     }
     peopleCache.forEach(p => {
@@ -1279,6 +1545,7 @@ const HAttendance = (() => {
     });
   }
 
+  /* ---------------- लाइभ क्यामेरा ---------------- */
   async function detectionLoop(video, overlay) {
     if (!matcher) { loopTimer = setTimeout(() => detectionLoop(video, overlay), 900); return; }
     const detections = await HFace.detectAll(video);
@@ -1304,20 +1571,6 @@ const HAttendance = (() => {
     loopTimer = setTimeout(() => detectionLoop(video, overlay), 900);
   }
 
-  function initModeSwitch() {
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        mode = btn.dataset.mode;
-        document.getElementById('attClassPicker').style.display = mode === 'student' ? 'flex' : 'none';
-        await renderManualTable();
-      });
-    });
-    document.getElementById('attClassSelect').addEventListener('change', renderManualTable);
-    document.getElementById('attClassPicker').style.display = mode === 'student' ? 'flex' : 'none';
-  }
-
   function initCamera() {
     const startBtn = document.getElementById('attCamStart');
     const video = document.getElementById('attVideo');
@@ -1340,7 +1593,7 @@ const HAttendance = (() => {
         await buildPeopleList();
         if (!peopleCache.length) {
           statusEl.textContent = 'दर्ता भएको कोही भेटिएन';
-          HApp.toast(mode === 'student' ? 'पहिले कक्षा छान्नुहोस् र विद्यार्थी दर्ता गर्नुहोस्' : 'पहिले शिक्षक दर्ता गर्नुहोस्', 'error');
+          HApp.toast(personMode === 'student' ? 'पहिले कक्षा छान्नुहोस् र विद्यार्थी दर्ता गर्नुहोस्' : 'पहिले शिक्षक दर्ता गर्नुहोस्', 'error');
           return;
         }
         stream = await HFace.startCamera(video);
@@ -1349,14 +1602,147 @@ const HAttendance = (() => {
         detectionLoop(video, overlay);
       } catch (err) {
         statusEl.textContent = 'क्यामेरा खोल्न सकिएन';
-        HApp.toast('क्यामेरा त्रुटि: ' + err.message, 'error');
+        HApp.toast('क्यामेरा त्रुटि: ' + err.message + ' — यदि फाइल सिधै (file://) खोलिएको हो भने, तल "फोटो अपलोड" विकल्प प्रयोग गर्नुहोस् वा लोकल सर्भरबाट चलाउनुहोस्।', 'error');
       }
+    });
+  }
+
+  function stopCameraIfRunning() {
+    if (stream) {
+      HFace.stopCamera(stream);
+      stream = null;
+      clearTimeout(loopTimer);
+      document.getElementById('attVideo').srcObject = null;
+      document.getElementById('attCamStart').textContent = 'क्यामेरा सुरु गर्नुहोस्';
+      document.getElementById('attCamStatus').textContent = 'क्यामेरा बन्द छ';
+    }
+  }
+
+  /* ---------------- फोटो अपलोड (fallback) ---------------- */
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function loadImage(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
+
+  async function handlePhotoUpload(file) {
+    const statusEl = document.getElementById('attUploadStatus');
+    const canvas = document.getElementById('attResultCanvas');
+    const emptyMsg = document.getElementById('attResultEmpty');
+
+    statusEl.textContent = 'फोटो प्रशोधन हुँदैछ...';
+    await buildPeopleList();
+    if (!peopleCache.length) {
+      statusEl.textContent = 'दर्ता भएको कोही भेटिएन';
+      HApp.toast(personMode === 'student' ? 'पहिले कक्षा छान्नुहोस् र विद्यार्थी दर्ता गर्नुहोस्' : 'पहिले शिक्षक दर्ता गर्नुहोस्', 'error');
+      return;
+    }
+
+    await HFace.ensureModels();
+    const dataUrl = await fileToDataURL(file);
+    const img = await loadImage(dataUrl);
+    const detections = await HFace.detectAllFromImage(img);
+
+    if (!detections.length) {
+      statusEl.textContent = 'फोटोमा कुनै अनुहार भेटिएन — स्पष्ट, उज्यालो फोटो प्रयोग गर्नुहोस्';
+      HApp.toast('अनुहार भेटिएन', 'error');
+      return;
+    }
+
+    emptyMsg.style.display = 'none';
+    const labels = [];
+    let newCount = 0, dupCount = 0, unknownCount = 0;
+
+    for (const d of detections) {
+      const best = matcher ? matcher.findBestMatch(d.descriptor) : { label: 'unknown' };
+      if (best.label === 'unknown') { labels.push('अज्ञात'); unknownCount++; continue; }
+      const [type, idStr, ...nameParts] = best.label.split(':');
+      const id = Number(idStr);
+      const name = nameParts.join(':');
+      const key = `${type}:${id}`;
+      if (markedToday.has(key)) {
+        labels.push(`${name} (पहिले नै)`);
+        dupCount++;
+      } else {
+        markedToday.add(key);
+        const person = peopleCache.find(p => p.type === type && p.id === id);
+        await markPresent(type, id, person ? person.classId : null);
+        labels.push(`${name} ✔`);
+        logEntry(`✅ ${name} — हाजिर भयो (${new Date().toLocaleTimeString('ne-NP')})`, false);
+        newCount++;
+      }
+    }
+
+    HFace.drawOnImage(canvas, img, detections, labels);
+    statusEl.textContent = `फोटोमा ${detections.length} अनुहार भेटियो — नयाँ हाजिर: ${newCount}, पहिले नै भइसकेको: ${dupCount}, अज्ञात: ${unknownCount}`;
+    HApp.refreshDashboard();
+    renderManualTable();
+  }
+
+  function initPhotoUpload() {
+    const input = document.getElementById('attPhotoInput');
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        await handlePhotoUpload(file);
+      } catch (err) {
+        document.getElementById('attUploadStatus').textContent = 'त्रुटि भयो';
+        HApp.toast('त्रुटि: ' + err.message, 'error');
+      } finally {
+        input.value = '';
+      }
+    });
+  }
+
+  /* ---------------- टगल स्विच ---------------- */
+  function initModeSwitch() {
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        personMode = btn.dataset.mode;
+        document.getElementById('attClassPicker').style.display = personMode === 'student' ? 'flex' : 'none';
+        await renderManualTable();
+      });
+    });
+    document.getElementById('attClassSelect').addEventListener('change', renderManualTable);
+    document.getElementById('attClassPicker').style.display = personMode === 'student' ? 'flex' : 'none';
+  }
+
+  function initCaptureToggle() {
+    const toggleBtns = document.querySelectorAll('.toggle-btn[data-atttype]');
+    const cameraPanel = document.getElementById('attCameraPanel');
+    const uploadPanel = document.getElementById('attUploadPanel');
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toggleBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        captureMode = btn.dataset.atttype;
+        const isCamera = captureMode === 'camera';
+        cameraPanel.style.display = isCamera ? 'grid' : 'none';
+        uploadPanel.style.display = isCamera ? 'none' : 'grid';
+        if (!isCamera) stopCameraIfRunning();
+      });
     });
   }
 
   function init() {
     initModeSwitch();
+    initCaptureToggle();
     initCamera();
+    initPhotoUpload();
     renderManualTable();
   }
 
